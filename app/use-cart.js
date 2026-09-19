@@ -10,6 +10,7 @@ export function useCart(mode) {
   const [unit, setUnit] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(mode === 'live');
 
   function sync(payload) {
     const quantities = {};
@@ -32,7 +33,7 @@ export function useCart(mode) {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error);
       if (active) sync(payload);
-    }).catch(reason => { if (active) setError(reason.message || 'سبد بارگذاری نشد. دوباره تلاش کنید.'); });
+    }).catch(reason => { if (active) setError(reason.message || 'سبد بارگذاری نشد. دوباره تلاش کنید.'); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [mode]);
 
@@ -57,5 +58,5 @@ export function useCart(mode) {
     } finally { setBusy(false); }
   }
 
-  return { cart, entries, subtotal, unit, busy, error, changeQuantity };
+  return { cart, entries, subtotal, unit, busy, loading, error, changeQuantity };
 }
