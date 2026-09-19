@@ -1,7 +1,9 @@
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 import { availableMethods, checkoutReady, checkoutTotal, pickupRate, safePaymentRedirect, storeRequest, validAddress, ZIBAL_METHOD } from '../../../lib/checkout';
 import { sameSiteOrigin } from '../../../lib/cart';
 import { storeOrigin } from '../../../lib/store';
+import { orderCookieName, receiptFromCheckout } from '../../../lib/order';
 
 const noStore = { 'Cache-Control': 'no-store' };
 const fail = (error, status) => Response.json({ error }, { status, headers: noStore });
@@ -48,7 +50,10 @@ export async function POST(request) {
     if (method === ZIBAL_METHOD) {
       const redirect = safePaymentRedirect(order.payment_result?.redirect_url, storeOrigin());
       if (!redirect) return fail('سفارش ایجاد شد، اما نشانی امن پرداخت دریافت نشد. پیش از تلاش دوباره وضعیت سفارش را در ووکامرس بررسی کنید.', 502);
-      return Response.json({ orderId: order.order_id, status: order.status, redirect, note: 'سفارش در ووکامرس ایجاد شد. پرداخت فقط پس از بازگشت و تأیید زیبال قطعی است.' }, { headers: noStore });
+      const response = NextResponse.json({ orderId: order.order_id, status: order.status, redirect, note: 'سفارش در ووکامرس ایجاد شد. پرداخت فقط پس از بازگشت و تأیید زیبال قطعی است.' }, { headers: noStore });
+      const receipt = receiptFromCheckout(order, address.email);
+      if (receipt) response.cookies.set(orderCookieName(order.order_id), receipt, { path: `/order/${order.order_id}`, httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 86400 });
+      return response;
     }
     return Response.json({ orderId: order.order_id, status: order.status, note: 'سفارش در ووکامرس ثبت شد. پرداخت در زمان تحویل انجام می‌شود.' }, { headers: noStore });
   } catch (error) {
