@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { checkoutReady, storeRequest, validAddress } from '../lib/checkout.js';
+import { checkoutReady, checkoutTotal, storeRequest, validAddress } from '../lib/checkout.js';
+
+test('checkout displays currency minor units but retains raw amount for expected-total guard', () => {
+  assert.deepEqual(checkoutTotal({ totals: { total_price: '365000000', currency_minor_unit: 2 } }), { raw: '365000000', display: 3650000 });
+});
 
 test('checkout rejects incomplete or unsafe billing details', () => {
   assert.equal(validAddress({ first_name: 'علی' }), null);

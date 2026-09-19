@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { checkoutReady, storeRequest, validAddress } from '../../../lib/checkout';
+import { checkoutReady, checkoutTotal, storeRequest, validAddress } from '../../../lib/checkout';
 import { sameSiteOrigin } from '../../../lib/cart';
 
 const noStore = { 'Cache-Control': 'no-store' };
@@ -15,7 +15,7 @@ export async function GET() {
     const state = process.env.STORE_CHECKOUT_ENABLED === 'true'
       ? checkoutReady(cart)
       : { ready: false, reason: 'ثبت سفارش تا تعیین نشانی تحویل حضوری و فعال‌سازی آن در ووکامرس بسته است.' };
-    return Response.json({ items: cart.items?.map(item => ({ id: item.id, name: item.name, quantity: item.quantity })) || [], total: cart.totals?.total_price || '0', unit: cart.totals?.currency_code === 'IRR' ? 'ریال' : cart.totals?.currency_code || '', ready: state.ready, reason: state.reason, needsShipping: !!cart.needs_shipping, shippingRates: cart.shipping_rates?.map(group => group.shipping_rates?.map(rate => ({ id: rate.rate_id, name: rate.name, selected: rate.selected, price: rate.price })) || []) || [] }, { headers: noStore });
+    return Response.json({ items: cart.items?.map(item => ({ id: item.id, name: item.name, quantity: item.quantity })) || [], total: checkoutTotal(cart).raw, displayTotal: checkoutTotal(cart).display, unit: cart.totals?.currency_code === 'IRR' ? 'ریال' : cart.totals?.currency_code || '', ready: state.ready, reason: state.reason, needsShipping: !!cart.needs_shipping, shippingRates: cart.shipping_rates?.map(group => group.shipping_rates?.map(rate => ({ id: rate.rate_id, name: rate.name, selected: rate.selected, price: rate.price })) || []) || [] }, { headers: noStore });
   } catch { return fail('اطلاعات صورت‌حساب از ووکامرس دریافت نشد. داده‌ای تغییر نکرده است؛ دوباره تلاش کنید.', 502); }
 }
 
