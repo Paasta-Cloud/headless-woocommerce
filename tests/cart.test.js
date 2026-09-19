@@ -45,3 +45,31 @@ test('cart token is forwarded to WooCommerce and private fields are not exposed'
     await new Promise(resolve => server.close(resolve));
   }
 });
+
+test('cart reads bypass shared WordPress caches without putting the token in the URL', async () => {
+  const requests = [];
+  const server = createServer((request, response) => {
+    requests.push({ url: request.url, token: request.headers['cart-token'] });
+    response.setHeader('content-type', 'application/json');
+    response.setHeader('Cart-Token', 'test-token');
+    response.end(JSON.stringify({ items: [], items_count: 0, totals: {} }));
+  });
+  await new Promise(resolve => server.listen(0, resolve));
+  const previous = process.env.WOOCOMMERCE_URL;
+  process.env.WOOCOMMERCE_URL = `http://localhost:${server.address().port}`;
+  try {
+    await requestCart('test-token');
+    await requestCart('test-token');
+    assert.equal(requests.length, 2);
+    assert.notEqual(requests[0].url, requests[1].url);
+    for (const request of requests) {
+      assert.equal(new URL(request.url, 'http://localhost').pathname, '/wp-json/wc/store/v1/cart');
+      assert.equal(request.token, 'test-token');
+      assert.ok(!request.url.includes('test-token'));
+    }
+  } finally {
+    if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
+    else process.env.WOOCOMMERCE_URL = previous;
+    await new Promise(resolve => server.close(resolve));
+  }
+});
