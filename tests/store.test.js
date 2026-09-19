@@ -8,6 +8,19 @@ test('demo catalog is synthetic and available without credentials', () => {
   assert.ok(demoProducts.every(product => product.id && product.name && product.price > 0));
 });
 
+test('explicit demo setting works for Git deployments requiring an environment value', async () => {
+  const previous = process.env.WOOCOMMERCE_URL;
+  process.env.WOOCOMMERCE_URL = 'demo';
+  try {
+    const result = await getProducts();
+    assert.equal(result.mode, 'demo');
+    assert.equal(result.products.length, demoProducts.length);
+  } finally {
+    if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
+    else process.env.WOOCOMMERCE_URL = previous;
+  }
+});
+
 test('Store API minor units and rial currency remain explicit', () => {
   const product = normalizeProduct({ id: 10, name: 'نمونه', prices: { price: '1234500', currency_minor_unit: 0, currency_code: 'IRR' }, categories: [{ name: 'خانه' }] });
   assert.equal(product.price, 1234500);
