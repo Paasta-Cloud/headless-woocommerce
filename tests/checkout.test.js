@@ -2,6 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { availableMethods, checkoutReady, checkoutTotal, safePaymentRedirect, storeRequest, validAddress, ZIBAL_METHOD } from '../lib/checkout.js';
+import { iranStateCode, IRAN_STATES } from '../lib/iran-states.js';
+
+test('Iran billing province maps Persian labels and rejects unknown values before WooCommerce', () => {
+  assert.equal(Object.keys(IRAN_STATES).length, 31);
+  assert.equal(iranStateCode('خراسان رضوی'), 'RKH');
+  assert.equal(iranStateCode(' rkh '), 'RKH');
+  assert.equal(iranStateCode('تهران'), 'THR');
+  assert.equal(iranStateCode('استان نامعتبر'), null);
+});
 
 test('sandbox exposes only test Zibal, never cash on delivery', () => {
   const cart = { payment_methods: ['cod', ZIBAL_METHOD, 'other'] };
@@ -16,8 +25,9 @@ test('checkout displays currency minor units but retains raw amount for expected
 test('checkout rejects incomplete or unsafe billing details', () => {
   assert.equal(validAddress({ first_name: 'علی' }), null);
   assert.equal(validAddress({ first_name: 'علی', last_name: 'رضایی', email: 'not-email', phone: '0912', city: 'تهران', address_1: 'خیابان' }), null);
-  assert.equal(validAddress({ first_name: 'علی', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', city: 'تهران', address_1: 'خیابان', postcode: '123' }), null);
-  assert.deepEqual(validAddress({ first_name: ' علی ', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', city: 'تهران', address_1: 'خیابان', postcode: '1234567890' }), { first_name: 'علی', last_name: 'رضایی', address_1: 'خیابان', city: 'تهران', state: '', postcode: '1234567890', email: 'a@example.com', phone: '09120000000', country: 'IR' });
+  assert.equal(validAddress({ first_name: 'علی', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', state: 'خراسان رضوی', city: 'مشهد', address_1: 'خیابان', postcode: '123' }), null);
+  assert.equal(validAddress({ first_name: 'علی', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', state: 'ناشناخته', city: 'تهران', address_1: 'خیابان', postcode: '1234567890' }), null);
+  assert.deepEqual(validAddress({ first_name: ' علی ', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', state: 'خراسان رضوی', city: 'مشهد', address_1: 'خیابان', postcode: '1234567890' }), { first_name: 'علی', last_name: 'رضایی', address_1: 'خیابان', city: 'مشهد', state: 'RKH', postcode: '1234567890', email: 'a@example.com', phone: '09120000000', country: 'IR' });
 });
 
 test('checkout requires a live cash-on-delivery method and selected shipping', () => {

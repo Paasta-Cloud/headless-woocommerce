@@ -29,10 +29,12 @@ export async function POST(request) {
   const input = await request.json().catch(() => null);
   const address = validAddress(input?.address);
   const method = input?.paymentMethod;
-  if (!['cod', ZIBAL_METHOD].includes(method) || (process.env.ZIBAL_SANDBOX === 'true' && method !== ZIBAL_METHOD) || !address || typeof input?.expectedTotal !== 'string' || !/^\d{1,16}$/.test(input.expectedTotal)) return fail('اطلاعات تماس، روش پرداخت یا مبلغ معتبر نیست. در این دمو فقط زیبال آزمایشی مجاز است.', 400);
+  if (!['cod', ZIBAL_METHOD].includes(method) || (process.env.ZIBAL_SANDBOX === 'true' && method !== ZIBAL_METHOD) || !address || typeof input?.expectedTotal !== 'string' || !/^\d{1,16}$/.test(input.expectedTotal)) return fail('اطلاعات تماس، استان، کد پستی یا مبلغ معتبر نیست. استان را از فهرست انتخاب کنید؛ سفارشی ثبت نشده است.', 400);
+  let stage = 'customer';
   try {
     const shippingAddress = { country: 'IR', state: 'THR', city: 'تهران', address_1: process.env.STORE_PICKUP_ADDRESS || 'تهران، خیابان تست، کوچه تستی', first_name: address.first_name, last_name: address.last_name, postcode: address.postcode };
     let cart = await storeRequest('cart/update-customer', token, 'POST', { billing_address: address, shipping_address: shippingAddress });
+    stage = 'shipping';
     const pickup = pickupRate(cart);
     if (!pickup) return fail('تحویل حضوری برای تهران در دسترس نیست. سفارشی ثبت نشده است.', 409);
     if (!pickup.selected) cart = await storeRequest('cart/select-shipping-rate', token, 'POST', { package_id: cart.shipping_rates[0].package_id, rate_id: pickup.rate_id });
@@ -40,6 +42,7 @@ export async function POST(request) {
     const state = checkoutReady(cart, method);
     if (!state.ready) return fail(state.reason, 409);
     if (cart.totals?.total_price !== input.expectedTotal) return fail('مبلغ سبد تغییر کرده است. صورت‌حساب را تازه کنید و دوباره تأیید کنید.', 409);
+    stage = 'checkout';
     const order = await storeRequest('checkout', token, 'POST', { billing_address: address, shipping_address: shippingAddress, payment_method: method, expected_total: input.expectedTotal });
     if (!Number.isSafeInteger(order?.order_id) || !['processing', 'on-hold', 'pending'].includes(order.status)) return fail('تأیید ثبت سفارش دریافت نشد. پیش از تلاش دوباره، سفارش‌های حساب ووکامرس را بررسی کنید.', 502);
     if (method === ZIBAL_METHOD) {
@@ -49,6 +52,8 @@ export async function POST(request) {
     }
     return Response.json({ orderId: order.order_id, status: order.status, note: 'سفارش در ووکامرس ثبت شد. پرداخت در زمان تحویل انجام می‌شود.' }, { headers: noStore });
   } catch (error) {
+    console.error('Checkout Store API request failed', { stage, status: error?.status, code: error?.code });
+    if (stage !== 'checkout' && (error?.code === 'rest_invalid_param' || error?.code === 'woocommerce_rest_invalid_address')) return fail('استان یا نشانی خریدار در ووکامرس پذیرفته نشد. استان را از فهرست انتخاب کنید و دوباره تلاش کنید؛ سفارشی ثبت نشده است.', 400);
     if (error?.code === 'woocommerce_rest_invalid_address') return fail('نشانی یا کد پستی در ووکامرس پذیرفته نشد. فرم را بررسی کنید؛ سفارش نهایی نشده است.', 400);
     if (error?.status === 409) return fail('مبلغ یا موجودی تغییر کرده است. صورت‌حساب را تازه کنید و دوباره بررسی کنید.', 409);
     return fail('وضعیت ثبت سفارش نامشخص است. پیش از تلاش دوباره، سفارش‌های حساب ووکامرس یا ایمیل تأیید را بررسی کنید تا سفارش تکراری ثبت نشود.', 502);

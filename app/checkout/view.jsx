@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { IRAN_STATES } from '../../lib/iran-states';
 
 const fields = {
   first_name: ['نام', 'given-name'], last_name: ['نام خانوادگی', 'family-name'],
@@ -55,7 +56,7 @@ export default function CheckoutView() {
       {!summary ? <p role="status">در حال دریافت صورت‌حساب…</p> : <div className="checkout-grid">
         <form id="checkout-form" className="address-form" onSubmit={submit}>
           <h2>اطلاعات خریدار</h2>
-          <div className="form-grid">{Object.entries(fields).map(([key, [label, autocomplete]]) => <label key={key} className={key === 'address_1' ? 'full' : ''}>{label}<input required={key !== 'state'} maxLength={key === 'postcode' ? 10 : 200} pattern={key === 'postcode' ? '[0-9]{10}' : undefined} inputMode={key === 'postcode' ? 'numeric' : undefined} title={key === 'postcode' ? 'کد پستی ۱۰ رقمی وارد کنید' : undefined} type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'} autoComplete={autocomplete} value={address[key]} onChange={event => setAddress(previous => ({ ...previous, [key]: event.target.value }))}/></label>)}</div>
+          <div className="form-grid">{Object.entries(fields).map(([key, [label, autocomplete]]) => <label key={key} className={key === 'address_1' ? 'full' : ''}>{label}{key === 'state' ? <select required autoComplete={autocomplete} value={address.state} onChange={event => setAddress(previous => ({ ...previous, state: event.target.value }))}><option value="">استان را انتخاب کنید</option>{Object.entries(IRAN_STATES).sort((a, b) => a[1].localeCompare(b[1], 'fa')).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select> : <input required maxLength={key === 'postcode' ? 10 : 200} pattern={key === 'postcode' ? '[0-9]{10}' : undefined} inputMode={key === 'postcode' ? 'numeric' : undefined} title={key === 'postcode' ? 'کد پستی ۱۰ رقمی وارد کنید' : undefined} type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'} autoComplete={autocomplete} value={address[key]} onChange={event => setAddress(previous => ({ ...previous, [key]: event.target.value }))}/>}</label>)}</div>
         </form>
         <aside className="order-summary">
           <h2>خلاصهٔ صورت‌حساب</h2>
