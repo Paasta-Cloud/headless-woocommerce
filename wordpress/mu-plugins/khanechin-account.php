@@ -47,7 +47,7 @@ add_action( 'rest_api_init', function () {
         },
     ) );
     register_rest_route( 'khanechin/v1', '/me', array(
-        'methods' => array( 'GET', 'POST' ),
+        'methods' => 'POST',
         'permission_callback' => function ( $request ) { return khanechin_customer_from_request( $request ) ? true : new WP_Error( 'unauthorized', 'ورود لازم است.', array( 'status' => 401 ) ); },
         'callback' => function ( $request ) {
             $user = khanechin_customer_from_request( $request );
