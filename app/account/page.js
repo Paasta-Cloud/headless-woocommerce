@@ -1,9 +1,10 @@
-import { storeOrigin } from '../../lib/store';
+import { customerAccount } from '../../lib/account';
+import LogoutButton from './view';
 
-export const metadata = { title: 'حساب کاربری | خانه‌چین' };
+export const metadata = { title: 'حساب من | خانه‌چین' };
 export const dynamic = 'force-dynamic';
 
-export default function AccountPage() {
-  const origin = storeOrigin();
-  return <main className="shop-shell"><nav className="shop-nav"><a href="/" className="shop-brand">خانه‌چین</a><div><a href="/cart">سبد خرید</a><a href="/">فروشگاه</a></div></nav><div className="account-panel"><span className="eyebrow">حساب کاربری</span><h1>ورود و پیگیری سفارش‌ها</h1><p>حساب مشتری و سفارش‌ها در ووکامرس نگهداری می‌شوند. ورود از صفحهٔ امن خود وردپرس انجام می‌شود؛ گذرواژه در فرانت‌اند خانه‌چین دریافت یا ذخیره نمی‌شود.</p>{origin ? <a className="primary-action" href={`${origin}/my-account/`}>ورود به حساب ووکامرس</a> : <p className="form-error">در حالت نمایشی، حساب کاربری فعال نیست. نشانی ووکامرس را تنظیم کنید.</p>}<p className="fine-print">برای خرید مهمان، می‌توانید بدون ورود به <a href="/checkout">صورت‌حساب</a> بروید؛ ثبت سفارش فقط با روش پرداخت و ارسال فعال ممکن است.</p></div></main>;
+export default async function AccountPage() {
+  const account = await customerAccount();
+  return <main className="shop-shell"><nav className="shop-nav"><a href="/" className="shop-brand">خانه‌چین</a><div><a href="/cart">سبد خرید</a><a href="/">فروشگاه</a></div></nav>{account ? <section className="account-home"><div className="account-top"><div><span className="eyebrow">حساب من</span><h1>سلام، {account.name}</h1><p dir="ltr">{account.email}</p></div><LogoutButton /></div><h2>سفارش‌های من</h2>{account.orders?.length ? <div className="account-orders">{account.orders.map(order => <article key={order.id}><strong>سفارش #{order.id}</strong><span>{order.date}</span><span>{order.status}</span><b>{new Intl.NumberFormat('fa-IR').format(Number(order.total))} {order.currency === 'IRR' ? 'ریال' : order.currency}</b></article>)}</div> : <div className="empty-state"><h2>هنوز سفارشی ندارید</h2><p>کالاهای فروشگاه را ببینید و اولین سفارش خود را ثبت کنید.</p><a className="primary-action" href="/">دیدن کالاها</a></div>}</section> : <section className="auth-panel"><span className="eyebrow">حساب من</span><h1>خوش آمدید</h1><p>برای دیدن سفارش‌ها و اطلاعات حساب، وارد شوید.</p><div className="auth-actions"><a className="primary-action" href="/login">ورود</a><a href="/register">ساخت حساب</a></div><p className="fine-print">خرید مهمان بدون ورود نیز از <a href="/checkout">صورت‌حساب</a> ممکن است.</p></section>}</main>;
 }
