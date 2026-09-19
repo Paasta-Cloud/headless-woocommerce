@@ -1,0 +1,13 @@
+.cart-error {
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: #8a291f;
+  background: #fff1ef;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}

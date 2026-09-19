@@ -1,4 +1,5 @@
 import './style.css';
+import './cart.css';
 
 export const metadata = {
   title: 'خانه‌چین | نمونه فروشگاه فارسی',
