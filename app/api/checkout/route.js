@@ -16,7 +16,7 @@ export async function GET() {
     const methods = cart.payment_methods?.filter(method => ['cod', ZIBAL_METHOD].includes(method)) || [];
     const state = process.env.STORE_CHECKOUT_ENABLED === 'true'
       ? { ready: methods.some(method => checkoutReady(cart, method).ready), reason: methods.length ? checkoutReady(cart, methods[0]).reason : 'روش پرداخت فعالی در ووکامرس وجود ندارد.' }
-      : { ready: false, reason: 'ثبت سفارش تا تعیین نشانی تحویل حضوری و فعال‌سازی آن در ووکامرس بسته است.' };
+      : { ready: false, reason: 'این فروشگاه با کالاهای نمایشی و درگاه آزمایشی منتشر شده است. ثبت سفارش عمومی تا آماده‌شدن کالاهای واقعی، اعلان سفارش و پذیرندهٔ اصلی بسته می‌ماند.' };
     return Response.json({ items: cart.items?.map(item => ({ id: item.id, name: item.name, quantity: item.quantity })) || [], total: checkoutTotal(cart).raw, displayTotal: checkoutTotal(cart).display, unit: cart.totals?.currency_code === 'IRR' ? 'ریال' : cart.totals?.currency_code || '', ready: state.ready, reason: state.reason, methods, zibalSandbox: process.env.ZIBAL_SANDBOX === 'true', pickupAddress: process.env.STORE_PICKUP_ADDRESS || '', needsShipping: !!cart.needs_shipping, shippingRates: cart.shipping_rates?.map(group => group.shipping_rates?.map(rate => ({ id: rate.rate_id, name: rate.name, selected: rate.selected, price: rate.price })) || []) || [] }, { headers: noStore });
   } catch { return fail('اطلاعات صورت‌حساب از ووکامرس دریافت نشد. داده‌ای تغییر نکرده است؛ دوباره تلاش کنید.', 502); }
 }
