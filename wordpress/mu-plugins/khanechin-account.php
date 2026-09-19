@@ -73,3 +73,11 @@ add_action( 'rest_api_init', function () {
         },
     ) );
 } );
+
+add_filter( 'rest_post_dispatch', function ( $response, $server, $request ) {
+    if ( strpos( $request->get_route(), '/khanechin/v1/' ) === 0 && $response instanceof WP_REST_Response ) {
+        $response->header( 'Cache-Control', 'private, no-store, max-age=0' );
+        $response->header( 'Pragma', 'no-cache' );
+    }
+    return $response;
+}, 10, 3 );
