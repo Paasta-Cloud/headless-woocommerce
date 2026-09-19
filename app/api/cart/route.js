@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { cartAction, publicCart, requestCart } from '../../../lib/cart';
+import { cartAction, publicCart, requestCart, sameSiteOrigin } from '../../../lib/cart';
 
 const COOKIE = 'khanechin_cart';
 
@@ -26,8 +26,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const origin = request.headers.get('origin');
-  if (origin && origin !== new URL(request.url).origin) return Response.json({ error: 'درخواست از مبدأ نامعتبر رد شد.' }, { status: 403 });
+  if (!sameSiteOrigin(request)) return Response.json({ error: 'درخواست از مبدأ نامعتبر رد شد.' }, { status: 403 });
   const input = await request.json().catch(() => null);
   const action = cartAction(input);
   if (!action) return Response.json({ error: 'درخواست سبد معتبر نیست.' }, { status: 400 });

@@ -1,7 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { cartAction, publicCart, requestCart } from '../lib/cart.js';
+import { cartAction, publicCart, requestCart, sameSiteOrigin } from '../lib/cart.js';
+
+test('cart origin follows the public proxy host and scheme without accepting another site', () => {
+  const request = (origin, host = 'shop.example') => new Request('http://internal:3000/api/cart', {
+    headers: { origin, host, 'x-forwarded-proto': 'https' },
+  });
+  assert.equal(sameSiteOrigin(request('https://shop.example')), true);
+  assert.equal(sameSiteOrigin(request('https://other.example')), false);
+  assert.equal(sameSiteOrigin(request('http://shop.example')), false);
+  assert.equal(sameSiteOrigin(request('https://shop.example', 'other.example')), false);
+});
 
 test('cart mutation accepts only bounded supported operations', () => {
   assert.deepEqual(cartAction({ action: 'add', id: 42 }), { path: '/add-item', body: { id: 42, quantity: 1 } });
