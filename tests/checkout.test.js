@@ -16,7 +16,8 @@ test('checkout displays currency minor units but retains raw amount for expected
 test('checkout rejects incomplete or unsafe billing details', () => {
   assert.equal(validAddress({ first_name: 'علی' }), null);
   assert.equal(validAddress({ first_name: 'علی', last_name: 'رضایی', email: 'not-email', phone: '0912', city: 'تهران', address_1: 'خیابان' }), null);
-  assert.deepEqual(validAddress({ first_name: ' علی ', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', city: 'تهران', address_1: 'خیابان' }), { first_name: 'علی', last_name: 'رضایی', address_1: 'خیابان', city: 'تهران', state: '', postcode: '', email: 'a@example.com', phone: '09120000000', country: 'IR' });
+  assert.equal(validAddress({ first_name: 'علی', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', city: 'تهران', address_1: 'خیابان', postcode: '123' }), null);
+  assert.deepEqual(validAddress({ first_name: ' علی ', last_name: 'رضایی', email: 'a@example.com', phone: '09120000000', city: 'تهران', address_1: 'خیابان', postcode: '1234567890' }), { first_name: 'علی', last_name: 'رضایی', address_1: 'خیابان', city: 'تهران', state: '', postcode: '1234567890', email: 'a@example.com', phone: '09120000000', country: 'IR' });
 });
 
 test('checkout requires a live cash-on-delivery method and selected shipping', () => {

@@ -31,7 +31,7 @@ export async function POST(request) {
   const method = input?.paymentMethod;
   if (!['cod', ZIBAL_METHOD].includes(method) || (process.env.ZIBAL_SANDBOX === 'true' && method !== ZIBAL_METHOD) || !address || typeof input?.expectedTotal !== 'string' || !/^\d{1,16}$/.test(input.expectedTotal)) return fail('اطلاعات تماس، روش پرداخت یا مبلغ معتبر نیست. در این دمو فقط زیبال آزمایشی مجاز است.', 400);
   try {
-    const shippingAddress = { country: 'IR', state: 'THR', city: 'تهران', address_1: process.env.STORE_PICKUP_ADDRESS || 'تهران، خیابان تست، کوچه تستی' };
+    const shippingAddress = { country: 'IR', state: 'THR', city: 'تهران', address_1: process.env.STORE_PICKUP_ADDRESS || 'تهران، خیابان تست، کوچه تستی', first_name: address.first_name, last_name: address.last_name, postcode: address.postcode };
     let cart = await storeRequest('cart/update-customer', token, 'POST', { billing_address: address, shipping_address: shippingAddress });
     const pickup = pickupRate(cart);
     if (!pickup) return fail('تحویل حضوری برای تهران در دسترس نیست. سفارشی ثبت نشده است.', 409);
@@ -49,6 +49,7 @@ export async function POST(request) {
     }
     return Response.json({ orderId: order.order_id, status: order.status, note: 'سفارش در ووکامرس ثبت شد. پرداخت در زمان تحویل انجام می‌شود.' }, { headers: noStore });
   } catch (error) {
+    if (error?.code === 'woocommerce_rest_invalid_address') return fail('نشانی یا کد پستی در ووکامرس پذیرفته نشد. فرم را بررسی کنید؛ سفارش نهایی نشده است.', 400);
     if (error?.status === 409) return fail('مبلغ یا موجودی تغییر کرده است. صورت‌حساب را تازه کنید و دوباره بررسی کنید.', 409);
     return fail('وضعیت ثبت سفارش نامشخص است. پیش از تلاش دوباره، سفارش‌های حساب ووکامرس یا ایمیل تأیید را بررسی کنید تا سفارش تکراری ثبت نشود.', 502);
   }
