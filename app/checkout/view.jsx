@@ -11,7 +11,7 @@ const fields = {
 export default function CheckoutView() {
   const [summary, setSummary] = useState(null);
   const [address, setAddress] = useState(Object.fromEntries(Object.keys(fields).map(key => [key, ''])));
-  const [method, setMethod] = useState('cod');
+  const [method, setMethod] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [order, setOrder] = useState(null);
@@ -22,7 +22,7 @@ export default function CheckoutView() {
     fetch('/api/checkout', { cache: 'no-store' }).then(async response => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      if (active) { setSummary(data); setMethod(data.methods?.[0] || 'cod'); }
+      if (active) { setSummary(data); setMethod(data.methods?.[0] || ''); }
     }).catch(reason => { if (active) setError(reason.message || 'صورت‌حساب بارگذاری نشد. صفحه را تازه کنید.'); });
     return () => { active = false; };
   }, []);
@@ -67,8 +67,9 @@ export default function CheckoutView() {
             {summary.methods.includes('cod') && <label><input type="radio" name="payment" value="cod" checked={method === 'cod'} onChange={() => setMethod('cod')}/><span>پرداخت در محل<small>پرداخت هنگام تحویل حضوری</small></span></label>}
             {summary.methods.includes('WC_Gateway_Zibal') && <label><input type="radio" name="payment" value="WC_Gateway_Zibal" checked={method === 'WC_Gateway_Zibal'} onChange={() => setMethod('WC_Gateway_Zibal')}/><span>درگاه زیبال{summary.zibalSandbox ? ' (آزمایشی)' : ''}<small>{summary.zibalSandbox ? 'پرداخت واقعی انجام نمی‌شود' : 'پس از ثبت سفارش به صفحهٔ امن پرداخت می‌روید'}</small></span></label>}
           </fieldset>
+          {summary.zibalSandbox && <p className="fine-print">این یک سفارش آزمایشی با کالاهای نمایشی است. وجهی دریافت و کالایی تحویل داده نمی‌شود.</p>}
           {!summary.ready && <p className="form-error" role="alert">{summary.reason}</p>}
-          <button type="submit" form="checkout-form" className="primary-action" disabled={!summary.ready || busy}>{busy ? 'در حال ثبت سفارش…' : method === 'cod' ? 'ثبت سفارش با پرداخت در محل' : 'ادامه به زیبال'}</button>
+          <button type="submit" form="checkout-form" className="primary-action" disabled={!summary.ready || !method || busy}>{busy ? 'در حال ثبت سفارش…' : summary.zibalSandbox ? 'ثبت سفارش آزمایشی و ادامه به زیبال' : method === 'cod' ? 'ثبت سفارش با پرداخت در محل' : 'ادامه به زیبال'}</button>
           <p className="fine-print">در زیبال، ثبت سفارش به معنی پرداخت نیست؛ نتیجه فقط پس از بازگشت و تأیید سمت سرور ووکامرس معتبر است. اگر پاسخ نامشخص شد، پیش از تلاش دوباره سفارش‌ها یا ایمیل خود را بررسی کنید.</p>
         </aside>
       </div>}

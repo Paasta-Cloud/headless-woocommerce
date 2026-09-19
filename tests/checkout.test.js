@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { checkoutReady, checkoutTotal, safePaymentRedirect, storeRequest, validAddress, ZIBAL_METHOD } from '../lib/checkout.js';
+import { availableMethods, checkoutReady, checkoutTotal, safePaymentRedirect, storeRequest, validAddress, ZIBAL_METHOD } from '../lib/checkout.js';
+
+test('sandbox exposes only test Zibal, never cash on delivery', () => {
+  const cart = { payment_methods: ['cod', ZIBAL_METHOD, 'other'] };
+  assert.deepEqual(availableMethods(cart, true), [ZIBAL_METHOD]);
+  assert.deepEqual(availableMethods(cart, false), ['cod', ZIBAL_METHOD]);
+});
 
 test('checkout displays currency minor units but retains raw amount for expected-total guard', () => {
   assert.deepEqual(checkoutTotal({ totals: { total_price: '365000000', currency_minor_unit: 2 } }), { raw: '365000000', display: 3650000 });

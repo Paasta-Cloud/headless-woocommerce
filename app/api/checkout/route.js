@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { checkoutReady, checkoutTotal, pickupRate, safePaymentRedirect, storeRequest, validAddress, ZIBAL_METHOD } from '../../../lib/checkout';
+import { availableMethods, checkoutReady, checkoutTotal, pickupRate, safePaymentRedirect, storeRequest, validAddress, ZIBAL_METHOD } from '../../../lib/checkout';
 import { sameSiteOrigin } from '../../../lib/cart';
 import { storeOrigin } from '../../../lib/store';
 
@@ -13,7 +13,7 @@ export async function GET() {
   if (!token) return fail('سبد خرید خالی است. ابتدا کالایی انتخاب کنید.', 409);
   try {
     const cart = await storeRequest('cart', token);
-    const methods = cart.payment_methods?.filter(method => ['cod', ZIBAL_METHOD].includes(method)) || [];
+    const methods = availableMethods(cart, process.env.ZIBAL_SANDBOX === 'true');
     const state = process.env.STORE_CHECKOUT_ENABLED === 'true'
       ? { ready: methods.some(method => checkoutReady(cart, method).ready), reason: methods.length ? checkoutReady(cart, methods[0]).reason : 'روش پرداخت فعالی در ووکامرس وجود ندارد.' }
       : { ready: false, reason: 'این فروشگاه با کالاهای نمایشی و درگاه آزمایشی منتشر شده است. ثبت سفارش عمومی تا آماده‌شدن کالاهای واقعی، اعلان سفارش و پذیرندهٔ اصلی بسته می‌ماند.' };
@@ -29,7 +29,7 @@ export async function POST(request) {
   const input = await request.json().catch(() => null);
   const address = validAddress(input?.address);
   const method = input?.paymentMethod;
-  if (!['cod', ZIBAL_METHOD].includes(method) || !address || typeof input?.expectedTotal !== 'string' || !/^\d{1,16}$/.test(input.expectedTotal)) return fail('اطلاعات تماس، روش پرداخت یا مبلغ معتبر نیست. فرم را بررسی کنید.', 400);
+  if (!['cod', ZIBAL_METHOD].includes(method) || (process.env.ZIBAL_SANDBOX === 'true' && method !== ZIBAL_METHOD) || !address || typeof input?.expectedTotal !== 'string' || !/^\d{1,16}$/.test(input.expectedTotal)) return fail('اطلاعات تماس، روش پرداخت یا مبلغ معتبر نیست. در این دمو فقط زیبال آزمایشی مجاز است.', 400);
   try {
     const shippingAddress = { country: 'IR', state: 'THR', city: 'تهران', address_1: process.env.STORE_PICKUP_ADDRESS || 'تهران، خیابان تست، کوچه تستی' };
     let cart = await storeRequest('cart/update-customer', token, 'POST', { billing_address: address, shipping_address: shippingAddress });
