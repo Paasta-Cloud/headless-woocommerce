@@ -23,7 +23,14 @@ export async function POST(request) {
 export async function DELETE(request) {
   if (!sameAccountOrigin(request)) return NextResponse.json({ error: 'مبدأ درخواست معتبر نیست.' }, { status: 403 });
   const token = request.cookies.get(SESSION_COOKIE)?.value;
-  try { if (token) await accountRequest('logout', token, 'POST'); } catch { /* Local session is still removed. */ }
+  if (token) {
+    try {
+      const result = await accountRequest('logout', token, 'POST');
+      if (result?.status !== 200) throw new Error('Session revocation failed');
+    } catch {
+      return NextResponse.json({ error: 'خروج از سرور انجام نشد. نشست شما هنوز فعال است؛ کمی بعد دوباره تلاش کنید.' }, { status: 503 });
+    }
+  }
   const response = NextResponse.json({ ok: true });
   response.cookies.delete(SESSION_COOKIE);
   response.headers.set('Cache-Control', 'no-store');
