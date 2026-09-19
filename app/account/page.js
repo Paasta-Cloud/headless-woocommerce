@@ -1,6 +1,7 @@
 import { storeOrigin } from '../../lib/store';
 
 export const metadata = { title: 'حساب کاربری | خانه‌چین' };
+export const dynamic = 'force-dynamic';
 
 export default function AccountPage() {
   const origin = storeOrigin();
