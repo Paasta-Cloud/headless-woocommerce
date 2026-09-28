@@ -49,7 +49,7 @@ export default function CheckoutView() {
     } finally { submitting.current = false; setBusy(false); }
   }
 
-  const price = value => new Intl.NumberFormat('fa-IR').format(Number(value || 0)) + ' ' + (summary?.unit || '');
+  const price = value => new Intl.NumberFormat('fa-IR').format(Number(value || 0)) + ' ' + (['IRT','TOMAN'].includes(summary?.unit) ? 'تومان' : summary?.unit || '');
   return <main className="shop-shell"><Breadcrumbs items={[{label:'صورت‌حساب'}]}/><CheckoutSteps current={2}/>
 
     {order ? <section className="empty-state success-state" role="status"><span className="eyebrow">سفارش ثبت شد</span><h1>ممنون از خرید شما</h1><p>شمارهٔ سفارش: <b dir="ltr">{order.orderId}</b></p><p>{order.note}</p><p>این تأییدیه به معنی پرداخت‌شدن سفارش نیست.</p><a className="primary-action" href="/">بازگشت به فروشگاه</a></section> : <>
