@@ -36,7 +36,7 @@ test('Store API toman amounts do not receive a hidden conversion', () => {
 
 test('live WooCommerce response is used without silently falling back to demo', async () => {
   const server = createServer((request, response) => {
-    assert.equal(request.url, '/wp-json/wc/store/v1/products?per_page=24');
+    assert.equal(request.url, '/wp-json/wc/store/v1/products?per_page=100&page=1');
     response.setHeader('content-type', 'application/json');
     response.end(JSON.stringify([{ id: 42, name: 'محصول زنده', prices: { price: '100000', currency_minor_unit: 0, currency_code: 'IRT' } }]));
   });
@@ -51,6 +51,34 @@ test('live WooCommerce response is used without silently falling back to demo', 
   } finally {
     if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
     else process.env.WOOCOMMERCE_URL = previous;
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('catalogue follows all pages and preserves the optional category boundary', async () => {
+  const requests = [];
+  const server = createServer((request, response) => {
+    const url = new URL(request.url, 'http://localhost');
+    requests.push(url.searchParams.get('page'));
+    assert.equal(url.searchParams.get('category'), '176');
+    response.setHeader('x-wp-totalpages', '2');
+    response.setHeader('content-type', 'application/json');
+    response.end(JSON.stringify([{ id: Number(url.searchParams.get('page')), name: 'کالا', categories: [{ id: 176, name: 'نمونه' }, { id: 177, name: 'مینا' }] }]));
+  });
+  await new Promise(resolve => server.listen(0, resolve));
+  const previous = { url: process.env.WOOCOMMERCE_URL, category: process.env.WOOCOMMERCE_CATEGORY_ID };
+  process.env.WOOCOMMERCE_URL = `http://localhost:${server.address().port}`;
+  process.env.WOOCOMMERCE_CATEGORY_ID = '176';
+  try {
+    const result = await getProducts();
+    assert.deepEqual(requests, ['1', '2']);
+    assert.deepEqual(result.products.map(p => p.id), [1, 2]);
+    assert.deepEqual(result.products[0].categories, ['مینا']);
+    assert.equal(result.products[0].category, 'مینا');
+  } finally {
+    for (const [key, value] of [['WOOCOMMERCE_URL', previous.url], ['WOOCOMMERCE_CATEGORY_ID', previous.category]]) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
     await new Promise(resolve => server.close(resolve));
   }
 });

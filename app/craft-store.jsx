@@ -36,9 +36,9 @@ export default function CraftStore({ products, mode, error }) {
   const favorites = useFavorites();
   const { cart, busy, error: cartError, addItem } = useCart(mode);
   const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  const categories = ['همه', ...new Set(products.map(p => p.category))];
+  const categories = ['همه', ...new Set(products.flatMap(p => p.categories?.length ? p.categories : [p.category]))];
   const visible = useMemo(() => {
-    const result = products.filter(p => (category === 'همه' || p.category === category) && `${p.name} ${p.category}`.includes(query.trim()));
+    const result = products.filter(p => (category === 'همه' || (p.categories || [p.category]).includes(category)) && `${p.name} ${(p.categories || [p.category]).join(' ')}`.includes(query.trim()));
     return sort === 'featured' ? result : [...result].sort(sort === 'cheap' ? (a,b) => a.price-b.price : (a,b) => b.price-a.price);
   }, [products, query, category, sort]);
   function findCraft(term) { setCategory('همه'); setQuery(term); }
