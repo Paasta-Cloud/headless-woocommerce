@@ -1,7 +1,9 @@
 'use client';
+import AuthFrame from '../components/auth-frame';
+import PasswordInput from '../components/password-input';
 import { useState } from 'react';
 
-export default function LoginForm() {
+export default function LoginForm({ embedded = false }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [unverified, setUnverified] = useState(false);
@@ -19,5 +21,5 @@ export default function LoginForm() {
       window.location.assign('/account');
     } catch (cause) { setError(cause.message); setBusy(false); }
   }
-  return <main className="shop-shell"><nav className="shop-nav"><a href="/" className="shop-brand">خانه‌چین</a><div><a href="/register">عضویت</a><a href="/">فروشگاه</a></div></nav><section className="auth-panel"><span className="eyebrow">حساب مشتری</span><h1>ورود به خانه‌چین</h1><p>سفارش‌ها و وضعیت خریدهای خود را در یک جا ببینید.</p><form onSubmit={submit}><label>ایمیل یا نام کاربری<input name="login" autoComplete="username" required maxLength="254" /></label><label>رمز عبور<input name="password" type="password" autoComplete="current-password" required /></label>{error && <p className="form-error" role="alert">{error}</p>}{unverified && <p className="form-success">ایمیل تأیید نرسیده؟ <a href="/verify">ارسال دوبارهٔ پیوند تأیید</a></p>}<button className="primary-action" disabled={busy}>{busy ? 'در حال بررسی…' : 'ورود به حساب'}</button></form><p className="auth-foot">رمز عبور را فراموش کرده‌اید؟ <a href="/forgot">بازیابی رمز عبور</a></p><p className="auth-foot">حساب ندارید؟ <a href="/register">صفحهٔ عضویت</a></p></section></main>;
+  return <AuthFrame embedded={embedded}><section className="auth-panel"><span className="eyebrow">حساب مشتری</span><h1>ورود به خانه‌چین</h1><p>سفارش‌ها و وضعیت خریدهای خود را در یک جا ببینید.</p><form onSubmit={submit}><label>ایمیل یا نام کاربری<input name="login" autoComplete="username" required maxLength="254" /></label><label>رمز عبور<PasswordInput name="password" autoComplete="current-password" required /></label>{error && <p className="form-error" role="alert">{error}</p>}{unverified && <p className="form-success">ایمیل تأیید نرسیده؟ <a href="/verify">ارسال دوبارهٔ پیوند تأیید</a></p>}<button className="primary-action" disabled={busy}>{busy ? 'در حال بررسی…' : 'ورود به حساب'}</button></form><p className="auth-foot">رمز عبور را فراموش کرده‌اید؟ <a href="/forgot">بازیابی رمز عبور</a></p><p className="auth-foot">حساب ندارید؟ <a href="/register">صفحهٔ عضویت</a></p></section></AuthFrame>;
 }

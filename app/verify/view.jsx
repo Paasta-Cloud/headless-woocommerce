@@ -1,4 +1,6 @@
 'use client';
+import AuthFrame from '../components/auth-frame';
+import PasswordInput from '../components/password-input';
 import { useEffect, useState } from 'react';
 
 export default function VerifyView({ token }) {
@@ -34,7 +36,7 @@ export default function VerifyView({ token }) {
     } catch (cause) { setError(cause.message); } finally { setBusy(false); }
   }
 
-  return <main className="shop-shell"><nav className="shop-nav"><a href="/" className="shop-brand">خانه‌چین</a><div><a href="/login">ورود</a><a href="/">فروشگاه</a></div></nav><section className="auth-panel"><span className="eyebrow">تأیید حساب</span><h1>تأیید ایمیل</h1>{state === 'checking' && <p role="status">در حال بررسی پیوند تأیید…</p>}{state === 'ok' && <>
+  return <AuthFrame><section className="auth-panel"><span className="eyebrow">تأیید حساب</span><h1>تأیید ایمیل</h1>{state === 'checking' && <p role="status">در حال بررسی پیوند تأیید…</p>}{state === 'ok' && <>
     <p className="form-success">ایمیل شما تأیید شد. حالا می‌توانید وارد حساب شوید.</p>
     <div className="auth-actions"><a className="primary-action" href="/login">ورود به حساب</a></div>
   </>}{state === 'failed' && <>
@@ -43,7 +45,7 @@ export default function VerifyView({ token }) {
   </>}{state === 'form' && <>
     <p>ایمیل خود را وارد کنید تا اگر حسابی تأییدنشده با آن وجود دارد، پیوند تأیید تازه برایش ارسال شود.</p>
     <ResendForm onSubmit={resend} busy={busy} error={error} success={success} />
-  </>}</section></main>;
+  </>}</section></AuthFrame>;
 }
 
 function ResendForm({ onSubmit, busy, error, success }) {

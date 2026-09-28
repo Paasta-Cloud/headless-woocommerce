@@ -1,3 +1,4 @@
+import { Breadcrumbs, CheckoutSteps } from '../../components/ui';
 import { cookies } from 'next/headers';
 import { decodeReceipt, getOrder, orderCookieName } from '../../../lib/order';
 
@@ -23,8 +24,8 @@ export default async function OrderPage({ params }) {
   const [title, explanation] = order ? (messages[order.status] || ['وضعیت سفارش مشخص نیست', 'برای پیگیری با فروشگاه تماس بگیرید.']) : ['اطلاعات سفارش در دسترس نیست', 'برای مشاهدهٔ امن سفارش، از همان مرورگری که خرید را آغاز کردید استفاده کنید یا وارد حساب ووکامرس شوید.'];
   const amount = order ? new Intl.NumberFormat('fa-IR').format(Number(order.total) / 10 ** order.minorUnit) : '';
   const unit = order?.currency === 'IRR' ? 'ریال' : order?.currency === 'IRT' ? 'تومان' : order?.currency || '';
-  return <main className="shop-shell order-page">
-    <nav className="shop-nav"><a href="/" className="shop-brand">خانه‌چین</a><div><a href="/account">حساب</a><a href="/">فروشگاه</a></div></nav>
+  return <main className="shop-shell order-page"><Breadcrumbs items={[{label:'پیگیری سفارش'}]}/><CheckoutSteps current={3}/>
+    
     <section className="order-result" aria-labelledby="order-title">
       <span className="eyebrow">پیگیری سفارش از ووکامرس</span>
       <h1 id="order-title">{title}</h1>

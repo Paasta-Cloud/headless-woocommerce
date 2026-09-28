@@ -1,4 +1,6 @@
 'use client';
+import { Breadcrumbs, CheckoutSteps } from '../components/ui';
+
 
 import { useEffect, useRef, useState } from 'react';
 import { IRAN_STATES } from '../../lib/iran-states';
@@ -48,12 +50,12 @@ export default function CheckoutView() {
   }
 
   const price = value => new Intl.NumberFormat('fa-IR').format(Number(value || 0)) + ' ' + (summary?.unit || '');
-  return <main className="shop-shell">
-    <nav className="shop-nav"><a href="/" className="shop-brand">خانه‌چین</a><div><a href="/cart">بازگشت به سبد</a><a href="/account">حساب</a></div></nav>
+  return <main className="shop-shell"><Breadcrumbs items={[{label:'صورت‌حساب'}]}/><CheckoutSteps current={2}/>
+    
     {order ? <section className="empty-state success-state" role="status"><span className="eyebrow">سفارش ثبت شد</span><h1>ممنون از خرید شما</h1><p>شمارهٔ سفارش: <b dir="ltr">{order.orderId}</b></p><p>{order.note}</p><p>این تأییدیه به معنی پرداخت‌شدن سفارش نیست.</p><a className="primary-action" href="/">بازگشت به فروشگاه</a></section> : <>
-      <div className="page-heading"><span className="eyebrow">مرحلهٔ ۲ از ۲</span><h1>صورت‌حساب و دریافت سفارش</h1><p>پیش از ثبت نهایی، اطلاعات تماس، روش دریافت و مبلغ را بررسی کنید.</p></div>
+      <div className="page-heading"><span className="eyebrow">مرحلهٔ ۲ از ۳</span><h1>صورت‌حساب و دریافت سفارش</h1><p>پیش از ثبت نهایی، اطلاعات تماس، روش دریافت و مبلغ را بررسی کنید.</p></div>
       {error && <p className="form-error" role="alert">{error}</p>}
-      {!summary ? <p role="status">در حال دریافت صورت‌حساب…</p> : <div className="checkout-grid">
+      {!summary ? error ? <div className="empty-state"><h2>صورت‌حساب دریافت نشد</h2><p>سفارشی از این صفحه ثبت نشده است.</p><a className="primary-action" href="/cart">بررسی سبد خرید</a></div> : <p role="status">در حال دریافت صورت‌حساب…</p> : <div className="checkout-grid">
         <form id="checkout-form" className="address-form" onSubmit={submit}>
           <h2>اطلاعات خریدار</h2>
           <div className="form-grid">{Object.entries(fields).map(([key, [label, autocomplete]]) => <label key={key} className={key === 'address_1' ? 'full' : ''}>{label}{key === 'state' ? <select required autoComplete={autocomplete} value={address.state} onChange={event => setAddress(previous => ({ ...previous, state: event.target.value }))}><option value="">استان را انتخاب کنید</option>{Object.entries(IRAN_STATES).sort((a, b) => a[1].localeCompare(b[1], 'fa')).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select> : <input required maxLength={key === 'postcode' ? 10 : 200} pattern={key === 'postcode' ? '[0-9]{10}' : undefined} inputMode={key === 'postcode' ? 'numeric' : undefined} title={key === 'postcode' ? 'کد پستی ۱۰ رقمی وارد کنید' : undefined} type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'} autoComplete={autocomplete} value={address[key]} onChange={event => setAddress(previous => ({ ...previous, [key]: event.target.value }))}/>}</label>)}</div>

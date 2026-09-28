@@ -1,10 +1,7 @@
-import './style.css';
-import './cart.css';
-import './shop.css';
-import './checkout.css';
-import './account.css';
-import './enhancements.css';
 import './craft-store.css';
+import './theme.css';
+import StoreShell from './components/store-shell';
+import { customerAccount } from '../lib/customer-session';
 import { storefrontConfig } from '../lib/storefront-config';
 
 export const metadata = {
@@ -12,6 +9,8 @@ export const metadata = {
   description: storefrontConfig.description,
 };
 
-export default function Layout({ children }) {
-  return <html lang="fa" dir="rtl"><body>{children}</body></html>;
+export default async function Layout({ children }) {
+  const mode = !process.env.WOOCOMMERCE_URL || process.env.WOOCOMMERCE_URL === 'demo' ? 'demo' : 'live';
+  const account = await customerAccount();
+  return <html lang="fa" dir="rtl"><body><StoreShell mode={mode} signedIn={Boolean(account)}>{children}</StoreShell></body></html>;
 }

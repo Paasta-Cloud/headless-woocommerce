@@ -29,5 +29,11 @@ Small downward neutral shadows separate image campaigns and white shelves from t
 ## Components
 Carousel uses explicit labeled controls, without automatic motion. Search, category filters, sorting, favorites and cart retain real behavior. Product prices and availability remain authoritative WooCommerce data. Reference demo products must be imported explicitly, never substituted for real product IDs.
 
+## Route contract
+Every route inherits StoreShell: announcement, two-row masthead, search, account/cart drawers and the same four-column footer. Breadcrumbs use a separate white strip. Catalogues have a right-hand filter column and three product columns; category discovery has image tiles. Product pages use gallery, details and purchase columns, with description/specification/delivery tabs and a related shelf. Authentication uses a pale turquoise illustration panel and white form; its drawer reuses the exact login behavior. Cart and checkout share numbered steps and a left-hand summary. Account uses a right-hand navigation rail. Informational pages, missing pages, loading and recoverable/global errors retain this frame.
+
+## Responsive and interaction contract
+At 640px filters stack, product and checkout panels become one column, category tiles remain two columns and a fixed five-item mobile navigation appears. Native dialogs provide focus containment and Escape dismissal. Password visibility controls, persisted local favorites and a shared cart provider keep controls consistent between routes and drawers. No simulated reviews, coupons, fake discounts or unconfigured contact channels. Licensed Yekan Bakh is optional; no font binaries are bundled.
+
 ## Do's and Don'ts
 Use real product imagery, accessible labels and visible focus. Do not invent discounts, stock, countdown deadlines or service guarantees.

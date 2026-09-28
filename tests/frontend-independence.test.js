@@ -21,7 +21,7 @@ test('storefront exposes sorting and frontend-owned routes without a WordPress p
   const favorites = readFileSync('app/favorites/page.js', 'utf8');
   const guide = readFileSync('app/guide/page.js', 'utf8');
   assert.match(source, /value="cheap"/);
-  assert.match(source, /href="\/favorites"/);
+  assert.match(readFileSync('app/components/store-shell.jsx','utf8'), /href="\/favorites"/);
   assert.match(source, /href="\/guide"/);
   assert.doesNotMatch(favorites + guide, /wp-json|wordpress/i);
 });

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getProduct, getVariations, storeOrigin } from '../../../lib/store';
+import { getProduct, getProducts, getVariations, storeOrigin } from '../../../lib/store';
 import ProductView from './product-view';
 
 export const dynamic = 'force-dynamic';
@@ -20,5 +20,7 @@ export default async function ProductPage({ params }) {
     try { stock = await getVariations(product.id); }
     catch (cause) { variationError = cause?.message || 'گزینه‌های این کالا دریافت نشد. دوباره تلاش کنید.'; }
   }
-  return <ProductView product={product} mode={storeOrigin() ? 'live' : 'demo'} stock={stock} variationError={variationError} />;
+  const {products} = await getProducts();
+  const related = products.filter(item => item.id !== product.id && item.category === product.category).slice(0,4);
+  return <ProductView product={product} mode={storeOrigin() ? 'live' : 'demo'} stock={stock} variationError={variationError} related={related} />;
 }

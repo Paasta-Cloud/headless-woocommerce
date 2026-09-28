@@ -1,4 +1,6 @@
 'use client';
+import AuthFrame from '../components/auth-frame';
+import PasswordInput from '../components/password-input';
 import { useState } from 'react';
 
 export default function ForgotForm() {
@@ -16,7 +18,7 @@ export default function ForgotForm() {
       setDone(true);
     } catch (cause) { setError(cause.message); } finally { setBusy(false); }
   }
-  return <main className="shop-shell"><nav className="shop-nav"><a href="/" className="shop-brand">خانه‌چین</a><div><a href="/login">ورود</a><a href="/">فروشگاه</a></div></nav><section className="auth-panel"><span className="eyebrow">حساب مشتری</span><h1>بازیابی رمز عبور</h1>{done ? <>
+  return <AuthFrame><section className="auth-panel"><span className="eyebrow">حساب مشتری</span><h1>بازیابی رمز عبور</h1>{done ? <>
     <p className="form-success">اگر این ایمیل در فروشگاه ثبت شده باشد، پیوند بازیابی برایتان ارسال شد. صندوق ایمیل خود را ببینید.</p>
     <div className="auth-actions"><a className="primary-action" href="/login">بازگشت به ورود</a></div>
   </> : <>
@@ -27,5 +29,5 @@ export default function ForgotForm() {
       <button className="primary-action" disabled={busy}>{busy ? 'در حال ارسال…' : 'ارسال پیوند بازیابی'}</button>
     </form>
     <p className="auth-foot">یادتان آمد؟ <a href="/login">ورود</a></p>
-  </>}</section></main>;
+  </>}</section></AuthFrame>;
 }

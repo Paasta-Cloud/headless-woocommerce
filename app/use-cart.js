@@ -1,8 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
-export function useCart(mode) {
+const CartContext = createContext(null);
+export function CartProvider({ mode, children }) {
+  const value = useCartState(mode);
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+}
+export function useCart() {
+  const value = useContext(CartContext);
+  if (!value) throw new Error('CartProvider is required');
+  return value;
+}
+function useCartState(mode) {
   const [cart, setCart] = useState({});
   const [entries, setEntries] = useState([]);
   const [subtotal, setSubtotal] = useState(null);
@@ -23,6 +33,9 @@ export function useCart(mode) {
   }
 
   useEffect(() => {
+    if (mode === 'demo') {
+      try { const saved = JSON.parse(sessionStorage.getItem('khanechin-demo-cart') || '{}'); setCart(Object.fromEntries(Object.entries(saved).filter(([id, qty]) => /^[1-9]\d*$/.test(id) && Number.isInteger(qty) && qty > 0 && qty <= 99))); } catch { /* Empty demo cart is safe. */ }
+    }
     if (mode !== 'live') return;
     let active = true;
     fetch('/api/cart', { cache: 'no-store' }).then(async response => {
@@ -50,10 +63,11 @@ export function useCart(mode) {
   // Adds a product; for variable products variation carries the chosen variant
   // ({ id, attributes: [{ name, value }] }) exactly as reported by the product page.
   async function addItem(id, variation) {
-    if (busy) return false;
+    if (busy || loading || !['demo','live'].includes(mode)) return false;
     setError('');
     if (mode === 'demo') {
-      setCart(previous => ({ ...previous, [id]: (previous[id] || 0) + 1 }));
+      const next = { ...cart, [id]: Math.min(99, (cart[id] || 0) + 1) };
+      setCart(next); try { sessionStorage.setItem('khanechin-demo-cart', JSON.stringify(next)); } catch { /* Storage may be disabled. */ }
       return true;
     }
     const action = variation ? { action: 'add', id, variation } : { action: 'add', id };
@@ -63,11 +77,12 @@ export function useCart(mode) {
   // Live mode identifies lines by their unique cart item key (two variations of
   // one product are separate lines); demo mode keeps working with product ids.
   async function changeQuantity(idOrKey, delta) {
-    if (busy) return;
+    if (busy || loading || !['demo','live'].includes(mode)) return;
     setError('');
     if (mode === 'demo') {
       const id = Number(idOrKey);
-      setCart(previous => ({ ...previous, [id]: Math.max(0, (previous[id] || 0) + delta) }));
+      const next = { ...cart, [id]: Math.min(99, Math.max(0, (cart[id] || 0) + delta)) };
+      setCart(next); try { sessionStorage.setItem('khanechin-demo-cart', JSON.stringify(next)); } catch { /* Storage may be disabled. */ }
       return;
     }
     const entry = entries.find(item => item.key === idOrKey);
@@ -77,5 +92,5 @@ export function useCart(mode) {
     return post(action);
   }
 
-  return { cart, entries, subtotal, unit, busy, loading, error, addItem, changeQuantity };
+  return { cart, entries, subtotal, unit, busy: busy || loading, loading, error, addItem, changeQuantity, mode };
 }
