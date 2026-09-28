@@ -51,7 +51,7 @@ export default function CheckoutView() {
 
   const price = value => new Intl.NumberFormat('fa-IR').format(Number(value || 0)) + ' ' + (summary?.unit || '');
   return <main className="shop-shell"><Breadcrumbs items={[{label:'صورت‌حساب'}]}/><CheckoutSteps current={2}/>
-    
+
     {order ? <section className="empty-state success-state" role="status"><span className="eyebrow">سفارش ثبت شد</span><h1>ممنون از خرید شما</h1><p>شمارهٔ سفارش: <b dir="ltr">{order.orderId}</b></p><p>{order.note}</p><p>این تأییدیه به معنی پرداخت‌شدن سفارش نیست.</p><a className="primary-action" href="/">بازگشت به فروشگاه</a></section> : <>
       <div className="page-heading"><span className="eyebrow">مرحلهٔ ۲ از ۳</span><h1>صورت‌حساب و دریافت سفارش</h1><p>پیش از ثبت نهایی، اطلاعات تماس، روش دریافت و مبلغ را بررسی کنید.</p></div>
       {error && <p className="form-error" role="alert">{error}</p>}

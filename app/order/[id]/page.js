@@ -25,7 +25,7 @@ export default async function OrderPage({ params }) {
   const amount = order ? new Intl.NumberFormat('fa-IR').format(Number(order.total) / 10 ** order.minorUnit) : '';
   const unit = order?.currency === 'IRR' ? 'ریال' : order?.currency === 'IRT' ? 'تومان' : order?.currency || '';
   return <main className="shop-shell order-page"><Breadcrumbs items={[{label:'پیگیری سفارش'}]}/><CheckoutSteps current={3}/>
-    
+
     <section className="order-result" aria-labelledby="order-title">
       <span className="eyebrow">پیگیری سفارش از ووکامرس</span>
       <h1 id="order-title">{title}</h1>
