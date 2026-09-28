@@ -1,4 +1,4 @@
-import Storefront from './storefront';
+import Storefront from './craft-store';
 import { getProducts } from '../lib/store';
 
 export const dynamic = 'force-dynamic';

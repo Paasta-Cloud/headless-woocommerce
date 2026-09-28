@@ -4,6 +4,7 @@ import './shop.css';
 import './checkout.css';
 import './account.css';
 import './enhancements.css';
+import './craft-store.css';
 import { storefrontConfig } from '../lib/storefront-config';
 
 export const metadata = {
