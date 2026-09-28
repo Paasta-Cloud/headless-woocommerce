@@ -21,6 +21,19 @@ test('cart mutation accepts only bounded supported operations', () => {
   assert.deepEqual(cartAction({ action: 'remove', key: 'a'.repeat(32) }), { path: '/remove-item', body: { key: 'a'.repeat(32) } });
 });
 
+test('variation adds carry the chosen variation id and exact attribute pairs', () => {
+  assert.deepEqual(
+    cartAction({ action: 'add', id: 9, variation: { id: 91, attributes: [{ name: 'رنگ', value: 'آبی' }] } }),
+    { path: '/add-item', body: { id: 91, quantity: 1, variation: [{ attribute: 'رنگ', value: 'آبی' }] } },
+  );
+  // Malformed variations are rejected instead of being sent half-formed.
+  assert.equal(cartAction({ action: 'add', id: 9, variation: { id: -1, attributes: [{ name: 'رنگ', value: 'آبی' }] } }), null);
+  assert.equal(cartAction({ action: 'add', id: 9, variation: { id: 91, attributes: [] } }), null);
+  assert.equal(cartAction({ action: 'add', id: 9, variation: { id: 91, attributes: [{ name: '', value: 'آبی' }] } }), null);
+  assert.equal(cartAction({ action: 'add', id: 9, variation: { id: 91, attributes: [{ name: 'رنگ' }] } }), null);
+  assert.equal(cartAction({ action: 'add', id: 9, variation: 'آبی' }), null);
+});
+
 test('cart token is forwarded to WooCommerce and private fields are not exposed', async () => {
   const server = createServer(async (request, response) => {
     assert.equal(request.url, '/wp-json/wc/store/v1/cart/add-item');
@@ -38,12 +51,24 @@ test('cart token is forwarded to WooCommerce and private fields are not exposed'
   try {
     const result = await requestCart('test-token', cartAction({ action: 'add', id: 42 }));
     assert.equal(result.token, 'next-token');
-    assert.deepEqual(publicCart(result.body), { items: [{ id: 42, key: 'a'.repeat(32), quantity: 1, name: 'محصول', image: '', price: 1000 }], totalItems: 1, subtotal: 1000, unit: 'تومان' });
+    assert.deepEqual(publicCart(result.body), { items: [{ id: 42, key: 'a'.repeat(32), quantity: 1, name: 'محصول', image: '', price: 1000, variation: '' }], totalItems: 1, subtotal: 1000, unit: 'تومان' });
   } finally {
     if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
     else process.env.WOOCOMMERCE_URL = previous;
     await new Promise(resolve => server.close(resolve));
   }
+});
+
+test('cart lines show the chosen variation attributes as a readable label', () => {
+  const cart = publicCart({
+    items: [
+      { id: 9, key: 'a'.repeat(32), quantity: 2, name: 'ماگ متغیر', prices: { price: '500000', currency_minor_unit: 0 }, variation: [{ attribute: 'رنگ', value: 'آبی' }, { attribute: 'سایز', value: 'بزرگ' }] },
+      { id: 3, key: 'b'.repeat(32), quantity: 1, name: 'ساده', prices: { price: '1000', currency_minor_unit: 0 }, variation: [] },
+    ],
+    totals: {},
+  });
+  assert.equal(cart.items[0].variation, 'رنگ: آبی، سایز: بزرگ');
+  assert.equal(cart.items[1].variation, '');
 });
 
 test('cart reads bypass shared WordPress caches without putting the token in the URL', async () => {

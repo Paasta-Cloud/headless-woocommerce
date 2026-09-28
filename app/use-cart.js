@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 export function useCart(mode) {
   const [cart, setCart] = useState({});
-  const [keys, setKeys] = useState({});
   const [entries, setEntries] = useState([]);
   const [subtotal, setSubtotal] = useState(null);
   const [unit, setUnit] = useState('');
@@ -14,13 +13,10 @@ export function useCart(mode) {
 
   function sync(payload) {
     const quantities = {};
-    const itemKeys = {};
     for (const item of payload.items || []) {
       quantities[item.id] = (quantities[item.id] || 0) + item.quantity;
-      itemKeys[item.id] = item.key;
     }
     setCart(quantities);
-    setKeys(itemKeys);
     setEntries(payload.items || []);
     setSubtotal(payload.subtotal);
     setUnit(payload.unit);
@@ -37,26 +33,49 @@ export function useCart(mode) {
     return () => { active = false; };
   }, [mode]);
 
-  async function changeQuantity(id, delta) {
-    if (busy) return;
-    setError('');
-    if (mode === 'demo') {
-      setCart(previous => ({ ...previous, [id]: Math.max(0, (previous[id] || 0) + delta) }));
-      return;
-    }
-    const quantity = Math.max(0, (cart[id] || 0) + delta);
-    const action = !keys[id] ? { action: 'add', id } : quantity === 0
-      ? { action: 'remove', key: keys[id] } : { action: 'quantity', key: keys[id], quantity };
+  async function post(action) {
     setBusy(true);
     try {
       const response = await fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(action) });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error);
       sync(payload);
+      return true;
     } catch (reason) {
       setError(reason.message || 'سبد تغییر نکرد. دوباره تلاش کنید.');
+      return false;
     } finally { setBusy(false); }
   }
 
-  return { cart, entries, subtotal, unit, busy, loading, error, changeQuantity };
+  // Adds a product; for variable products variation carries the chosen variant
+  // ({ id, attributes: [{ name, value }] }) exactly as reported by the product page.
+  async function addItem(id, variation) {
+    if (busy) return false;
+    setError('');
+    if (mode === 'demo') {
+      setCart(previous => ({ ...previous, [id]: (previous[id] || 0) + 1 }));
+      return true;
+    }
+    const action = variation ? { action: 'add', id, variation } : { action: 'add', id };
+    return post(action);
+  }
+
+  // Live mode identifies lines by their unique cart item key (two variations of
+  // one product are separate lines); demo mode keeps working with product ids.
+  async function changeQuantity(idOrKey, delta) {
+    if (busy) return;
+    setError('');
+    if (mode === 'demo') {
+      const id = Number(idOrKey);
+      setCart(previous => ({ ...previous, [id]: Math.max(0, (previous[id] || 0) + delta) }));
+      return;
+    }
+    const entry = entries.find(item => item.key === idOrKey);
+    const quantity = Math.max(0, (entry?.quantity || 0) + delta);
+    const action = !entry ? { action: 'add', id: idOrKey } : quantity === 0
+      ? { action: 'remove', key: idOrKey } : { action: 'quantity', key: idOrKey, quantity };
+    return post(action);
+  }
+
+  return { cart, entries, subtotal, unit, busy, loading, error, addItem, changeQuantity };
 }

@@ -1,4 +1,4 @@
-import { customerAccount } from '../../lib/account';
+import { customerAccount } from '../../lib/customer-session';
 import LogoutButton from './view';
 
 export const metadata = { title: 'حساب من | خانه‌چین' };

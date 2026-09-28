@@ -3,10 +3,12 @@ import './cart.css';
 import './shop.css';
 import './checkout.css';
 import './account.css';
+import './enhancements.css';
+import { storefrontConfig } from '../lib/storefront-config';
 
 export const metadata = {
-  title: 'خانه‌چین | نمونه فروشگاه فارسی',
-  description: 'نمونه متن‌باز فروشگاه فارسی با فرانت‌اند جداگانه و ووکامرس',
+  title: `${storefrontConfig.name} | نمونه فروشگاه فارسی`,
+  description: storefrontConfig.description,
 };
 
 export default function Layout({ children }) {

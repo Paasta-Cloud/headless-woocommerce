@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getProduct, storeOrigin } from '../../../lib/store';
+import { getProduct, getVariations, storeOrigin } from '../../../lib/store';
 import ProductView from './product-view';
 
 export const dynamic = 'force-dynamic';
@@ -12,5 +12,13 @@ export async function generateMetadata({ params }) {
 export default async function ProductPage({ params }) {
   const product = await getProduct(Number((await params).id));
   if (!product) notFound();
-  return <ProductView product={product} mode={storeOrigin() ? 'live' : 'demo'} />;
+  // Variation stock and price come from the Store API products query; the
+  // attribute pairs of each variation come from the parent product itself.
+  let stock = null;
+  let variationError = '';
+  if (product.type === 'variable' && storeOrigin()) {
+    try { stock = await getVariations(product.id); }
+    catch (cause) { variationError = cause?.message || 'گزینه‌های این کالا دریافت نشد. دوباره تلاش کنید.'; }
+  }
+  return <ProductView product={product} mode={storeOrigin() ? 'live' : 'demo'} stock={stock} variationError={variationError} />;
 }

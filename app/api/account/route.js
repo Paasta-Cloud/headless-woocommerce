@@ -12,7 +12,11 @@ export async function POST(request) {
   try {
     const result = await accountRequest('login', null, 'POST', { login, password });
     if (!result) return NextResponse.json({ error: 'حساب کاربری در حالت نمایشی در دسترس نیست.' }, { status: 503 });
-    if (result.status !== 200 || !/^[a-f0-9]{64}$/.test(result.data?.token || '')) return NextResponse.json({ error: result.status === 429 ? 'تلاش‌های ورود زیاد بوده است. ۱۵ دقیقه دیگر دوباره امتحان کنید.' : 'نام کاربری یا رمز عبور درست نیست.' }, { status: result.status === 429 ? 429 : 401 });
+    if (result.status !== 200 || !/^[a-f0-9]{64}$/.test(result.data?.token || '')) return result.status === 429
+      ? NextResponse.json({ error: 'تلاش‌های ورود زیاد بوده است. ۱۵ دقیقه دیگر دوباره امتحان کنید.' }, { status: 429 })
+      : result.status === 403
+        ? NextResponse.json({ error: 'ایمیل شما تأیید نشده است. پیوند تأیید را از صندوق ایمیل خود باز کنید.', unverified: true }, { status: 403 })
+        : NextResponse.json({ error: 'نام کاربری یا رمز عبور درست نیست.' }, { status: 401 });
     const response = NextResponse.json({ ok: true });
     response.cookies.set(SESSION_COOKIE, result.data.token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 12 * 60 * 60 });
     response.headers.set('Cache-Control', 'no-store');

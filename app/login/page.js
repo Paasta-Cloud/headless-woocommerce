@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { customerAccount } from '../../lib/account';
+import { customerAccount } from '../../lib/customer-session';
 import LoginForm from './view';
 
 export const metadata = { title: 'ورود | خانه‌چین' };

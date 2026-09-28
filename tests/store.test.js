@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { demoProducts, getProducts, normalizeProduct } from '../lib/store.js';
+import { demoProducts, getProducts, getProduct, getVariations, normalizeProduct, normalizeVariation } from '../lib/store.js';
 
 test('demo catalog is synthetic and available without credentials', () => {
   assert.ok(demoProducts.length >= 6);
@@ -52,6 +52,96 @@ test('live WooCommerce response is used without silently falling back to demo', 
     if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
     else process.env.WOOCOMMERCE_URL = previous;
     await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('variable products keep their variation options and stay non-addable as-is', () => {
+  const product = normalizeProduct({
+    id: 9, name: 'ماگ متغیر', type: 'variable', is_in_stock: true,
+    prices: { price: '420000', currency_minor_unit: 0, currency_code: 'IRT' },
+    attributes: [
+      { name: 'رنگ', has_variations: true, terms: [{ name: 'آبی', slug: 'آبی' }, { name: 'سبز', slug: 'سبز' }] },
+      { name: 'سایز', has_variations: false, terms: [{ name: 'بزرگ', slug: 'بزرگ' }] },
+    ],
+    variations: [
+      { id: 91, attributes: [{ name: 'رنگ', value: 'آبی' }] },
+      { id: 92, attributes: [{ name: 'رنگ', value: 'سبز' }] },
+    ],
+  });
+  assert.equal(product.type, 'variable');
+  assert.equal(product.purchasable, false);
+  assert.equal(product.outOfStock, false);
+  assert.deepEqual(product.options.map(option => option.name), ['رنگ']);
+  assert.deepEqual(product.options[0].terms[0], { name: 'آبی', slug: 'آبی', default: false });
+  assert.deepEqual(product.variations.map(variation => variation.id), [91, 92]);
+  assert.equal(product.variations[0].attributes[0].value, 'آبی');
+});
+
+test('out-of-stock and non-purchasable products are never directly addable', () => {
+  assert.equal(normalizeProduct({ id: 12, name: 'ناموجود', is_in_stock: false, prices: { price: '1000', currency_minor_unit: 0, currency_code: 'IRT' } }).outOfStock, true);
+  assert.equal(normalizeProduct({ id: 13, name: 'غیرقابل فروش', is_purchasable: false, prices: { price: '1000', currency_minor_unit: 0, currency_code: 'IRT' } }).purchasable, false);
+});
+
+test('variation details expose price, unit and stock without attribute guessing', () => {
+  const variation = normalizeVariation({ id: 91, prices: { price: '500000', currency_minor_unit: 0, currency_code: 'IRT' }, is_in_stock: true, is_purchasable: true });
+  assert.equal(variation.id, 91);
+  assert.equal(variation.price, 500000);
+  assert.equal(variation.unit, 'تومان');
+  assert.equal(variation.inStock, true);
+  assert.equal(normalizeVariation({ id: 92, prices: { price: '1000', currency_minor_unit: 0, currency_code: 'IRT' }, is_in_stock: false }).inStock, false);
+});
+
+test('variation stock and price are read from the Store API variation query', async () => {
+  const server = createServer((request, response) => {
+    assert.equal(request.url, '/wp-json/wc/store/v1/products?type=variation&parent=9&per_page=100&orderby=id&order=asc');
+    response.setHeader('content-type', 'application/json');
+    response.end(JSON.stringify([
+      { id: 91, prices: { price: '500000', currency_minor_unit: 0, currency_code: 'IRT' }, is_in_stock: true },
+      { id: 92, prices: { price: '450000', currency_minor_unit: 0, currency_code: 'IRT' }, is_in_stock: false },
+    ]));
+  });
+  await new Promise(resolve => server.listen(0, resolve));
+  const previous = process.env.WOOCOMMERCE_URL;
+  process.env.WOOCOMMERCE_URL = `http://localhost:${server.address().port}`;
+  try {
+    const variations = await getVariations(9);
+    assert.deepEqual(variations.map(variation => variation.id), [91, 92]);
+    assert.equal(variations[0].price, 500000);
+    assert.equal(variations[1].inStock, false);
+  } finally {
+    if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
+    else process.env.WOOCOMMERCE_URL = previous;
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('variation fetch failures surface a recovery message instead of silent emptiness', async () => {
+  const server = createServer((request, response) => {
+    response.writeHead(500);
+    response.end(JSON.stringify({ code: 'boom' }));
+  });
+  await new Promise(resolve => server.listen(0, resolve));
+  const previous = process.env.WOOCOMMERCE_URL;
+  process.env.WOOCOMMERCE_URL = `http://localhost:${server.address().port}`;
+  try {
+    await assert.rejects(getVariations(9), /گزینه‌های این کالا دریافت نشد/);
+  } finally {
+    if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
+    else process.env.WOOCOMMERCE_URL = previous;
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('demo mode has no variation stock source', async () => {
+  const previous = process.env.WOOCOMMERCE_URL;
+  process.env.WOOCOMMERCE_URL = 'demo';
+  try {
+    assert.equal(await getVariations(9), null);
+    assert.equal(await getVariations(-1), null);
+    assert.equal(await getProduct(1).then(product => product.type), 'simple');
+  } finally {
+    if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
+    else process.env.WOOCOMMERCE_URL = previous;
   }
 });
 
