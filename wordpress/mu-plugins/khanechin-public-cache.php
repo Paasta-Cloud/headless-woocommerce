@@ -32,7 +32,7 @@ function khc_key($request) {
     $params = $request->get_query_params();
     unset($params['_']); // Builder's historical cache-buster is not content.
     foreach ($params as $name => $value) {
-        if (!in_array($name, ['per_page', 'page', 'category', 'type', 'parent', 'orderby', 'order'], true) || !is_scalar($value)) return null;
+        if (!in_array($name, ['per_page', 'page', 'category', 'orderby', 'order'], true) || !is_scalar($value)) return null;
     }
     ksort($params);
     return hash('sha256', $route . '?' . http_build_query($params) . ':' . khc_revision());

@@ -37,6 +37,7 @@ foreach(['/wc/store/v1/cart','/wc/store/v1/checkout','/wc/store/v1/order/1','/pa
 foreach(['authorization','cart-token','nonce','x-wp-nonce'] as $header)check(khc_key(new Request(headers:[$header=>'private']))===null);
 check(khc_key(new Request(method:'POST'))===null);
 check(khc_key(new Request(params:['context'=>'edit']))===null);
+check(khc_key(new Request(params:['type'=>'variation','parent'=>'42']))===null);
 $_COOKIE=['session'=>'private'];check(khc_key($r)===null);$_COOKIE=[];
 $slots=[];for($i=0;$i<1000;$i++)$slots[khc_slot(hash('sha256',(string)$i))]=true;check(count($slots)<=64);
 $pre(null,null,$r);$post(new WP_REST_Response(['error'=>1],500),null,$r);check($pre(null,null,$r)===null);
