@@ -10,7 +10,7 @@ test('revision changes invalidate data across reads; missing plugin falls back s
   assert.equal(await publicVersionedRead('https://tenant-a.test','catalog',load),1);
   assert.equal(checks,1);
   revision='b'.repeat(32);
-  await new Promise(resolve=>setTimeout(resolve,3100));
+  await new Promise(resolve=>setTimeout(resolve,15100));
   assert.equal(await publicVersionedRead('https://tenant-a.test','catalog',load),2);
   globalThis.fetch=async()=>new Response('',{status:404});
   assert.equal(await publicVersionedRead('https://legacy.test','legacy',load),3);
