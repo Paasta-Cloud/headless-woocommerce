@@ -63,6 +63,7 @@ add_action('rest_api_init',function(){
         return phb_response(array('token'=>$token,'expiresIn'=>PHB_MANAGER_TTL));
     }));
     $routes=array(
+      'commerce'=>function($request){return phb_commerce($request);},
       'session'=>function(){return phb_response(array('name'=>wp_get_current_user()->display_name));},
       'logout'=>function($request){delete_transient('phb_manager_'.hash('sha256',phb_manager_token($request)));return phb_response(array('ok'=>true));},
       'read'=>function(){return phb_response(phb_manager_document());},
