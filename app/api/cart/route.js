@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { cartAction, publicCart, requestCart, sameSiteOrigin } from '../../../lib/cart';
+import {customerAccount} from '../../../lib/customer-session';
 
 const COOKIE = 'khanechin_cart';
 
@@ -11,10 +12,10 @@ function responseWithCart(result, request) {
   return response;
 }
 
-function failure(reason) {
+function failure(reason, action) {
   const status = reason?.status === 400 || reason?.status === 404 ? 409 : 502;
   return Response.json({ error: status === 409
-    ? 'کالا یا تعداد انتخاب‌شده در سبد پذیرفته نشد. سبد را تازه کنید و دوباره تلاش کنید.'
+    ? action?.path?.includes('coupon') ? 'کد تخفیف برای این سبد معتبر نیست یا شرایط استفاده از آن برقرار نیست. کد و شرایطش را بررسی کنید.' : 'کالا یا تعداد انتخاب‌شده در سبد پذیرفته نشد. سبد را تازه کنید و دوباره تلاش کنید.'
     : 'ارتباط با سبد ووکامرس برقرار نشد. سفارشی ثبت نشده است؛ کمی بعد دوباره تلاش کنید.' }, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -34,6 +35,10 @@ export async function POST(request) {
     let token = (await cookies()).get(COOKIE)?.value;
     if (!token) token = (await requestCart(null)).token;
     if (!token) throw new Error('Cart token missing');
+    if(action.path==='/apply-coupon'){
+      const account=await customerAccount();
+      if(account?.email)await requestCart(token,{path:'/update-customer',body:{billing_address:{email:account.email}}});
+    }
     return responseWithCart(await requestCart(token, action), request);
-  } catch (reason) { return failure(reason); }
+  } catch (reason) { return failure(reason, action); }
 }

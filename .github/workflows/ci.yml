@@ -18,6 +18,7 @@ jobs:
       - run: php tests/design-schema.php
       - run: php tests/manage-permissions.php
       - run: php tests/commerce.php
+      - run: php tests/checkout-customer.php
       - run: find wordpress/plugins/paasta-headless-builder -name '*.php' -exec php -l {} \;
       - run: npm run build
       - run: git diff --check

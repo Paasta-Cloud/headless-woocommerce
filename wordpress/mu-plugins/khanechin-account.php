@@ -236,9 +236,16 @@ add_action( 'rest_api_init', function () {
         'callback' => function ( $request ) {
             $user = khanechin_customer_from_request( $request );
             $orders = function_exists( 'wc_get_orders' ) ? wc_get_orders( array( 'customer_id' => $user->ID, 'limit' => 20, 'orderby' => 'date', 'order' => 'DESC' ) ) : array();
+            if(function_exists('wc_get_orders')){
+                $headless=wc_get_orders(array('meta_query'=>array(array('key'=>'_khanechin_customer_id','value'=>$user->ID,'compare'=>'=')),'limit'=>20,'orderby'=>'date','order'=>'DESC'));
+                $headless=array_filter($headless,function($order)use($user){return (int)$order->get_meta('_khanechin_customer_id')===(int)$user->ID;});
+                $unique=array();foreach(array_merge($orders,$headless) as $order)$unique[$order->get_id()]=$order;
+                usort($unique,function($a,$b){return $b->get_id()<=>$a->get_id();});$orders=array_slice($unique,0,20);
+            }
             return array(
                 'name' => $user->display_name,
                 'email' => $user->user_email,
+                'billing' => array_merge(array('email'=>$user->user_email),array_combine(array('first_name','last_name','address_1','city','state','postcode','phone'),array_map(function($field)use($user){return (string)get_user_meta($user->ID,'billing_'.$field,true);},array('first_name','last_name','address_1','city','state','postcode','phone')))),
                 'orders' => array_map( function ( $order ) {
                     return array( 'id' => $order->get_id(), 'status' => wc_get_order_status_name( $order->get_status() ), 'total' => $order->get_total(), 'currency' => $order->get_currency(), 'date' => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '' );
                 }, $orders ),
@@ -257,6 +264,18 @@ add_action( 'rest_api_init', function () {
         },
     ) );
 } );
+
+// Only a validated customer session can attach a Store API order to an account.
+add_action('woocommerce_store_api_checkout_update_order_from_request',function($order,$request){
+    $header=$request->get_header('authorization');
+    if(!$header){$order->delete_meta_data('_khanechin_customer_id');return;}
+    $user=khanechin_customer_from_request($request);
+    if(!$user)throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException('customer_session_expired','نشست مشتری منقضی شده است. دوباره وارد شوید.',401);
+    // The official gateway starts on a native guest order-pay page. Preserve
+    // that payment authorization flow; bind the headless account privately,
+    // never by submitted email or a browser-supplied customer ID.
+    $order->update_meta_data('_khanechin_customer_id',$user->ID);
+},10,2);
 
 add_filter( 'rest_post_dispatch', function ( $response, $server, $request ) {
     if ( strpos( $request->get_route(), '/khanechin/v1/' ) === 0 && $response instanceof WP_REST_Response ) {

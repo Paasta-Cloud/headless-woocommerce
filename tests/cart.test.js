@@ -21,6 +21,14 @@ test('cart mutation accepts only bounded supported operations', () => {
   assert.deepEqual(cartAction({ action: 'remove', key: 'a'.repeat(32) }), { path: '/remove-item', body: { key: 'a'.repeat(32) } });
 });
 
+test('coupons use bounded native cart operations without accepting client discount amounts',()=>{
+  assert.deepEqual(cartAction({action:'apply-coupon',code:' TEST10 ',amount:999}),{path:'/apply-coupon',body:{code:'TEST10'}});
+  assert.deepEqual(cartAction({action:'remove-coupon',code:'test10'}),{path:'/remove-coupon',body:{code:'test10'}});
+  for(const code of ['', ' ', '<script>', 'a'.repeat(101), 'bad\ncode', null, 10])assert.equal(cartAction({action:'apply-coupon',code}),null);
+  const cart=publicCart({items:[],coupons:[{code:'test10',totals:{total_discount:'125',currency_minor_unit:2},secret:'hidden'}],totals:{total_items:'1250',total_discount:'125',total_price:'1125',currency_minor_unit:2,currency_code:'IRT'}});
+  assert.equal(cart.discount,1.25);assert.equal(cart.total,11.25);assert.deepEqual(cart.coupons,[{code:'test10',discount:1.25}]);
+});
+
 test('variation adds carry the chosen variation id and exact attribute pairs', () => {
   assert.deepEqual(
     cartAction({ action: 'add', id: 9, variation: { id: 91, attributes: [{ name: 'رنگ', value: 'آبی' }] } }),
@@ -51,7 +59,7 @@ test('cart token is forwarded to WooCommerce and private fields are not exposed'
   try {
     const result = await requestCart('test-token', cartAction({ action: 'add', id: 42 }));
     assert.equal(result.token, 'next-token');
-    assert.deepEqual(publicCart(result.body), { items: [{ id: 42, key: 'a'.repeat(32), quantity: 1, name: 'محصول', image: '', price: 1000, variation: '' }], totalItems: 1, subtotal: 1000, unit: 'تومان' });
+    assert.deepEqual(publicCart(result.body), { items: [{ id: 42, key: 'a'.repeat(32), quantity: 1, name: 'محصول', image: '', price: 1000, variation: '' }], totalItems: 1, subtotal: 1000, discount:0,total:1000,coupons:[], unit: 'تومان' });
   } finally {
     if (previous === undefined) delete process.env.WOOCOMMERCE_URL;
     else process.env.WOOCOMMERCE_URL = previous;

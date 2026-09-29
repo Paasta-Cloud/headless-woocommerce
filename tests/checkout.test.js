@@ -65,3 +65,10 @@ test('checkout GET is cache-busted and never puts the private Cart Token in the 
     await new Promise(resolve => server.close(resolve));
   }
 });
+
+test('checkout forwards only valid customer tokens as a private header',async()=>{
+ const seen=[];const server=createServer((request,response)=>{seen.push({authorization:request.headers.authorization,url:request.url});response.setHeader('content-type','application/json');response.end('{}');});
+ await new Promise(resolve=>server.listen(0,resolve));const previous=process.env.WOOCOMMERCE_URL;process.env.WOOCOMMERCE_URL=`http://localhost:${server.address().port}`;
+ try{await storeRequest('checkout','cart-token','POST',{},'a'.repeat(64));await storeRequest('checkout','cart-token','POST',{},'invalid');assert.equal(seen[0].authorization,'Bearer '+'a'.repeat(64));assert.equal(seen[1].authorization,undefined);assert.ok(!seen[0].url.includes('a'.repeat(64)));}
+ finally{if(previous===undefined)delete process.env.WOOCOMMERCE_URL;else process.env.WOOCOMMERCE_URL=previous;await new Promise(resolve=>server.close(resolve));}
+});

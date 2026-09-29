@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { mutateCart } from '../lib/cart-mutation';
 
 const CartContext = createContext(null);
 export function CartProvider({ mode, children }) {
@@ -17,9 +18,13 @@ function useCartState(mode) {
   const [entries, setEntries] = useState([]);
   const [subtotal, setSubtotal] = useState(null);
   const [unit, setUnit] = useState('');
+  const [coupons, setCoupons] = useState([]);
+  const [discount, setDiscount] = useState(0);
+  const [total, setTotal] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(mode === 'live');
+  const [uncertain, setUncertain] = useState(false);
 
   function sync(payload) {
     const quantities = {};
@@ -30,6 +35,7 @@ function useCartState(mode) {
     setEntries(payload.items || []);
     setSubtotal(payload.subtotal);
     setUnit(payload.unit);
+    setCoupons(payload.coupons || []);setDiscount(payload.discount || 0);setTotal(payload.total || 0);
   }
 
   useEffect(() => {
@@ -49,14 +55,15 @@ function useCartState(mode) {
   async function post(action) {
     setBusy(true);
     try {
-      const response = await fetch('/api/cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(action) });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error);
-      sync(payload);
-      return true;
-    } catch (reason) {
-      setError(reason.message || 'سبد تغییر نکرد. دوباره تلاش کنید.');
-      return false;
+      return await mutateCart(action, {
+        request: async (method, body) => {
+          const response = await fetch('/api/cart', { method, cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+          const payload = await response.json();
+          if (!response.ok) throw new Error(payload.error);
+          return payload;
+        }, sync, onError: setError,
+        invalidate: () => { setUncertain(true); setError('وضعیت سبد مشخص نیست. پیش از ادامه، صفحه را تازه کنید.'); },
+      });
     } finally { setBusy(false); }
   }
 
@@ -92,5 +99,9 @@ function useCartState(mode) {
     return post(action);
   }
 
-  return { cart, entries, subtotal, unit, busy: busy || loading, loading, error, addItem, changeQuantity, mode };
+  async function changeCoupon(code, remove=false) {
+    if (busy || loading || mode !== 'live') return false;
+    setError('');return post({action:remove?'remove-coupon':'apply-coupon',code});
+  }
+  return { cart, entries, subtotal, total, discount, coupons, unit, busy: busy || loading || uncertain, loading, error, addItem, changeQuantity, changeCoupon, mode };
 }

@@ -4,6 +4,8 @@ import { Breadcrumbs, CheckoutSteps } from '../components/ui';
 
 import { useEffect, useRef, useState } from 'react';
 import { IRAN_STATES } from '../../lib/iran-states';
+import CouponForm from '../components/coupon-form';
+import {useCart} from '../use-cart';
 
 const fields = {
   first_name: ['نام', 'given-name'], last_name: ['نام خانوادگی', 'family-name'],
@@ -11,14 +13,17 @@ const fields = {
   city: ['شهر', 'address-level2'], address_1: ['نشانی کامل', 'street-address'], postcode: ['کد پستی', 'postal-code'],
 };
 
-export default function CheckoutView() {
+export default function CheckoutView({initialAddress={}}) {
+  const {busy:cartBusy,error:cartError}=useCart();
   const [summary, setSummary] = useState(null);
-  const [address, setAddress] = useState(Object.fromEntries(Object.keys(fields).map(key => [key, ''])));
+  const [address, setAddress] = useState(Object.fromEntries(Object.keys(fields).map(key => [key, initialAddress[key]||''])));
   const [method, setMethod] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [order, setOrder] = useState(null);
   const submitting = useRef(false);
+  const [refreshing,setRefreshing]=useState(false);
+  async function refreshSummary(){setRefreshing(true);setError('');try{const response=await fetch('/api/checkout',{cache:'no-store'});const data=await response.json();if(!response.ok)throw Error(data.error);setSummary(data);setMethod(previous=>data.methods.includes(previous)?previous:data.methods[0]||'');}catch(reason){setSummary(null);setError(reason.message||'مبلغ تازه دریافت نشد؛ صفحه را تازه کنید.');}finally{setRefreshing(false);}}
 
   useEffect(() => {
     let active = true;
@@ -32,7 +37,7 @@ export default function CheckoutView() {
 
   async function submit(event) {
     event.preventDefault();
-    if (submitting.current || !summary?.ready) return;
+    if (submitting.current || cartBusy || refreshing || !summary?.ready) return;
     submitting.current = true;
     setBusy(true); setError('');
     try {
@@ -55,6 +60,7 @@ export default function CheckoutView() {
     {order ? <section className="empty-state success-state" role="status"><span className="eyebrow">سفارش ثبت شد</span><h1>ممنون از خرید شما</h1><p>شمارهٔ سفارش: <b dir="ltr">{order.orderId}</b></p><p>{order.note}</p><p>این تأییدیه به معنی پرداخت‌شدن سفارش نیست.</p><a className="primary-action" href="/">بازگشت به فروشگاه</a></section> : <>
       <div className="page-heading"><span className="eyebrow">مرحلهٔ ۲ از ۳</span><h1>صورت‌حساب و دریافت سفارش</h1><p>پیش از ثبت نهایی، اطلاعات تماس، روش دریافت و مبلغ را بررسی کنید.</p></div>
       {error && <p className="form-error" role="alert">{error}</p>}
+      {cartError&&<p className="form-error" role="alert">{cartError}</p>}
       {!summary ? error ? <div className="empty-state"><h2>صورت‌حساب دریافت نشد</h2><p>سفارشی از این صفحه ثبت نشده است.</p><a className="primary-action" href="/cart">بررسی سبد خرید</a></div> : <p role="status">در حال دریافت صورت‌حساب…</p> : <div className="checkout-grid">
         <form id="checkout-form" className="address-form" onSubmit={submit}>
           <h2>اطلاعات خریدار</h2>
@@ -64,6 +70,7 @@ export default function CheckoutView() {
           <h2>خلاصهٔ صورت‌حساب</h2>
           {summary.items.map(item => <div key={item.id}><span>{item.name} × {item.quantity.toLocaleString('fa-IR')}</span></div>)}
           <div className="total-row"><span>مبلغ فعلی</span><strong>{price(summary.displayTotal)}</strong></div>
+          <CouponForm onChanging={()=>setRefreshing(true)} onChanged={refreshSummary} disabled={busy||refreshing}/>
           {summary.pickupAddress && <div className="pickup-info"><strong>تحویل حضوری رایگان</strong><span>{summary.pickupAddress}</span></div>}
           {summary.needsShipping && <p>روش دریافت و هزینهٔ آن در ووکامرس محاسبه می‌شود.</p>}
           <fieldset className="payment-options"><legend>روش پرداخت</legend>
@@ -72,7 +79,7 @@ export default function CheckoutView() {
           </fieldset>
           {summary.zibalSandbox && <p className="fine-print">این یک سفارش آزمایشی با کالاهای نمایشی است. وجهی دریافت و کالایی تحویل داده نمی‌شود.</p>}
           {!summary.ready && <p className="form-error" role="alert">{summary.reason}</p>}
-          <button type="submit" form="checkout-form" className="primary-action" disabled={!summary.ready || !method || busy}>{busy ? 'در حال ثبت سفارش…' : summary.zibalSandbox ? 'ثبت سفارش آزمایشی و ادامه به زیبال' : method === 'cod' ? 'ثبت سفارش با پرداخت در محل' : 'ادامه به زیبال'}</button>
+          <button type="submit" form="checkout-form" className="primary-action" disabled={!summary.ready || !method || busy || cartBusy || refreshing}>{busy ? 'در حال ثبت سفارش…' : summary.zibalSandbox ? 'ثبت سفارش آزمایشی و ادامه به زیبال' : method === 'cod' ? 'ثبت سفارش با پرداخت در محل' : 'ادامه به زیبال'}</button>
           <p className="fine-print">در زیبال، ثبت سفارش به معنی پرداخت نیست؛ نتیجه فقط پس از بازگشت و تأیید سمت سرور ووکامرس معتبر است. اگر پاسخ نامشخص شد، پیش از تلاش دوباره سفارش‌ها یا ایمیل خود را بررسی کنید.</p>
         </aside>
       </div>}

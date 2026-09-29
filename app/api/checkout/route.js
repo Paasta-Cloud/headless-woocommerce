@@ -4,6 +4,7 @@ import { availableMethods, checkoutReady, checkoutTotal, pickupRate, safePayment
 import { sameSiteOrigin } from '../../../lib/cart';
 import { storeOrigin } from '../../../lib/store';
 import { orderCookieName, receiptFromCheckout } from '../../../lib/order';
+import {SESSION_COOKIE} from '../../../lib/account';
 
 const noStore = { 'Cache-Control': 'no-store' };
 const fail = (error, status) => Response.json({ error }, { status, headers: noStore });
@@ -45,7 +46,8 @@ export async function POST(request) {
     if (!state.ready) return fail(state.reason, 409);
     if (cart.totals?.total_price !== input.expectedTotal) return fail('مبلغ سبد تغییر کرده است. صورت‌حساب را تازه کنید و دوباره تأیید کنید.', 409);
     stage = 'checkout';
-    const order = await storeRequest('checkout', token, 'POST', { billing_address: address, shipping_address: shippingAddress, payment_method: method, expected_total: input.expectedTotal });
+    const customerToken=(await cookies()).get(SESSION_COOKIE)?.value;
+    const order = await storeRequest('checkout', token, 'POST', { billing_address: address, shipping_address: shippingAddress, payment_method: method, expected_total: input.expectedTotal },customerToken);
     if (!Number.isSafeInteger(order?.order_id) || !['processing', 'on-hold', 'pending'].includes(order.status)) return fail('تأیید ثبت سفارش دریافت نشد. پیش از تلاش دوباره، سفارش‌های حساب ووکامرس را بررسی کنید.', 502);
     if (method === ZIBAL_METHOD) {
       const redirect = safePaymentRedirect(order.payment_result?.redirect_url, storeOrigin());
