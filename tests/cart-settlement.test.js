@@ -14,7 +14,7 @@ test('only a verified paid order and its unchanged original cart can detach',()=
 test('changed quantities, new products and new discounts survive a payment return',()=>{
  for(const changed of [{...cart,items:[{id:11,quantity:3}]},{...cart,items:[...cart.items,{id:12,quantity:1}]},{...cart,coupons:[]}])assert.equal(shouldDetachCart(paid,receipt,'original',changed),false);
 });
-test('pre-upgrade receipt is recovered only with an exact verified order match',()=>{
- assert.equal(shouldDetachCart(paid,{},'original',cart),true);
+test('pre-upgrade receipts cannot detach carts without checkout binding',()=>{
+ assert.equal(shouldDetachCart(paid,{},'original',cart),false);
  assert.equal(shouldDetachCart({...paid,items:[{id:12,quantity:2}]},{},'original',cart),false);
 });
