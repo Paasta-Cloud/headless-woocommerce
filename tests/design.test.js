@@ -2,6 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {defaultDesign,normalizeDesign,safeDesignUrl,contrastingText} from '../lib/design.js';
 import {fetchDesign} from '../lib/design-fetch.js';
+import {readFileSync} from 'node:fs';
+
+test('private information previews remain within the preview cookie path',()=>{
+  const route=readFileSync('app/preview/[page]/page.js','utf8');
+  assert.match(route,/Object.hasOwn\(pages,page\)/);
+  assert.match(route,/preview&&/);
+  assert.match(readFileSync('app/api/design-preview/route.js','utf8'),/path:'\/preview'/);
+  assert.match(readFileSync('app/preview/start.jsx','utf8'),/replaceState\(null,'',window.location.pathname\)/);
+  assert.match(readFileSync('app/preview/navigation.jsx','utf8'),/href=\{'\/preview'/);
+});
 
 test('builder defaults preserve the existing five homepage sections',()=>{
   assert.deepEqual(defaultDesign.sections.map(s=>s.type),['hero','features','banners','products','text-image']);

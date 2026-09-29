@@ -1,0 +1,1 @@
+export default function PreviewNavigation(){return <nav className="preview-pages" aria-label="صفحات پیش‌نمایش">{Object.entries({'':'صفحهٔ اصلی',about:'دربارهٔ ما',contact:'تماس',guide:'راهنما',faq:'سؤالات متداول',terms:'شرایط استفاده',privacy:'حریم خصوصی'}).map(([path,label])=><a href={'/preview'+(path?'/'+path:'')} key={path}>{label}</a>)}</nav>;}

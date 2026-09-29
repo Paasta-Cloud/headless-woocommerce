@@ -6,9 +6,9 @@ export default function PreviewStart({ready=false}){
   useEffect(()=>{
     if(tokenRef.current===null)tokenRef.current=window.location.hash.slice(1);
     const token=tokenRef.current;
-    window.history.replaceState(null,'','/preview');
+    window.history.replaceState(null,'',window.location.pathname);
     if(!token&&ready)return;
-    if(!/^[a-f0-9]{64}$/.test(token)){setError('از ویرایشگر وردپرس یک پیش‌نمایش تازه بسازید.');return;}
+    if(!/^[a-f0-9]{64}$/.test(token)){setError('از پنل مدیریت یک پیش‌نمایش تازه بسازید.');return;}
     let active=true;setExchanging(true);
     requestRef.current??=fetch('/api/design-preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})}).then(response=>{if(!response.ok)throw Error('پیش‌نمایش معتبر نیست یا منقضی شده است.');});
     requestRef.current.then(()=>{if(active)window.location.replace('/preview');}).catch(cause=>{if(active){setError(cause.message);setExchanging(false);}});
