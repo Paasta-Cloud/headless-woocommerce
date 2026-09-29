@@ -40,15 +40,18 @@ function khc_key($request) {
 function khc_slot($key) { return 'khc_public_' . (hexdec(substr($key, 0, 2)) % 64); }
 add_filter('rest_pre_dispatch', static function ($result, $server, $request) {
     if ($result !== null || !($key = khc_key($request))) return $result;
-    $GLOBALS['khc_requests'][spl_object_id($request)] = $key;
+    $GLOBALS['khc_requests'][spl_object_id($request)] = ['key' => $key, 'revision' => khc_revision()];
     $hit = get_transient(khc_slot($key));
     if (!is_array($hit) || $hit['key'] !== $key) return $result;
     return new WP_REST_Response($hit['data'], 200, $hit['headers'] + ['X-Paasta-Public-Cache' => 'HIT']);
 }, 10, 3);
 add_filter('rest_post_dispatch', static function ($response, $server, $request) {
-    $key = $GLOBALS['khc_requests'][spl_object_id($request)] ?? null;
+    $context = $GLOBALS['khc_requests'][spl_object_id($request)] ?? null;
     unset($GLOBALS['khc_requests'][spl_object_id($request)]);
-    if (!$key || $key !== khc_key($request) || $response->get_status() !== 200) return $response;
+    // REST validation normalizes query values (e.g. category to an array).
+    // Keep the original eligible key, but reject a concurrent content change.
+    if (!$context || $context['revision'] !== khc_revision() || $response->get_status() !== 200 || is_user_logged_in() || !empty($_COOKIE)) return $response;
+    $key = $context['key'];
     $headers = $response->get_headers();
     if (isset($headers['X-Paasta-Public-Cache'])) return $response;
     foreach ($headers as $name => $value) if (strtolower($name) === 'set-cookie') return $response;

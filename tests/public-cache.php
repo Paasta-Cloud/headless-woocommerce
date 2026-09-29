@@ -28,7 +28,9 @@ require __DIR__.'/../wordpress/mu-plugins/khanechin-public-cache.php';
 function check($ok){if(!$ok)throw new Exception('Cache regression');}
 $r=new Request();$pre=$filters['rest_pre_dispatch'];$post=$filters['rest_post_dispatch'];
 check($pre(null,null,$r)===null);
+$r->params=['category'=>[16]]; // Native REST sanitization happens after pre_dispatch.
 $post(new WP_REST_Response(['products'=>[1]]),null,$r);
+$r->params=[];
 check($pre(null,null,$r)->get_headers()['X-Paasta-Public-Cache']==='HIT');
 $before=khc_revision();khc_invalidate();check($before!==khc_revision());check($pre(null,null,$r)===null);
 foreach(['/wc/store/v1/cart','/wc/store/v1/checkout','/wc/store/v1/order/1','/paasta-headless/v1/preview/read','/khanechin/v1/me'] as $route)check(khc_key(new Request($route))===null);
