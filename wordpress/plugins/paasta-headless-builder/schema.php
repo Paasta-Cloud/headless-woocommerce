@@ -33,6 +33,24 @@ function phb_clean_design($raw) {
     $settings['fontSize'] = phb_number($s['fontSize'] ?? null, 12, 20, 14); $settings['containerWidth'] = phb_number($s['containerWidth'] ?? null, 960, 1440, 1240);
     foreach (array('headerLinks'=>12,'footerLinks'=>36,'mobileLinks'=>5) as $key=>$max) $settings[$key] = phb_links($s[$key] ?? null, $d[$key], $max);
     $sections = array();
+    $settings['pages'] = array();
+    foreach (array('about','contact','guide','faq','terms','privacy') as $key) {
+        $page = isset($s['pages'][$key]) && is_array($s['pages'][$key]) ? $s['pages'][$key] : array();
+        $settings['pages'][$key] = array('enabled'=>($page['enabled'] ?? false) === true, 'title'=>phb_text($page['title'] ?? ''), 'intro'=>phb_text($page['intro'] ?? '',1000), 'body'=>phb_text($page['body'] ?? '',12000));
+    }
+    foreach (array('showBenefits','showSearch','showCategories','showTracking','showFavorites','showMobileNav') as $key) $settings[$key] = ($s[$key] ?? true) !== false;
+    $settings['authTitle'] = phb_text($s['authTitle'] ?? 'حساب شما در {name}');
+    $settings['authDescription'] = phb_text($s['authDescription'] ?? 'انتخاب‌های امروز، پیگیری خریدهای فردا.',1000);
+    $benefits = array(
+        array('icon'=>'check','title'=>'قیمت و موجودی','body'=>'هماهنگ با فروشگاه','href'=>'/guide'),
+        array('icon'=>'user','title'=>'حساب مشتری','body'=>'پیگیری خریدهای شما','href'=>'/guide'),
+        array('icon'=>'heart','title'=>'انتخاب‌های شما','body'=>'ذخیره در علاقه‌مندی‌ها','href'=>'/guide'),
+        array('icon'=>'bag','title'=>'سبد خرید آنلاین','body'=>'بررسی پیش از پرداخت','href'=>'/guide')
+    );
+    $settings['benefits'] = array();
+    foreach (array_slice(is_array($s['benefits'] ?? null) ? $s['benefits'] : $benefits,0,8) as $item) {
+        $settings['benefits'][] = array('icon'=>phb_icon($item['icon'] ?? ''),'title'=>phb_text($item['title'] ?? ''),'body'=>phb_text($item['body'] ?? '',500),'href'=>phb_url($item['href'] ?? ''));
+    }
     foreach (array_slice($raw['sections'], 0, 40) as $value) {
         if (!is_array($value) || !in_array($value['type'] ?? '', array('hero','banners','categories','products','text-image','features','faq','spacer'), true)) continue;
         $section = array('type'=>$value['type']);

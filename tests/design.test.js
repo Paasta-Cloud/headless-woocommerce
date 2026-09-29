@@ -8,6 +8,24 @@ test('builder defaults preserve the existing five homepage sections',()=>{
   assert.equal(defaultDesign.sections[0].items.length,4);
   assert.equal(defaultDesign.settings.mobileLinks.length,5);
 });
+
+test('page and display settings are bounded, safe and backwards compatible',()=>{
+  const raw=structuredClone(defaultDesign);
+  raw.settings.pages={about:{enabled:true,title:'<b>درباره</b>',intro:'شرح',body:'x'.repeat(13000)},unknown:{enabled:true}};
+  raw.settings.benefits=[{title:'<img>خدمت',body:'توضیح',href:'javascript:alert(1)',icon:'script'}];
+  raw.settings.showSearch=false;raw.settings.authTitle='حساب {name}';
+  const clean=normalizeDesign(raw);
+  assert.equal(clean.settings.pages.about.title,'درباره');
+  assert.equal(clean.settings.pages.about.body.length,12000);
+  assert.equal(clean.settings.pages.unknown,undefined);
+  assert.equal(clean.settings.pages.contact.enabled,false);
+  assert.equal(clean.settings.benefits[0].href,'');
+  assert.equal(clean.settings.benefits[0].icon,'info');
+  assert.equal(clean.settings.showSearch,false);
+  assert.equal(clean.settings.showMobileNav,true);
+  assert.equal(normalizeDesign({...raw,settings:{}}).settings.benefits.length,4);
+  assert.deepEqual(normalizeDesign(clean),clean);
+});
 test('design contract rejects unsupported versions and strips executable settings',()=>{
   assert.throws(()=>normalizeDesign({...defaultDesign,version:2}));
   const design=normalizeDesign({version:1,settings:{name:'<b>فروشگاه</b>',primary:'red;display:none',fontUrl:'https://example.test/font.css',secret:'private'},sections:[{type:'script'},{type:'products',columns:99,mobileColumns:99,limit:999,productIds:[1,1,-1,'2'],items:[{href:'javascript:alert(1)'}]}]});

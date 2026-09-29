@@ -7,9 +7,10 @@
 import {useEffect,useId,useRef,useState} from 'react';
 import Icon from '../components/icons';
 import {defaultDesign} from '../../lib/design';
+import ContentSettings from './content-settings';
 
 const types={hero:'اسلایدر تصویری',features:'خدمات فروشگاه',banners:'بنرهای تصویری',products:'ویترین محصولات',categories:'دسته‌بندی محصولات','text-image':'تصویر و متن',faq:'سؤالات متداول',spacer:'فاصله‌گذار'};
-const tabs={home:'صفحهٔ اصلی',identity:'هویت و رنگ',menus:'منوها',history:'تاریخچه'};
+const tabs={home:'صفحهٔ اصلی',identity:'هویت و رنگ',menus:'منوها',content:'صفحات و محتوا',display:'نمایش و خدمات',history:'تاریخچه'};
 const fa=value=>Number(value).toLocaleString('fa-IR');
 const copy=value=>JSON.parse(JSON.stringify(value));
 async function api(action,body={}){
@@ -58,8 +59,9 @@ export default function Manager(){
         </div>}
         {tab==='identity'&&<section className="manage-settings"><Settings value={design.settings} onChange={setSettings} onMedia={setMediaTarget}/></section>}
         {tab==='menus'&&<section className="manage-settings">{[['headerLinks','منوی بالای فروشگاه',12],['footerLinks','منوی پایین فروشگاه',36],['mobileLinks','دسترسی سریع موبایل',5]].map(([key,title,max])=><Links key={key} title={title} kind={key} value={design.settings[key]} max={max} onChange={v=>setSettings({[key]:v})}/>)}</section>}
+        {(tab==='content'||tab==='display')&&<section className="manage-settings"><fieldset disabled={Boolean(busy)}><ContentSettings mode={tab} value={design.settings} onChange={setSettings}/></fieldset></section>}
         {tab==='history'&&<section className="manage-settings"><h2>نسخه‌های ذخیره‌شده</h2><p>با بازگردانی یک نسخه، تنظیمات و چیدمان همان نسخه منتشر می‌شود. محصولات و سفارش‌ها تغییر نمی‌کنند.</p>{busy==='history'?<p role="status">در حال دریافت تاریخچه…</p>:history.length?<ol className="manage-history">{history.map((r,i)=><li key={r.id}><Icon name="order"/><div><strong>نسخهٔ {fa(history.length-i)}</strong><small>{new Date(`${r.date.replace(' ','T')}Z`).toLocaleString('fa-IR')}</small></div><button disabled={Boolean(busy)} onClick={()=>restore(r.id)}>بازگردانی این نسخه</button></li>)}</ol>:<p>پس از اولین تغییر، نسخه‌های قبلی اینجا نمایش داده می‌شوند.</p>}</section>}
-        {tab==='help'&&<section className="manage-settings manage-help"><h2>از انتخاب یک بخش شروع کنید</h2><p>در صفحهٔ اصلی، بخشی مثل اسلایدر یا ویترین محصولات را انتخاب کنید. محتوای آن در ستون ویرایش باز می‌شود. دکمه‌های بالا و پایین ترتیب بخش‌ها را عوض می‌کنند.</p><h2>پیش‌نمایش با انتشار فرق دارد</h2><p>پیش‌نمایش فقط برای شماست. تا «انتشار تغییرات» را نزنید، مشتریان طراحی قبلی را می‌بینند. لینک پیش‌نمایش را در اختیار دیگران نگذارید.</p><h2>اگر از نتیجه راضی نبودید</h2><p>در تاریخچه، یکی از نسخه‌های قبلی را بازگردانید. تغییرات قالب به سفارش‌ها، موجودی و اطلاعات مشتریان دست نمی‌زند.</p><h2>مدیریت فروشگاه در حال توسعه است</h2><p>این مرحله مخصوص ظاهر و محتوای صفحهٔ اصلی است. مدیریت محصولات و سفارش‌ها هنوز در این پنل پیاده نشده است.</p></section>}
+        {tab==='help'&&<section className="manage-settings manage-help"><h2>از انتخاب یک بخش شروع کنید</h2><p>در صفحهٔ اصلی، بخشی مثل اسلایدر یا ویترین محصولات را انتخاب کنید. محتوای آن در ستون ویرایش باز می‌شود. دکمه‌های بالا و پایین ترتیب بخش‌ها را عوض می‌کنند.</p><h2>پیش‌نمایش با انتشار فرق دارد</h2><p>پیش‌نمایش فقط برای شماست. تا «انتشار تغییرات» را نزنید، مشتریان طراحی قبلی را می‌بینند. لینک پیش‌نمایش را در اختیار دیگران نگذارید.</p><h2>اگر از نتیجه راضی نبودید</h2><p>در تاریخچه، یکی از نسخه‌های قبلی را بازگردانید. تغییرات قالب به سفارش‌ها، موجودی و اطلاعات مشتریان دست نمی‌زند.</p><h2>مدیریت فروشگاه در حال توسعه است</h2><p>صفحهٔ اصلی، محتوای صفحات اطلاعاتی، منوها، هویت بصری و اجزای نمایشی از این پنل تنظیم می‌شوند. مدیریت محصولات و سفارش‌ها هنوز در این پنل پیاده نشده است.</p></section>}
       </main></div>
     <MediaDialog target={mediaTarget} onClose={()=>setMediaTarget(null)}/>
     {reauth&&<Reauthenticate onClose={()=>setReauth(false)}/>}

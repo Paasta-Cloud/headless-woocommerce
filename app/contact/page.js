@@ -1,4 +1,5 @@
 import InformationPage from '../components/information-page';
 import {storefrontConfig} from '../../lib/storefront-config';
-export const metadata={title:'ارتباط و دریافت سفارش | خانه‌چین'};
+import {informationMetadata} from '../../lib/page-metadata';
+export const generateMetadata=()=>informationMetadata('contact','ارتباط و دریافت سفارش');
 export default function Contact(){return <InformationPage title="ارتباط و دریافت سفارش" intro="اطلاعات لازم برای پیگیری خرید شما"><h2>محل تحویل حضوری</h2><p>{storefrontConfig.pickupAddress}</p><p>روش دریافت فعال را پیش از ثبت سفارش در صورت‌حساب بررسی کنید. این نشانی به‌تنهایی به معنی آماده‌بودن یک سفارش برای تحویل نیست.</p><h2>پیگیری سفارش</h2><p>وضعیت ثبت‌شدهٔ خرید را از <a href="/account">حساب کاربری</a> ببینید. اگر نتیجهٔ پرداخت نامشخص است، پرداخت را تکرار نکنید و شمارهٔ سفارش را نگه دارید.</p><h2>پرسشی دربارهٔ خرید دارید؟</h2><p><a href="/faq">سؤالات متداول</a> و <a href="/guide">راهنمای خرید</a> را ببینید. هنوز شمارهٔ تماس یا ایمیل پشتیبانی عمومی برای این فروشگاه نمونه ثبت نشده است.</p></InformationPage>;}
