@@ -1,0 +1,10 @@
+<?php
+require __DIR__.'/../wordpress/plugins/paasta-headless-builder/schema.php';
+function check($condition) { if (!$condition) throw new RuntimeException('Design regression failed'); }
+$design=phb_clean_design(phb_defaults());
+check(count($design['sections'])===5);
+foreach(array('javascript:alert(1)','//evil.test','https://user:pass@example.test/a','/\\evil.test','https://example.test/"</style>') as $url) check(phb_url($url)==='');
+check(phb_url('/shop?q=1')==='/shop?q=1');
+$raw=phb_defaults();$raw['settings']['primary']='red;display:none';$raw['sections']=array(array('type'=>'script'),array('type'=>'products','columns'=>99,'productIds'=>array(1,1,-1,'2')));
+$safe=phb_clean_design($raw);check(count($safe['sections'])===1);check($safe['sections'][0]['columns']===6);check($safe['sections'][0]['productIds']===array(1));check($safe['settings']['primary']===phb_defaults()['settings']['primary']);
+echo "PHP design schema regressions passed\n";

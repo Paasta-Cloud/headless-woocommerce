@@ -9,6 +9,8 @@ colors:
 ---
 
 ## Overview
+The WordPress builder uses native Gutenberg controls, block list reordering, document save/revisions, and a separate private frontend preview. Global settings are runtime CSS variables shared across routes. No arbitrary HTML/CSS is accepted. The bundled section document preserves the original homepage; mobile columns and visibility are explicit per section. Admin controls remain neutral WordPress UI rather than copying the consumer storefront styling.
+
 User-pinned reference: https://dinaha.i-design.ir/. Persian handicraft storefront with a two-row white masthead, wide photographic campaign carousel, four image category tiles, and compact product shelves. Keep the independent Khanechin identity.
 
 ## Colors

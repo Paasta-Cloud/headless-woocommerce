@@ -15,8 +15,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - run: php tests/design-schema.php
+      - run: find wordpress/plugins/paasta-headless-builder -name '*.php' -exec php -l {} \;
       - run: npm run build
       - run: git diff --check
+      - run: cd wordpress/plugins && zip -r ../../paasta-headless-builder.zip paasta-headless-builder
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paasta-headless-builder
+          path: paasta-headless-builder.zip
 
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

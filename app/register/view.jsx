@@ -1,9 +1,11 @@
 'use client';
+import {useStoreSettings} from '../components/store-settings';
 import AuthFrame from '../components/auth-frame';
 import PasswordInput from '../components/password-input';
 import { useState } from 'react';
 
 export default function RegisterForm() {
+  const settings=useStoreSettings();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
@@ -24,7 +26,7 @@ export default function RegisterForm() {
       setDone(true);
     } catch (cause) { setError(cause.message); } finally { setBusy(false); }
   }
-  return <AuthFrame><section className="auth-panel"><span className="eyebrow">عضویت</span><h1>ساخت حساب خانه‌چین</h1>{done ? <>
+  return <AuthFrame><section className="auth-panel"><span className="eyebrow">عضویت</span><h1>ساخت حساب {settings.name}</h1>{done ? <>
     <p className="form-success">حساب شما ساخته شد. پیوند تأیید به ایمیل شما ارسال شد؛ برای فعال‌شدن حساب، آن را باز کنید.</p>
     <div className="auth-actions"><a className="primary-action" href="/login">رفتن به ورود</a><a href="/verify">پیوند تأیید نرسیده؟ ارسال دوباره</a></div>
   </> : <>

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "settings": {
+    "name": "خانه‌چین", "tagline": "هنر ایرانی، برای خانهٔ شما", "description": "فروشگاه فارسی صنایع‌دستی", "logo": "", "favicon": "",
+    "announcement": "خانه‌چین؛ تماشای هنر، انتخابی برای خانه", "announcementNote": "فروشگاه نمونهٔ صنایع‌دستی",
+    "footerText": "هنر دست، برای خانهٔ شما. جزئیات هر کالا را ببینید و انتخاب‌های خود را برای بعد نگه دارید.",
+    "footerNote": "نمونهٔ متن‌باز فروشگاه فارسی روی پاستا", "primary": "#00796f", "background": "#f4f5f8", "surface": "#ffffff", "text": "#303537", "muted": "#657174",
+    "font": "system", "fontUrl": "", "fontSize": 14, "containerWidth": 1240, "frontendUrl": "",
+    "headerLinks": [{"label":"راهنمای خرید","href":"/guide"},{"label":"سؤالات متداول","href":"/faq"},{"label":"دربارهٔ ما","href":"/about"},{"label":"ارتباط با ما","href":"/contact"}],
+    "footerLinks": [{"label":"همهٔ محصولات","href":"/shop","group":"همراه خرید شما"},{"label":"دسته‌بندی‌ها","href":"/categories","group":"همراه خرید شما"},{"label":"علاقه‌مندی‌ها","href":"/favorites","group":"همراه خرید شما"},{"label":"سبد خرید","href":"/cart","group":"همراه خرید شما"},{"label":"حساب و سفارش‌ها","href":"/account","group":"خدمات مشتریان"},{"label":"راهنمای خرید","href":"/guide","group":"خدمات مشتریان"},{"label":"سؤالات متداول","href":"/faq","group":"خدمات مشتریان"},{"label":"ارتباط با ما","href":"/contact","group":"خدمات مشتریان"},{"label":"داستان این فروشگاه","href":"/about","group":"دربارهٔ خانه‌چین"},{"label":"حریم خصوصی","href":"/privacy","group":"دربارهٔ خانه‌چین"},{"label":"شرایط استفاده","href":"/terms","group":"دربارهٔ خانه‌چین"},{"label":"کد متن‌باز فروشگاه","href":"https://github.com/Paasta-Cloud/headless-woocommerce","group":"دربارهٔ خانه‌چین"}],
+    "mobileLinks": [{"label":"خانه","href":"/","icon":"home"},{"label":"دسته‌ها","href":"/categories","icon":"grid"},{"label":"علاقه‌مندی","href":"/favorites","icon":"heart"},{"label":"سبد خرید","href":"/cart","icon":"bag"},{"label":"حساب من","href":"/account","icon":"user"}]
+  },
+  "sections": [
+    {"type":"hero","title":"پیشنهادهای صنایع‌دستی","items":[{"title":"انواع ظروف میناکاری","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/slide2.jpg","href":"/shop?q=مینا"},{"title":"انواع ظروف فیروزه‌کوبی","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/slide1.jpg","href":"/shop?q=فیروزه"},{"title":"انواع شکلات‌خوری مسی","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/slide3.jpg","href":"/shop?q=مس"},{"title":"انواع جعبه هدیه خاتم‌کاری","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/slide4.jpg","href":"/shop?q=خاتم"}]},
+    {"type":"features","title":"راهنمای خدمات","items":[{"title":"قیمت و موجودی","body":"هماهنگ با فروشگاه","icon":"check","href":"/guide"},{"title":"حساب مشتری","body":"پیگیری خریدهای شما","icon":"user","href":"/account"},{"title":"انتخاب‌های شما","body":"ذخیره در علاقه‌مندی‌ها","icon":"heart","href":"/favorites"},{"title":"سبد خرید آنلاین","body":"بررسی پیش از پرداخت","icon":"bag","href":"/cart"}]},
+    {"type":"banners","title":"کشف صنایع‌دستی","items":[{"title":"هنر میناکاری","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/banner1.jpg","href":"/shop?q=مینا"},{"title":"انواع کیف چرم","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/banner2.jpg","href":"/shop?q=کیف"},{"title":"فرش دستبافت","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/banner3.jpg","href":"/shop?q=فرش"},{"title":"انواع دستبند","image":"https://dinaha.i-design.ir/wp-content/uploads/2022/11/banner4.jpg","href":"/shop?q=دستبند"}]},
+    {"type":"products","title":"محصولات فروشگاه","source":"all","limit":100,"showFilters":true},
+    {"type":"text-image","title":"هنر دست، در خانهٔ شما","subtitle":"خانه‌چین","body":"جزئیات را ببینید، انتخاب‌هایتان را کنار بگذارید و پیش از ثبت سفارش، قیمت و روش دریافت را بررسی کنید.","buttonLabel":"راهنمای خرید","href":"/guide","background":"#e4f1ee","padding":32}
+  ]
+}
