@@ -2,7 +2,7 @@
 
 Install `wordpress/mu-plugins/khanechin-public-cache.php` in the site's MU plugin directory. No Redis, credentials or public purge API are required.
 
-WordPress caches only anonymous GET product/design responses, for up to 60 seconds. Storage is bounded to 64 collision-safe transient slots, each accepting at most 256 KiB of JSON. Cookies, authorization, cart tokens, nonces, unknown query parameters, errors and Set-Cookie responses bypass caching. WordPress database transients work without a persistent object cache; an existing correctly isolated object cache can also serve them.
+WordPress caches only anonymous GET product/design responses, for up to 60 seconds. Storage is bounded to 64 collision-safe transient slots, each accepting at most 512 KiB of JSON. Cookies, authorization, cart tokens, nonces, unknown query parameters, errors and Set-Cookie responses bypass caching. WordPress database transients work without a persistent object cache; an existing correctly isolated object cache can also serve them.
 
 Product/variation saves, stock changes, product metadata, taxonomy changes, design/attachment saves/deletes and WooCommerce option changes rotate a public generation. Frontend processes check that generation at most once every three seconds and cache public data for 60 seconds under it. The generation is not a credential and cannot mutate anything. No webhook delivery or replica-local purge is required. Already-open browser pages still need navigation/refresh to display changes.
 

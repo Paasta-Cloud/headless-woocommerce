@@ -54,7 +54,7 @@ add_filter('rest_post_dispatch', static function ($response, $server, $request) 
     foreach ($headers as $name => $value) if (strtolower($name) === 'set-cookie') return $response;
     foreach (headers_list() as $header) if (stripos($header, 'Set-Cookie:') === 0) return $response;
     $data = $response->get_data();
-    if (strlen(wp_json_encode($data)) > 262144) return $response;
+    if (strlen(wp_json_encode($data)) > 524288) return $response;
     // Fixed 64 slots: arbitrary public query strings cannot grow cache storage.
     // Collisions are safe misses; TTL also bounds changes from third-party hooks.
     set_transient(khc_slot($key), ['key' => $key, 'data' => $data, 'headers' => $headers], 60);
@@ -70,6 +70,7 @@ function khc_post_change($id) {
 }
 add_action('save_post', 'khc_post_change', 100);
 add_action('before_delete_post', 'khc_post_change');
+add_action('set_object_terms', 'khc_post_change');
 foreach (['updated_post_meta', 'added_post_meta', 'deleted_post_meta'] as $hook) {
     add_action($hook, static function ($meta_id, $post_id) { khc_post_change($post_id); }, 10, 2);
 }
