@@ -21,6 +21,7 @@ jobs:
       - run: php tests/checkout-customer.php
       - run: php tests/order-currency.php
       - run: php tests/return-plugin.php
+      - run: php tests/public-cache.php
       - run: find wordpress/plugins/paasta-headless-builder -name '*.php' -exec php -l {} \;
       - run: npm run build
       - run: git diff --check

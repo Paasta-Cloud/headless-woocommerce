@@ -36,6 +36,7 @@ test('Store API toman amounts do not receive a hidden conversion', () => {
 
 test('live WooCommerce response is used without silently falling back to demo', async () => {
   const server = createServer((request, response) => {
+    if(request.url==='/wp-json/paasta-cache/v1/revision'){response.writeHead(404);response.end();return;}
     assert.equal(request.url, '/wp-json/wc/store/v1/products?per_page=100&page=1');
     response.setHeader('content-type', 'application/json');
     response.end(JSON.stringify([{ id: 42, name: 'محصول زنده', prices: { price: '100000', currency_minor_unit: 0, currency_code: 'IRT' } }]));
@@ -58,6 +59,7 @@ test('live WooCommerce response is used without silently falling back to demo', 
 test('catalogue follows all pages and preserves the optional category boundary', async () => {
   const requests = [];
   const server = createServer((request, response) => {
+    if(request.url==='/wp-json/paasta-cache/v1/revision'){response.writeHead(404);response.end();return;}
     const url = new URL(request.url, 'http://localhost');
     requests.push(url.searchParams.get('page'));
     assert.equal(url.searchParams.get('category'), '176');
