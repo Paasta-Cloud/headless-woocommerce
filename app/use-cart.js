@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { mutateCart } from '../lib/cart-mutation';
 
 const CartContext = createContext(null);
@@ -25,6 +25,7 @@ function useCartState(mode) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(mode === 'live');
   const [uncertain, setUncertain] = useState(false);
+  const generation=useRef(0),mutating=useRef(false);
 
   function sync(payload) {
     const quantities = {};
@@ -38,21 +39,32 @@ function useCartState(mode) {
     setCoupons(payload.coupons || []);setDiscount(payload.discount || 0);setTotal(payload.total || 0);
   }
 
+  const refreshCart=useCallback(async()=>{
+    if(mode!=='live'||mutating.current)return;
+    const current=++generation.current;
+    try{
+      const response=await fetch('/api/cart',{cache:'no-store'});
+      const payload=await response.json();if(!response.ok)throw Error(payload.error);
+      if(current===generation.current){sync(payload);setUncertain(false);}
+    }catch(reason){if(current===generation.current)setError(reason.message||'سبد بارگذاری نشد. دوباره تلاش کنید.');}
+    finally{if(current===generation.current)setLoading(false);}
+  },[mode]);
   useEffect(() => {
     if (mode === 'demo') {
       try { const saved = JSON.parse(sessionStorage.getItem('khanechin-demo-cart') || '{}'); setCart(Object.fromEntries(Object.entries(saved).filter(([id, qty]) => /^[1-9]\d*$/.test(id) && Number.isInteger(qty) && qty > 0 && qty <= 99))); } catch { /* Empty demo cart is safe. */ }
     }
     if (mode !== 'live') return;
-    let active = true;
-    fetch('/api/cart', { cache: 'no-store' }).then(async response => {
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error);
-      if (active) sync(payload);
-    }).catch(reason => { if (active) setError(reason.message || 'سبد بارگذاری نشد. دوباره تلاش کنید.'); }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [mode]);
+    refreshCart();
+    const storage=event=>{if(event.key==='khanechin-cart-updated')refreshCart();};
+    const visible=()=>{if(document.visibilityState==='visible')refreshCart();};
+    const restored=event=>{if(event.persisted)refreshCart();};
+    window.addEventListener('storage',storage);window.addEventListener('pageshow',restored);document.addEventListener('visibilitychange',visible);
+    return()=>{generation.current++;window.removeEventListener('storage',storage);window.removeEventListener('pageshow',restored);document.removeEventListener('visibilitychange',visible);};
+  }, [mode,refreshCart]);
 
   async function post(action) {
+    if(mutating.current||uncertain)return false;
+    mutating.current=true;generation.current++;
     setBusy(true);
     try {
       return await mutateCart(action, {
@@ -64,7 +76,7 @@ function useCartState(mode) {
         }, sync, onError: setError,
         invalidate: () => { setUncertain(true); setError('وضعیت سبد مشخص نیست. پیش از ادامه، صفحه را تازه کنید.'); },
       });
-    } finally { setBusy(false); }
+    } finally { mutating.current=false;setBusy(false); }
   }
 
   // Adds a product; for variable products variation carries the chosen variant
@@ -103,5 +115,5 @@ function useCartState(mode) {
     if (busy || loading || mode !== 'live') return false;
     setError('');return post({action:remove?'remove-coupon':'apply-coupon',code});
   }
-  return { cart, entries, subtotal, total, discount, coupons, unit, busy: busy || loading || uncertain, loading, error, addItem, changeQuantity, changeCoupon, mode };
+  return { cart, entries, subtotal, total, discount, coupons, unit, busy: busy || loading || uncertain, loading, error, addItem, changeQuantity, changeCoupon, refreshCart, mode };
 }

@@ -14,7 +14,7 @@ const fields = {
 };
 
 export default function CheckoutView({initialAddress={}}) {
-  const {busy:cartBusy,error:cartError}=useCart();
+  const {busy:cartBusy,error:cartError,refreshCart}=useCart();
   const [summary, setSummary] = useState(null);
   const [address, setAddress] = useState(Object.fromEntries(Object.keys(fields).map(key => [key, initialAddress[key]||''])));
   const [method, setMethod] = useState('');
@@ -49,6 +49,7 @@ export default function CheckoutView({initialAddress={}}) {
       if (!response.ok) throw new Error(data.error);
       if (data.redirect) { window.location.assign(data.redirect); return; }
       setOrder(data);
+      await refreshCart();
     } catch (reason) {
       setError(reason.message || 'وضعیت سفارش مشخص نشد. پیش از تلاش دوباره حساب ووکامرس یا ایمیل خود را بررسی کنید.');
     } finally { submitting.current = false; setBusy(false); }

@@ -22,6 +22,7 @@ function failure(reason, action) {
 export async function GET(request) {
   try {
     const token = (await cookies()).get(COOKIE)?.value;
+    if(!token)return Response.json(publicCart({items:[],totals:{},coupons:[]}),{headers:{'Cache-Control':'no-store'}});
     return responseWithCart(await requestCart(token), request);
   } catch (reason) { return failure(reason); }
 }

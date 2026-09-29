@@ -1,6 +1,7 @@
 import { Breadcrumbs, CheckoutSteps } from '../../components/ui';
 import { cookies } from 'next/headers';
 import { decodeReceipt, getOrder, orderCookieName } from '../../../lib/order';
+import SettleCart from './settle-cart';
 
 export const metadata = { title: 'پیگیری سفارش | خانه‌چین', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
@@ -25,6 +26,7 @@ export default async function OrderPage({ params }) {
   const amount = order ? new Intl.NumberFormat('fa-IR').format(Number(order.total) / 10 ** order.minorUnit) : '';
   const unit = order?.currency === 'IRR' ? 'ریال' : order?.currency === 'IRT' ? 'تومان' : order?.currency || '';
   return <main className="shop-shell order-page"><Breadcrumbs items={[{label:'پیگیری سفارش'}]}/><CheckoutSteps current={3}/>
+    {order&&['processing','completed'].includes(order.status)&&<SettleCart id={id}/>}
 
     <section className="order-result" aria-labelledby="order-title">
       <span className="eyebrow">پیگیری سفارش از ووکامرس</span>

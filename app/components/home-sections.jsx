@@ -1,10 +1,12 @@
 'use client';
+import StoreLink from './store-link';
+
 import {useRef,useState} from 'react';
 import {catalogCategories,filterProducts,inCategory} from '../../lib/catalog';
 import ProductCard from './product-card';
 import Icon from './icons';
 
-function OptionalLink({href,children,...props}){return href?<a href={href} {...props}>{children}</a>:<div {...props}>{children}</div>;}
+function OptionalLink({href,children,...props}){return href?<StoreLink href={href} {...props}>{children}</StoreLink>:<div {...props}>{children}</div>;}
 function Hero({section}){
   const items=section.items.filter(item=>item.image),[slide,setSlide]=useState(0);
   if(!items.length)return null;const current=items[slide%items.length];
@@ -29,8 +31,8 @@ export default function HomeSection({section,products,error,index}){
   else if(section.type==='features')content=<div className="craft-benefits builder-grid">{section.items.map((item,i)=><OptionalLink key={i} href={item.href}><Icon name={item.icon}/><span><strong>{item.title}</strong><small>{item.body}</small></span></OptionalLink>)}</div>;
   else if(section.type==='categories'){
     const categories=catalogCategories(products).filter(category=>!section.categoryIds.length||section.categoryIds.includes(category.id));
-    content=<><h2 className="builder-section-title">{section.title}</h2><div className="categories-grid builder-grid">{categories.map(category=><a className="category-card" key={category.id} href={`/category/${category.id}`}><div>{category.image?<img src={category.image} alt="" loading="lazy"/>:<Icon name="grid"/>}</div><h3>{category.name}</h3><span>{category.count.toLocaleString('fa-IR')} محصول</span></a>)}</div></>;
-  }else if(section.type==='text-image')content=<div className={`builder-text-image image-${section.imageSide}${section.image?'':' no-image'}`}>{section.image&&<img src={section.image} alt={section.title} loading="lazy"/>}<div>{section.subtitle&&<span className="eyebrow">{section.subtitle}</span>}<h2>{section.title}</h2><p>{section.body}</p>{section.href&&section.buttonLabel&&<a className="secondary-button" href={section.href}>{section.buttonLabel}<Icon name="arrow"/></a>}</div></div>;
+    content=<><h2 className="builder-section-title">{section.title}</h2><div className="categories-grid builder-grid">{categories.map(category=><StoreLink className="category-card" key={category.id} href={`/category/${category.id}`}><div>{category.image?<img src={category.image} alt="" loading="lazy"/>:<Icon name="grid"/>}</div><h3>{category.name}</h3><span>{category.count.toLocaleString('fa-IR')} محصول</span></StoreLink>)}</div></>;
+  }else if(section.type==='text-image')content=<div className={`builder-text-image image-${section.imageSide}${section.image?'':' no-image'}`}>{section.image&&<img src={section.image} alt={section.title} loading="lazy"/>}<div>{section.subtitle&&<span className="eyebrow">{section.subtitle}</span>}<h2>{section.title}</h2><p>{section.body}</p>{section.href&&section.buttonLabel&&<StoreLink className="secondary-button" href={section.href}>{section.buttonLabel}<Icon name="arrow"/></StoreLink>}</div></div>;
   else if(section.type==='faq')content=<div className="content-panel builder-faq"><h2>{section.title}</h2>{section.items.map((item,i)=><details key={i}><summary>{item.title}</summary><p>{item.body}</p></details>)}</div>;
   else content=<div className="builder-spacer" aria-hidden="true"/>;
   return <section className={`builder-section builder-${section.type} visibility-${section.visibility}`} aria-label={section.title||undefined} style={{'--section-columns':section.columns,'--section-mobile-columns':section.mobileColumns,'--section-gap':`${section.gap}px`,'--section-padding':`${section.padding}px`,marginTop:index===0?0:`${section.spacing}px`,backgroundColor:section.background||undefined}}>{content}</section>;

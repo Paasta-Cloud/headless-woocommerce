@@ -5,6 +5,7 @@ import { sameSiteOrigin } from '../../../lib/cart';
 import { storeOrigin } from '../../../lib/store';
 import { orderCookieName, receiptFromCheckout } from '../../../lib/order';
 import {SESSION_COOKIE} from '../../../lib/account';
+import {cartDigest,tokenDigest} from '../../../lib/cart-settlement';
 
 const noStore = { 'Cache-Control': 'no-store' };
 const fail = (error, status) => Response.json({ error }, { status, headers: noStore });
@@ -53,11 +54,13 @@ export async function POST(request) {
       const redirect = safePaymentRedirect(order.payment_result?.redirect_url, storeOrigin());
       if (!redirect) return fail('سفارش ایجاد شد، اما نشانی امن پرداخت دریافت نشد. پیش از تلاش دوباره وضعیت سفارش را در ووکامرس بررسی کنید.', 502);
       const response = NextResponse.json({ orderId: order.order_id, status: order.status, redirect, note: 'سفارش در ووکامرس ایجاد شد. پرداخت فقط پس از بازگشت و تأیید زیبال قطعی است.' }, { headers: noStore });
-      const receipt = receiptFromCheckout(order, address.email);
+      const receipt = receiptFromCheckout(order, address.email, {cartToken:tokenDigest(token),cartDigest:cartDigest(cart)});
       if (receipt) response.cookies.set(orderCookieName(order.order_id), receipt, { path: `/order/${order.order_id}`, httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 86400 });
       return response;
     }
-    return Response.json({ orderId: order.order_id, status: order.status, note: 'سفارش در ووکامرس ثبت شد. پرداخت در زمان تحویل انجام می‌شود.' }, { headers: noStore });
+    const response=NextResponse.json({ orderId: order.order_id, status: order.status, note: 'سفارش در ووکامرس ثبت شد. پرداخت در زمان تحویل انجام می‌شود.' }, { headers: noStore });
+    response.cookies.set('khanechin_cart','',{path:'/',maxAge:0,httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production'});
+    return response;
   } catch (error) {
     console.error('Checkout Store API request failed', { stage, status: error?.status, code: error?.code });
     if (stage !== 'checkout' && (error?.code === 'rest_invalid_param' || error?.code === 'woocommerce_rest_invalid_address')) return fail('استان یا نشانی خریدار در ووکامرس پذیرفته نشد. استان را از فهرست انتخاب کنید و دوباره تلاش کنید؛ سفارشی ثبت نشده است.', 400);
