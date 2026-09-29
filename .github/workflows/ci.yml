@@ -16,6 +16,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: php tests/design-schema.php
+      - run: php tests/manage-permissions.php
       - run: find wordpress/plugins/paasta-headless-builder -name '*.php' -exec php -l {} \;
       - run: npm run build
       - run: git diff --check

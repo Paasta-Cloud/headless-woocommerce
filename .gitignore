@@ -1,5 +1,7 @@
 .next/
 node_modules/
+.artifacts/
+.freebuff/
 .env*
 !.env
 !.env.example

@@ -9,7 +9,10 @@ colors:
 ---
 
 ## Overview
-The WordPress builder uses native Gutenberg controls, block list reordering, document save/revisions, and a separate private frontend preview. Global settings are runtime CSS variables shared across routes. No arbitrary HTML/CSS is accepted. The bundled section document preserves the original homepage; mobile columns and visibility are explicit per section. Admin controls remain neutral WordPress UI rather than copying the consumer storefront styling.
+The independent `/manage` workspace replaces the Gutenberg management surface. WordPress remains the authenticated data store and revision history. The approved composition is option 1: task tabs, a thumbnail section list, a focused form and a compact preview. The consumer storefront identity below remains unchanged.
+
+## Management workspace
+Operate mode, designed for a merchant editing from a laptop in normal daylight. Use the Paasta operational palette: white surfaces on `#f5f7fa`, ink `#050816`, secondary ink `#536078`, dividers `#dce3ee`, black primary actions and blue keyboard focus. Yekan Bakh when licensed and configured, Tahoma fallback. One outline icon family, 4px spacing, 44px controls, restrained 12px corners. State uses both text and color. Keep publish and preview visible, show unsaved changes, preserve edits on errors, detect concurrent updates. Desktop has right navigation and list/form/preview columns; narrow screens use section selection followed by the focused form, never a compressed desktop canvas. Only functioning management modules appear. Generated comp copy, stock photos and fabricated service claims are not product content.
 
 User-pinned reference: https://dinaha.i-design.ir/. Persian handicraft storefront with a two-row white masthead, wide photographic campaign carousel, four image category tiles, and compact product shelves. Keep the independent Khanechin identity.
 
