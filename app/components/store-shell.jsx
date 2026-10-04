@@ -18,9 +18,12 @@ import {defaultDesign,contrastingText} from '../../lib/design';
 
 export default function StoreShell({ mode, children, signedIn = false, settings=defaultDesign.settings, preview=false }) {
   const pathname=usePathname();
-  if(pathname==='/manage'||pathname?.startsWith('/manage/'))return children;
+  if(pathname==='/manage'||pathname?.startsWith('/manage/')||pathname?.startsWith('/demos/'))return children;
+  return <StoreFrame mode={mode} signedIn={signedIn} settings={settings} preview={preview}>{children}</StoreFrame>;
+}
+export function StoreFrame({mode,children,signedIn=false,settings=defaultDesign.settings,preview=false}){
   const style={'--configured-primary':settings.primary,'--primary-contrast':contrastingText(settings.primary),'--configured-background':settings.background,'--configured-surface':settings.surface,'--configured-text':settings.text,'--configured-muted':settings.muted,'--store-font':settings.font==='custom'&&settings.fontUrl?'StoreCustom,Tahoma,sans-serif':settings.font==='tahoma'?'Tahoma,Arial,sans-serif':'"Yekan Bakh",Tahoma,Arial,sans-serif','--store-font-size':`${settings.fontSize}px`,'--font-scale':settings.fontSize/14,'--store-width':`${settings.containerWidth}px`};
-  return <StoreSettings.Provider value={settings}><CartProvider mode={mode}><div className="store-frame" style={style}>{preview&&<div className="preview-notice">پیش‌نمایش خصوصی؛ این تغییرات هنوز برای مشتریان منتشر نشده‌اند.<StoreLink href="/">دیدن نسخهٔ عمومی</StoreLink></div>}<Chrome signedIn={signedIn} settings={settings}/>{children}<StoreFooter settings={settings}/></div></CartProvider></StoreSettings.Provider>;
+  return <StoreSettings.Provider value={settings}><CartProvider mode={mode}><div className="store-frame" data-store-theme={settings.theme} style={style}>{preview&&<div className="preview-notice">پیش‌نمایش خصوصی؛ این تغییرات هنوز برای مشتریان منتشر نشده‌اند.<StoreLink href="/">دیدن نسخهٔ عمومی</StoreLink></div>}<Chrome signedIn={signedIn} settings={settings}/>{children}<StoreFooter settings={settings}/></div></CartProvider></StoreSettings.Provider>;
 }
 function Chrome({ signedIn, settings }) {
   const login = useRef(null), basket = useRef(null);

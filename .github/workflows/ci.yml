@@ -22,14 +22,21 @@ jobs:
       - run: php tests/order-currency.php
       - run: php tests/return-plugin.php
       - run: php tests/public-cache.php
+      - run: php tests/connector.php
+      - run: php -l wordpress/plugins/paasta-headless-connector/paasta-headless-connector.php
       - run: find wordpress/plugins/paasta-headless-builder -name '*.php' -exec php -l {} \;
       - run: npm run build
+      - run: node scripts/package-connector.mjs
       - run: git diff --check
       - run: cd wordpress/plugins && zip -r ../../paasta-headless-builder.zip paasta-headless-builder
       - uses: actions/upload-artifact@v4
         with:
           name: paasta-headless-builder
           path: paasta-headless-builder.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paasta-headless-connector
+          path: public/downloads/paasta-headless-connector.zip
 
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

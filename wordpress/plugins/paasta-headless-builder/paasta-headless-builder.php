@@ -2,7 +2,7 @@
 /**
  * Plugin Name: صفحه‌ساز فروشگاه هدلس پاستا
  * Description: مدیریت بلوکی صفحهٔ اصلی، هویت بصری و منوهای فرانت‌اند مستقل؛ همراه با پیش‌نمایش امن و تاریخچهٔ وردپرس.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
@@ -45,14 +45,15 @@ function phb_parse($content) {
     if ($settings===null || count($sections)>40) throw new InvalidArgumentException('یک بلوک تنظیمات کلی و حداکثر ۴۰ سکشن لازم است.');
     return phb_clean_design(array('version'=>1,'settings'=>$settings,'sections'=>$sections));
 }
-register_activation_hook(__FILE__, function() {
+function phb_activate() {
     if (!post_type_exists('paasta_design')) phb_register();
     if (get_post((int)get_option('paasta_design_id'))) return;
     $design=phb_defaults();
     $design['settings']['frontendUrl']=phb_url(get_option('khanechin_frontend_url',''),true);
     $id=wp_insert_post(array('post_type'=>'paasta_design','post_title'=>'طراحی فروشگاه','post_status'=>'publish','post_content'=>wp_slash(phb_serialize($design))),true);
     if (!is_wp_error($id)) update_option('paasta_design_id',$id,false);
-});
+}
+register_activation_hook(__FILE__, 'phb_activate');
 add_filter('allowed_block_types_all',function($allowed,$context){return !empty($context->post) && $context->post->post_type==='paasta_design' ? array_map(function($type){return 'paasta/'.$type;},phb_types()) : $allowed;},10,2);
 add_filter('block_categories_all',function($categories,$context){if(!empty($context->post)&&$context->post->post_type==='paasta_design')array_unshift($categories,array('slug'=>'paasta-store','title'=>'بلوک‌های فروشگاه'));return $categories;},10,2);
 add_filter('rest_pre_insert_paasta_design',function($post,$request){

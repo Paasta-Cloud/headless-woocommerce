@@ -35,5 +35,9 @@ foreach(array('invalid','expired','administrator') as $case){
 $session=12;$roles=array('customer');$hooks['rest_api_init']();
 $result=$routes['/me']['callback'](new TestRequest('Bearer '.str_repeat('a',64)));
 verify(array_column($result['orders'],'id')===array(2,1));
+define('PAASTA_CONNECTOR_RESPECT_REGISTRATION',true);
+$order=new TestOrder();$order->customer=99;
+$hook($order,new TestRequest('Basic unrelated'));verify($order->customer===99);
+$hook($order,new TestRequest('Bearer third-party-jwt'));verify($order->customer===99);
 echo "Checkout binding and unrelated-order isolation passed\n";
 }

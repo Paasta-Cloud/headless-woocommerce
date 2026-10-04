@@ -25,7 +25,7 @@ function Products({section,products,error}){
 export default function HomeSection({section,products,error,index}){
   if(!section.enabled)return null;
   let content;
-  if(section.type==='hero')content=<Hero section={section}/>;
+  if(section.type==='hero')content=section.featuredProduct&&products.length?<div className={`builder-hero-pair image-${section.imageSide}`}><Hero section={section}/><aside aria-label="محصول منتخب"><ProductCard product={products.find(p=>p.id===section.productIds[0])||products[0]}/></aside></div>:<Hero section={section}/>;
   else if(section.type==='products')content=<Products section={section} products={products} error={error}/>;
   else if(section.type==='banners')content=<div className="craft-tiles builder-grid">{section.items.filter(item=>item.image).map((item,i)=><OptionalLink key={i} href={item.href}><img src={item.image} alt={item.title} width="400" height="240" loading="lazy"/></OptionalLink>)}</div>;
   else if(section.type==='features')content=<div className="craft-benefits builder-grid">{section.items.map((item,i)=><OptionalLink key={i} href={item.href}><Icon name={item.icon}/><span><strong>{item.title}</strong><small>{item.body}</small></span></OptionalLink>)}</div>;

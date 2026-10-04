@@ -24,6 +24,7 @@ function phb_links($value, $fallback, $max) {
 function phb_clean_design($raw) {
     if (!is_array($raw) || ($raw['version'] ?? null) !== 1 || !isset($raw['settings'], $raw['sections']) || !is_array($raw['settings']) || !is_array($raw['sections'])) throw new InvalidArgumentException('ساختار طراحی معتبر نیست.');
     $d = phb_defaults()['settings']; $s = $raw['settings']; $settings = array();
+    $settings['theme']=in_array($s['theme']??'',array('digital','grocery'),true)?$s['theme']:'craft';
     foreach (array('name','tagline','description','announcement','announcementNote','footerText','footerNote') as $key) $settings[$key] = phb_text($s[$key] ?? $d[$key], $key === 'footerText' ? 1000 : 200);
     if (!$settings['name']) $settings['name'] = $d['name'];
     foreach (array('primary','background','surface','text','muted') as $key) $settings[$key] = phb_color($s[$key] ?? '', $d[$key]);
@@ -65,6 +66,7 @@ function phb_clean_design($raw) {
         $section['display'] = ($value['display'] ?? '') === 'carousel' ? 'carousel' : 'grid';
         $section['imageSide'] = ($value['imageSide'] ?? '') === 'left' ? 'left' : 'right';
         $section['showFilters'] = ($value['showFilters'] ?? false) === true;
+        $section['featuredProduct'] = ($value['featuredProduct'] ?? false) === true;
         $section['productIds'] = phb_ids($value['productIds'] ?? null); $section['categoryIds'] = phb_ids($value['categoryIds'] ?? null);
         $section['items'] = array();
         foreach (array_slice(is_array($value['items'] ?? null) ? $value['items'] : array(), 0, 20) as $item) {

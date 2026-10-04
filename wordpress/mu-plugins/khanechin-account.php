@@ -102,6 +102,7 @@ add_action( 'rest_api_init', function () {
         'methods' => 'POST',
         'permission_callback' => '__return_true',
         'callback' => function ( $request ) {
+            if(defined('PAASTA_CONNECTOR_RESPECT_REGISTRATION') && PAASTA_CONNECTOR_RESPECT_REGISTRATION && get_option('woocommerce_enable_myaccount_registration')!=='yes')return new WP_Error('registration_disabled','ثبت‌نام در این فروشگاه فعال نیست.',array('status'=>403));
             if ( khanechin_rate_limited( 'register', 3, HOUR_IN_SECONDS ) ) {
                 return new WP_Error( 'rate_limited', 'تلاش‌های ثبت‌نام زیاد بوده است. بعداً دوباره امتحان کنید.', array( 'status' => 429 ) );
             }
@@ -269,6 +270,7 @@ add_action( 'rest_api_init', function () {
 add_action('woocommerce_store_api_checkout_update_order_from_request',function($order,$request){
     $header=$request->get_header('authorization');
     if(!$header){$order->delete_meta_data('_khanechin_customer_id');return;}
+    if(defined('PAASTA_CONNECTOR_RESPECT_REGISTRATION') && PAASTA_CONNECTOR_RESPECT_REGISTRATION && (!is_string($header)||!preg_match('/^Bearer [a-f0-9]{64}$/D',$header)))return;
     $user=khanechin_customer_from_request($request);
     if(!$user)throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException('customer_session_expired','نشست مشتری منقضی شده است. دوباره وارد شوید.',401);
     // The official gateway starts on a native guest order-pay page. Preserve
