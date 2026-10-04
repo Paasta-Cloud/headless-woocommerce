@@ -24,3 +24,9 @@ test('demo favorites and navigation are isolated without disabling slide control
  assert.match(link,/event.preventDefault\(\);demoNavigate\(href\)/);
  assert.doesNotMatch(readFileSync('app/demos/[theme]/page.js','utf8'),/\binert\b/);
 });
+
+test('featured media keeps its fixed height above the title',()=>{
+ const css=readFileSync('app/retail.css','utf8');
+ assert.match(css,/\.store-frame:not\(\[data-store-theme=craft\]\) \.retail-featured \.craft-product-photo>a\{display:block;height:100%;aspect-ratio:auto;min-height:0\}/);
+ assert.match(css,/\.retail-featured \.craft-product-photo img\{height:100%;max-height:100%;min-height:0;aspect-ratio:auto;object-fit:contain\}/);
+});
