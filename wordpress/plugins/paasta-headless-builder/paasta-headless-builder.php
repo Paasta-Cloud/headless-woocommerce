@@ -2,7 +2,7 @@
 /**
  * Plugin Name: صفحه‌ساز فروشگاه هدلس پاستا
  * Description: مدیریت بلوکی صفحهٔ اصلی، هویت بصری و منوهای فرانت‌اند مستقل؛ همراه با پیش‌نمایش امن و تاریخچهٔ وردپرس.
- * Version: 1.4.0
+ * Version: 1.5.0
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later

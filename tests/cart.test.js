@@ -16,6 +16,8 @@ test('cart origin follows the public proxy host and scheme without accepting ano
 test('cart mutation accepts only bounded supported operations', () => {
   assert.deepEqual(cartAction({ action: 'add', id: 42 }), { path: '/add-item', body: { id: 42, quantity: 1 } });
   assert.equal(cartAction({ action: 'add', id: -1 }), null);
+  assert.deepEqual(cartAction({action:'add',id:42,quantity:5}),{path:'/add-item',body:{id:42,quantity:5}});
+  for(const quantity of [0,-1,100,1.5,'2',null])assert.equal(cartAction({action:'add',id:42,quantity}),null);
   assert.equal(cartAction({ action: 'quantity', key: 'bad', quantity: 2 }), null);
   assert.equal(cartAction({ action: 'quantity', key: 'a'.repeat(32), quantity: 100 }), null);
   assert.deepEqual(cartAction({ action: 'remove', key: 'a'.repeat(32) }), { path: '/remove-item', body: { key: 'a'.repeat(32) } });

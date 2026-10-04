@@ -19,7 +19,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/bc93c85850fde03509e271edbdd006735e284682_1738580487.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/bc93c85850fde03509e271edbdd006735e284682_1738580487-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 59800
     },
     {
       "id": 2,
@@ -37,7 +38,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a20b2cb862517e6735974fd4f931014b5dcc0f0e_1718697953.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a20b2cb862517e6735974fd4f931014b5dcc0f0e_1718697953-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 160000
     },
     {
       "id": 3,
@@ -55,7 +57,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/04584e7385a28cb12933a48e2d6caabaa36248b3_1731830918.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/04584e7385a28cb12933a48e2d6caabaa36248b3_1731830918-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 41100
     },
     {
       "id": 4,
@@ -73,7 +76,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/4c5ad8a86af0a552dc3d5914a0c0b5c1af1e47c1_1621059789.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/4c5ad8a86af0a552dc3d5914a0c0b5c1af1e47c1_1621059789-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 80800
     },
     {
       "id": 5,
@@ -91,7 +95,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a12ca4b7445e88deaaac4bad626639a880be5319_1615028589.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a12ca4b7445e88deaaac4bad626639a880be5319_1615028589-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 3880000
     },
     {
       "id": 6,
@@ -109,7 +114,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/23232.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/23232-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 310000
     },
     {
       "id": 7,
@@ -127,7 +133,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/12121.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/12121-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 189000
     },
     {
       "id": 8,
@@ -145,7 +152,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/3604890.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/3604890-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 26000
     },
     {
       "id": 9,
@@ -163,7 +171,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/123.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/123-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 47500
     },
     {
       "id": 10,
@@ -181,7 +190,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/64eca2a52cdda744c25fcbc17741ef9becfeb8e8_1623589300.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/64eca2a52cdda744c25fcbc17741ef9becfeb8e8_1623589300-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 76000
     },
     {
       "id": 11,
@@ -199,7 +209,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/08a070389477499c0677873ea32524e01178553e_1605352046.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/08a070389477499c0677873ea32524e01178553e_1605352046-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 69000
     },
     {
       "id": 12,
@@ -217,7 +228,8 @@
       "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/1-10.jpg",
       "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/1-10-300x300.jpg",
       "type": "simple",
-      "purchasable": false
+      "purchasable": false,
+      "regularPrice": 282000
     }
   ]
 }

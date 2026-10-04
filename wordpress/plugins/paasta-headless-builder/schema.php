@@ -67,6 +67,7 @@ function phb_clean_design($raw) {
         $section['imageSide'] = ($value['imageSide'] ?? '') === 'left' ? 'left' : 'right';
         $section['showFilters'] = ($value['showFilters'] ?? false) === true;
         $section['featuredProduct'] = ($value['featuredProduct'] ?? false) === true;
+        $section['presentation'] = in_array($value['presentation'] ?? '', array('stories','brands','editorial','showcase','ranked','spotlight','offers'), true) ? $value['presentation'] : 'standard';
         $section['productIds'] = phb_ids($value['productIds'] ?? null); $section['categoryIds'] = phb_ids($value['categoryIds'] ?? null);
         $section['items'] = array();
         foreach (array_slice(is_array($value['items'] ?? null) ? $value['items'] : array(), 0, 20) as $item) {

@@ -32,6 +32,8 @@ Small downward neutral shadows separate image campaigns and white shelves from t
 12px surface corners, 8px inputs and controls, circular carousel indicators.
 
 ## Components
+Digital and grocery are user-pinned Dina/Dinama variants, not recolored craft pages. Their frame uses a slim utility row, pill search/account controls, a 12-item story rail, a 3:1 tabbed campaign/featured-product pair (mirrored for grocery), five compact benefits, campaign tiles, product spotlight, offer rail, category showcases, numbered shelves, editorial tiles and brand rails. White surfaces sit on #f4f5f8 with 20px section gaps and 10px corners. Grocery uses pink actions with green story rings; digital uses turquoise accents with pink rings. Mobile keeps the complete content in a single-column flow, horizontally scrollable stories/shelves and full-width featured product. No fabricated timers, trust badges, sales statistics or service guarantees. Demo data stays isolated from real cart/account APIs; image controls remain usable. The craft identity and merchant content remain unchanged.
+
 Carousel uses explicit labeled controls, without automatic motion. Search, category filters, sorting, favorites and cart retain real behavior. Product prices and availability remain authoritative WooCommerce data. Reference demo products must be imported explicitly, never substituted for real product IDs.
 
 ## Route contract

@@ -21,4 +21,11 @@ check($safe['settings']['showMobileNav']===true);
 check($safe['settings']['benefits'][0]['href']==='');
 check($safe['settings']['benefits'][0]['icon']==='info');
 check(phb_clean_design($safe)===$safe);
+$raw=phb_defaults();
+foreach (array('stories','brands','editorial','showcase','ranked','spotlight','offers') as $presentation) {
+    $raw['sections'][0]['presentation']=$presentation;
+    check(phb_clean_design($raw)['sections'][0]['presentation']===$presentation);
+}
+$raw['sections'][0]['presentation']='javascript:bad';
+check(phb_clean_design($raw)['sections'][0]['presentation']==='standard');
 echo "PHP design schema regressions passed\n";

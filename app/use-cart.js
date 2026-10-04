@@ -81,15 +81,16 @@ function useCartState(mode) {
 
   // Adds a product; for variable products variation carries the chosen variant
   // ({ id, attributes: [{ name, value }] }) exactly as reported by the product page.
-  async function addItem(id, variation) {
+  async function addItem(id, variation, quantity=1) {
+    if(!Number.isSafeInteger(quantity)||quantity<1||quantity>99)return false;
     if (busy || loading || !['demo','live'].includes(mode)) return false;
     setError('');
     if (mode === 'demo') {
-      const next = { ...cart, [id]: Math.min(99, (cart[id] || 0) + 1) };
+      const next = { ...cart, [id]: Math.min(99, (cart[id] || 0) + quantity) };
       setCart(next); try { sessionStorage.setItem('khanechin-demo-cart', JSON.stringify(next)); } catch { /* Storage may be disabled. */ }
       return true;
     }
-    const action = variation ? { action: 'add', id, variation } : { action: 'add', id };
+    const action = variation ? { action: 'add', id, variation, quantity } : { action: 'add', id, quantity };
     return post(action);
   }
 
