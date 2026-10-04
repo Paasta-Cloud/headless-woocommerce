@@ -10,8 +10,19 @@ test('visual demos are read-only and never select demo products for real checkou
   assert.match(page,/<div inert>/);
   assert.match(page,/StoreFrame mode="preview"/);
   assert.match(page,/if\(!preset\)notFound\(\)/);
-  assert.match(page,/getProducts\(\)/);
+  assert.match(page,/demo-digital\.json/);
+  assert.match(page,/demo-grocery\.json/);
+  assert.doesNotMatch(page,/getProducts\(\)/);
   assert.doesNotMatch(page,/api\/checkout|api\/manage\/save/);
+});
+
+test('demo snapshots never claim live inventory or offers',()=>{
+  for(const theme of ['digital','grocery']){
+    const data=JSON.parse(readFileSync(new URL(`../lib/demo-${theme}.json`,import.meta.url),'utf8'));
+    assert.equal(data.products.length,12);
+    assert.ok(data.products.every(p=>p.purchasable===false&&Number.isFinite(p.price)&&new URL(p.image).protocol==='https:'));
+    assert.match(data.notice,/Never use for checkout/);
+  }
 });
 
 test('all starter layouts preserve identity and page data without mutating the current design',()=>{

@@ -1,0 +1,223 @@
+{
+  "source": "https://dina.i-design.ir/",
+  "capturedAt": "2026-10-04",
+  "notice": "Read-only reference snapshot. Prices are not current offers. Never use for checkout.",
+  "products": [
+    {
+      "id": 1,
+      "name": "ساعت هوشمند اپل واچ سری 6 مدل 44mm Aluminum Case with Sport silicone Band",
+      "price": 10500000,
+      "unit": "تومان",
+      "category": "ساعت اپل",
+      "categoryRefs": [
+        {
+          "id": 204,
+          "name": "ساعت اپل",
+          "slug": "204"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/6b288bef53cce2b3d80e0226525985a8857c2479_1600689706.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/6b288bef53cce2b3d80e0226525985a8857c2479_1600689706-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 2,
+      "name": "لپ تاپ 16 اینچی ایسوس مدل ProArt W7600H3A-L2008",
+      "price": 82000000,
+      "unit": "تومان",
+      "category": "لپ تاپ",
+      "categoryRefs": [
+        {
+          "id": 262,
+          "name": "لپ تاپ",
+          "slug": "262"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/b7e7f5c40eb33dcefe01cf78a4c02ce21e8cdf34_1651074845.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/b7e7f5c40eb33dcefe01cf78a4c02ce21e8cdf34_1651074845-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 3,
+      "name": "تبلت مایکروسافت مدل Surface Pro 8 &#8211; F ظرفیت 512 گیگابایت",
+      "price": 56700000,
+      "unit": "تومان",
+      "category": "تبلت",
+      "categoryRefs": [
+        {
+          "id": 293,
+          "name": "تبلت",
+          "slug": "293"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/8d2deaa2b2475b84c44a2eeb3126da72a9dab7fa_1644755696.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/8d2deaa2b2475b84c44a2eeb3126da72a9dab7fa_1644755696-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 4,
+      "name": "گوشی موبایل شیائومی مدل Redmi K50 Gaming 21121210C دو سیم کارت ظرفیت 256 گیگابایت و رم 12 گیگابایت",
+      "price": 15500000,
+      "unit": "تومان",
+      "category": "گوشی موبایل",
+      "categoryRefs": [
+        {
+          "id": 122,
+          "name": "گوشی موبایل",
+          "slug": "122"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/8c995b473f00f810343e5f8896a40c3a69ecfe64_1660140516.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/8c995b473f00f810343e5f8896a40c3a69ecfe64_1660140516-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 5,
+      "name": "گوشی موبایل هوآوی مدل P50 دو سیم کارت ظرفیت 256 گیگابایت و رم 8 گیگابایت",
+      "price": 17420000,
+      "unit": "تومان",
+      "category": "گوشی موبایل",
+      "categoryRefs": [
+        {
+          "id": 122,
+          "name": "گوشی موبایل",
+          "slug": "122"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/9a8077c286f4362c3f3410a92a77e0e626d3471c_1657952364.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/9a8077c286f4362c3f3410a92a77e0e626d3471c_1657952364-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 6,
+      "name": "لپ تاپ 13.9 اینچی هوآوی مدل Matebook X pro MachD",
+      "price": 47000000,
+      "unit": "تومان",
+      "category": "لپ تاپ",
+      "categoryRefs": [
+        {
+          "id": 262,
+          "name": "لپ تاپ",
+          "slug": "262"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/539b29e09e14e34dfa57653bad9bad55d99bcabc_1641727610.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/539b29e09e14e34dfa57653bad9bad55d99bcabc_1641727610-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 7,
+      "name": "گوشی موبایل اپل مدل iPhone 12 A2402 MGHN3J/A تک سیم‌ کارت ظرفیت 64 گیگابایت و رم 4 گیگابایت",
+      "price": 29300000,
+      "unit": "تومان",
+      "category": "گوشی موبایل",
+      "categoryRefs": [
+        {
+          "id": 122,
+          "name": "گوشی موبایل",
+          "slug": "122"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/ba19b2db04e853866fee87866a09ff6c697f4f39_1657356228.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/ba19b2db04e853866fee87866a09ff6c697f4f39_1657356228-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 8,
+      "name": "ساعت هوشمند اپل واچ سری 7 مدل 41mm Aluminum Case with Nike Sport silicone Band",
+      "price": 10800000,
+      "unit": "تومان",
+      "category": "ساعت اپل",
+      "categoryRefs": [
+        {
+          "id": 204,
+          "name": "ساعت اپل",
+          "slug": "204"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/861d477cb9ed2ffa31a77562c6c6f3f6fe76cde7_1656933676.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/861d477cb9ed2ffa31a77562c6c6f3f6fe76cde7_1656933676-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 9,
+      "name": "ساعت هوشمند هوآوی مدل Watch 3 بند سیلیکونی",
+      "price": 9100000,
+      "unit": "تومان",
+      "category": "ساعت هوآوی",
+      "categoryRefs": [
+        {
+          "id": 203,
+          "name": "ساعت هوآوی",
+          "slug": "203"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/4dec5e3b7c5d4f8799df5575afc53a8c7098afa9_1656933459.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/4dec5e3b7c5d4f8799df5575afc53a8c7098afa9_1656933459-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 10,
+      "name": "گوشی موبایل شیائومی مدل 12X 2112123AG دو سیم کارت ظرفیت 256 گیگابایت و رم 8 گیگابایت",
+      "price": 15490000,
+      "unit": "تومان",
+      "category": "گوشی موبایل",
+      "categoryRefs": [
+        {
+          "id": 122,
+          "name": "گوشی موبایل",
+          "slug": "122"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/f1e6d995b3ddf958310c86fa8796d140840e7d59_1655898093.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/f1e6d995b3ddf958310c86fa8796d140840e7d59_1655898093-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 11,
+      "name": "گوشی موبایل سامسونگ مدل Galaxy S22 Ultra 5G دو سیم کارت ظرفیت 512 گیگابایت و رم 12 گیگابایت نسخه اسنپدراگون",
+      "price": 50250000,
+      "unit": "تومان",
+      "category": "گوشی موبایل",
+      "categoryRefs": [
+        {
+          "id": 122,
+          "name": "گوشی موبایل",
+          "slug": "122"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/2b679aa7e3e6ec4fd8e6a7a83d963c6b4e543e9a_1660628867.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/2b679aa7e3e6ec4fd8e6a7a83d963c6b4e543e9a_1660628867-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 12,
+      "name": "تبلت سامسونگ مدل Galaxy TAB S6 Lite ظرفیت 64 گیگابایت",
+      "price": 10700000,
+      "unit": "تومان",
+      "category": "تبلت",
+      "categoryRefs": [
+        {
+          "id": 293,
+          "name": "تبلت",
+          "slug": "293"
+        }
+      ],
+      "image": "https://dina.i-design.ir/wp-content/uploads/2022/08/121277336.jpg",
+      "thumbnail": "https://dina.i-design.ir/wp-content/uploads/2022/08/121277336-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    }
+  ]
+}

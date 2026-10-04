@@ -14,7 +14,7 @@ export function PresetGallery({onSelect}){
     <div className="manage-preset-grid">{storePresets.map(preset=><article key={preset.id} className="manage-preset">
       <div className="manage-preset-swatch" style={{background:preset.background,borderTopColor:preset.color}}><ol aria-label={`ترتیب بخش‌های ${preset.name}`}>{preset.sections.map((label,i)=><li key={label}><span>{(i+1).toLocaleString('fa-IR')}</span>{label}</li>)}</ol></div>
       <h2>{preset.name}</h2><p>{preset.description}</p><small>الهام از <bdi>{preset.reference}</bdi> · محصولات همین فروشگاه</small>
-      <a href={`/demos/${preset.id}`} target="_blank" rel="noopener noreferrer">دیدن پیش‌نمایش ظاهری ↗</a>
+      <a href={`/demos/${preset.id}`} target="_blank" rel="noopener noreferrer">دیدن دمو با کاتالوگ نمایشی ↗</a>
       <button onClick={()=>onSelect(preset.id)}>استفاده در پیش‌نویس</button>
     </article>)}</div>
     <p className="manage-hint">نام، لوگو، فونت، منوها و صفحات شما حفظ می‌شوند. چیدمان صفحهٔ اصلی، سبک ویترین و دو رنگ تغییر می‌کنند؛ محصول نمونه وارد نمی‌شود. تغییر فقط پس از «انتشار تغییرات» عمومی خواهد شد.</p>

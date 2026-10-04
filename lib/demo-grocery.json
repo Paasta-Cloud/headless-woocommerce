@@ -1,0 +1,223 @@
+{
+  "source": "https://dinama.i-design.ir/",
+  "capturedAt": "2026-10-04",
+  "notice": "Read-only reference snapshot. Prices are not current offers. Never use for checkout.",
+  "products": [
+    {
+      "id": 1,
+      "name": "دستمال مرطوب پنبه ریز مدل چای سبز بسته 25 عددی",
+      "price": 53800,
+      "unit": "تومان",
+      "category": "بهداشت شخصی",
+      "categoryRefs": [
+        {
+          "id": 227,
+          "name": "بهداشت شخصی",
+          "slug": "227"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/bc93c85850fde03509e271edbdd006735e284682_1738580487.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/bc93c85850fde03509e271edbdd006735e284682_1738580487-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 2,
+      "name": "شامپو تقویت‌کننده مو فولیکا مدل Arginine B وزن 400 گرم",
+      "price": 152000,
+      "unit": "تومان",
+      "category": "بهداشت شخصی",
+      "categoryRefs": [
+        {
+          "id": 227,
+          "name": "بهداشت شخصی",
+          "slug": "227"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a20b2cb862517e6735974fd4f931014b5dcc0f0e_1718697953.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a20b2cb862517e6735974fd4f931014b5dcc0f0e_1718697953-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 3,
+      "name": "خمير دندان گلدنت مدل محافظت کننده کامل وزن 100 گرم",
+      "price": 37000,
+      "unit": "تومان",
+      "category": "بهداشت دهان و دندان",
+      "categoryRefs": [
+        {
+          "id": 228,
+          "name": "بهداشت دهان و دندان",
+          "slug": "228"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/04584e7385a28cb12933a48e2d6caabaa36248b3_1731830918.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/04584e7385a28cb12933a48e2d6caabaa36248b3_1731830918-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 4,
+      "name": "شامپو بدن اکتیو مدل اسپرت وزن 400 گرم",
+      "price": 80800,
+      "unit": "تومان",
+      "category": "بهداشت شخصی",
+      "categoryRefs": [
+        {
+          "id": 227,
+          "name": "بهداشت شخصی",
+          "slug": "227"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/4c5ad8a86af0a552dc3d5914a0c0b5c1af1e47c1_1621059789.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/4c5ad8a86af0a552dc3d5914a0c0b5c1af1e47c1_1621059789-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 5,
+      "name": "روغن زیتون بکر کریستال &#8211; 4 لیتر",
+      "price": 3880000,
+      "unit": "تومان",
+      "category": "روغن",
+      "categoryRefs": [
+        {
+          "id": 205,
+          "name": "روغن",
+          "slug": "205"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a12ca4b7445e88deaaac4bad626639a880be5319_1615028589.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2025/04/a12ca4b7445e88deaaac4bad626639a880be5319_1615028589-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 6,
+      "name": "برنج پاکستانی سوپر باسماتی خاطره طلایی &#8211; 10 کیلوگرم",
+      "price": 290000,
+      "unit": "تومان",
+      "category": "برنج",
+      "categoryRefs": [
+        {
+          "id": 204,
+          "name": "برنج",
+          "slug": "204"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/23232.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/23232-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 7,
+      "name": "عسل ارگانیک آویشن اورازان &#8211; 960 گرم",
+      "price": 189000,
+      "unit": "تومان",
+      "category": "صبحانه",
+      "categoryRefs": [
+        {
+          "id": 231,
+          "name": "صبحانه",
+          "slug": "231"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/12121.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/12121-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 8,
+      "name": "گلاب ربیع مقدار 0.43 لیتر",
+      "price": 26000,
+      "unit": "تومان",
+      "category": "عرقیات و گلاب",
+      "categoryRefs": [
+        {
+          "id": 243,
+          "name": "عرقیات و گلاب",
+          "slug": "243"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/3604890.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/3604890-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 9,
+      "name": "دمنوش کیسه ای هرمی لاغری شاهسوند بسته 14 عددی",
+      "price": 35600,
+      "unit": "تومان",
+      "category": "دمنوش",
+      "categoryRefs": [
+        {
+          "id": 242,
+          "name": "دمنوش",
+          "slug": "242"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/123.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/123-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 10,
+      "name": "بار فشرده کنجدی فوکاپیت &#8211; 450 گرم",
+      "price": 72000,
+      "unit": "تومان",
+      "category": "صبحانه",
+      "categoryRefs": [
+        {
+          "id": 231,
+          "name": "صبحانه",
+          "slug": "231"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/64eca2a52cdda744c25fcbc17741ef9becfeb8e8_1623589300.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/64eca2a52cdda744c25fcbc17741ef9becfeb8e8_1623589300-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 11,
+      "name": "کرم کاکائو تلخ فندقی فرمند مقدار 330 گرم",
+      "price": 62000,
+      "unit": "تومان",
+      "category": "شکلات صبحانه",
+      "categoryRefs": [
+        {
+          "id": 235,
+          "name": "شکلات صبحانه",
+          "slug": "235"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/08a070389477499c0677873ea32524e01178553e_1605352046.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/08a070389477499c0677873ea32524e01178553e_1605352046-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    },
+    {
+      "id": 12,
+      "name": "عسل شیگوار &#8211; 1.8 کیلوگرم",
+      "price": 282000,
+      "unit": "تومان",
+      "category": "صبحانه",
+      "categoryRefs": [
+        {
+          "id": 231,
+          "name": "صبحانه",
+          "slug": "231"
+        }
+      ],
+      "image": "https://dinama.i-design.ir/wp-content/uploads/2021/08/1-10.jpg",
+      "thumbnail": "https://dinama.i-design.ir/wp-content/uploads/2021/08/1-10-300x300.jpg",
+      "type": "simple",
+      "purchasable": false
+    }
+  ]
+}
