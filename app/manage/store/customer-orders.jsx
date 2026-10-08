@@ -1,10 +1,16 @@
 'use client';
 // Operate: inherit the merchant studio; show the order facts, then the next safe action.
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import Icon from '../../components/icons';
 import {IRAN_STATES} from '../../../lib/iran-states';
 import {Badge} from '../../components/vibefarsi/controls';
 import {customerName,orderStatuses,orderStatusOptions,money,dateLabel,text} from '../../../lib/customer-orders';
+
+export function SaveConfirmation({message,onCancel,onConfirm}){
+ const dialog=useRef(null);
+ useEffect(()=>{const node=dialog.current;node.showModal();return()=>node.close();},[]);
+ return <dialog ref={dialog} className="operations-confirm" aria-labelledby="operations-confirm-title" onCancel={onCancel}><h2 id="operations-confirm-title">ذخیرهٔ تغییرات در فروشگاه؟</h2><p>{message}</p><div><button type="button" onClick={onCancel} autoFocus>بازگشت به ویرایش</button><button type="button" className="manage-primary" onClick={onConfirm}>تأیید و ذخیره</button></div></dialog>;
+}
 
 function Address({value={},title}){return <section className="operations-address"><h3>{title}</h3><strong>{[value.first_name,value.last_name].filter(Boolean).join(' ')||'نام ثبت نشده'}</strong><p>{[value.company,value.address_1,value.address_2,value.city,value.country==='IR'?(IRAN_STATES[value.state]||value.state):value.state,value.country==='IR'?'ایران':value.country].filter(Boolean).join('، ')||'نشانی ثبت نشده است.'}</p>{value.postcode&&<small>کد پستی: <bdi>{value.postcode}</bdi></small>}{value.phone&&<a dir="ltr" href={'tel:'+value.phone}>{value.phone}</a>}{value.email&&<a dir="ltr" href={'mailto:'+value.email}>{value.email}</a>}</section>;}
 export function OrderEditor({item,value,onChange,Field,call,onSaveNote,noteRefresh,onNoteDraftChange,busy,dirty,unresolved,onOpenCustomer}){
