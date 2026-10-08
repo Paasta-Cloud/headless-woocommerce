@@ -16,14 +16,14 @@ export function ProductList({items,currency,onOpen,variation=false}){
 export default function ProductEditor({resource,value:v,set,item,currency,Field,call,onVariations}){
  const [active,setActive]=useState('details'),[media,setMedia]=useState([]),[visited,setVisited]=useState(['details']);
  const id=useId(),variation=resource==='variations';
- const tabs=variation?sections.filter(([key])=>key!=='media'):sections;
+ const tabs=variation?sections.filter(([key])=>key!=='media').map(([key,label,icon])=>[key,key==='organization'?'گزینه‌های تنوع':label,icon]):sections;
  const known=[...(item.images||[]),...media];
  const cover=known.find(image=>image.id===v.images?.[0]?.id);
  const field=(key,label,options={})=><Field label={label} value={v[key]} onChange={value=>set({[key]:value})} {...options}/>;
  function selectSection(key){setActive(key);setVisited(current=>current.includes(key)?current:[...current,key]);}
  function panel(key,title,hint,children){return <section hidden={active!==key} id={id+'-'+key} className="product-section" aria-label={title}><header><h2>{title}</h2><p>{hint}</p></header>{children}</section>;}
  return <div className="product-workbench"><div className="product-form"><nav className="product-sections" aria-label="بخش‌های ویرایش محصول">{tabs.map(([key,label,icon])=><button type="button" key={key} aria-pressed={active===key} aria-controls={id+'-'+key} onClick={()=>selectSection(key)}><Icon name={icon}/>{label}</button>)}</nav>
- {panel('details','مشخصات محصول','نام و شناسهٔ کالا را مشخص کنید؛ انتشار را از ستون کنار فرم تنظیم کنید.',<>
+ {panel('details',variation?'مشخصات تنوع':'مشخصات محصول',variation?'شناسهٔ این تنوع را مشخص کنید؛ گزینه‌ها را از بخش «گزینه‌های تنوع» تغییر دهید.':'نام و شناسهٔ کالا را مشخص کنید؛ انتشار را از ستون کنار فرم تنظیم کنید.',<>
   {!variation&&field('name','نام محصول')}
   <div className="manage-field-grid">{!variation&&field('type','نوع محصول',{options:{simple:'ساده',variable:'متغیر',...(['external','grouped'].includes(v.type)?{[v.type]:productTypes[v.type]}:{})}})}{field('sku','شناسهٔ کالا (SKU)',{dir:'ltr',hint:'اختیاری؛ در فروشگاه باید یکتا باشد.'})}</div>
   {!variation&&<Toggle label="محصول مجازی" value={v.virtual} onChange={virtual=>set({virtual})} hint="محصول مجازی به ارسال فیزیکی نیاز ندارد."/>}
