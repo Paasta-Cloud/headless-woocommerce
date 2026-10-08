@@ -3,6 +3,8 @@
 if (!defined('ABSPATH')) exit;
 function phb_commerce_spec($resource,$parent=0) {
     $specs=array(
+        'posts'=>array('/wp/v2/posts',array('title','slug','status','excerpt','featured_media','blocks')),
+        'pages'=>array('/wp/v2/pages',array('title','slug','status','featured_media','blocks')),
         'products'=>array('/products',array('name','type','status','description','short_description','sku','regular_price','sale_price','manage_stock','stock_quantity','stock_status','weight','dimensions','categories','images','attributes','default_attributes','virtual','featured','catalog_visibility')),
         'variations'=>array('/products/'.(int)$parent.'/variations',array('status','description','sku','regular_price','sale_price','manage_stock','stock_quantity','stock_status','weight','dimensions','image','attributes','virtual')),
         'categories'=>array('/products/categories',array('name','slug','parent','description','image')),
@@ -27,6 +29,7 @@ function phb_commerce_customer($id){
     return $user&&in_array('customer',$user->roles,true)&&!array_diff($user->roles,array('customer','subscriber'))&&!user_can($user,'manage_options')&&!user_can($user,'edit_posts')&&!user_can($user,'manage_woocommerce');
 }
 function phb_commerce_public($resource,$data){
+    if(in_array($resource,array('posts','pages'),true))return phb_content_item($data);
     if($resource==='customers'){
         if(isset($data['id']))return phb_commerce_customer($data['id'])?array_intersect_key($data,array_flip(array('id','first_name','last_name','email','billing','shipping','date_created','date_created_gmt','is_paying_customer'))):null;
         return array_values(array_filter(array_map(function($item){return phb_commerce_public('customers',$item);},$data)));
@@ -48,14 +51,19 @@ function phb_commerce_public($resource,$data){
     return array_map(function($item)use($resource){return phb_commerce_public($resource,$item);},$data);
 }
 function phb_commerce_call($method,$path,$values=array(),$before=null){
-    $inner=new WP_REST_Request($method,'/wc/v3'.$path);
+    $inner=new WP_REST_Request($method,str_starts_with($path,'/wp/v2/')?$path:'/wc/v3'.$path);
     if($method==='GET')$inner->set_query_params($values);
     elseif(substr($path,-10)==='/locations'){$inner->set_header('Content-Type','application/json');$inner->set_body(wp_json_encode($values['locations']));}
     else $inner->set_body_params($values);
     // Record a write only after native schema validation and permission checks.
     $guard=function($result,$request)use($inner,$before){return $request===$inner&&$before&&$result===null?$before():$result;};
+    // WP's draft-slug branch reads these unset create properties. Scope defaults
+    // to this native request; no core patch or permission/schema bypass.
+    $postHook=$method==='POST'&&in_array($path,array('/wp/v2/posts','/wp/v2/pages'),true)?'rest_pre_insert_'.($path==='/wp/v2/posts'?'post':'page'):null;
+    $postDefaults=function($post,$request)use($inner){if($request===$inner&&!is_wp_error($post)){if(!isset($post->id))$post->id=0;if(!isset($post->post_parent))$post->post_parent=0;}return $post;};
+    if($postHook)add_filter($postHook,$postDefaults,10,2);
     if($before)add_filter('rest_dispatch_request',$guard,PHP_INT_MAX,2);
-    try{return rest_do_request($inner);}finally{if($before)remove_filter('rest_dispatch_request',$guard,PHP_INT_MAX);}
+    try{return rest_do_request($inner);}finally{if($before)remove_filter('rest_dispatch_request',$guard,PHP_INT_MAX);if($postHook)remove_filter($postHook,$postDefaults,10);}
 }
 function phb_commerce_revision($data){return hash('sha256',wp_json_encode($data));}
 function phb_commerce_operation_lock($operation){global $wpdb;return 'phb-op:'.substr(hash('sha256',DB_NAME.':'.$wpdb->prefix.':'.get_current_user_id().':'.$operation),0,55);}
@@ -75,8 +83,9 @@ function phb_commerce_resolve($operation,$acknowledged){
     }finally{$wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$lock));}
 }
 function phb_commerce($request){
-    if(!current_user_can('manage_woocommerce'))return phb_manager_error('forbidden','دسترسی مدیریت ووکامرس لازم است.',403);
     $resource=$request->get_param('resource');$verb=$request->get_param('verb')?:'list';
+    $content=in_array($resource,array('posts','pages'),true);
+    if(!current_user_can($content?'edit_posts':'manage_woocommerce'))return phb_manager_error('forbidden','دسترسی مدیریت این بخش لازم است.',403);
     $parent=$request->get_param('parentId')??0;$id=$request->get_param('id');
     if(!is_int($parent)||$parent<0||$parent>2147483647)return phb_manager_error('invalid_parent','شناسهٔ والد معتبر نیست.');
     $spec=is_string($resource)?phb_commerce_spec($resource,$parent):null;
@@ -99,6 +108,7 @@ function phb_commerce($request){
     if($resource==='customers'&&in_array($verb,array('read','update'),true)){
         if(!phb_commerce_customer($id))return phb_manager_error('protected_account','این بخش فقط حساب مشتریان فروشگاه را مدیریت می‌کند.',403);
     }
+    if($resource==='pages'&&$verb==='update'&&phb_content_protected($id))return phb_manager_error('protected_page','این برگه، مسیر سیستمی فروشگاه است؛ ظاهر آن را از تنظیمات قالب مدیریت کنید.',403);
     if($verb==='create'&&in_array($resource,array('orders','gateways','customers'),true))return phb_manager_error('unsupported','ایجاد این مورد از مدیریت مجاز نیست.');
     $path=$spec[0].(in_array($verb,array('read','update'),true)?'/'.$id:'');
     if($resource==='locations')$path.='/locations';
@@ -109,13 +119,16 @@ function phb_commerce($request){
         if(isset($query['customer'])&&(!is_int($query['customer'])||$query['customer']<1))return phb_manager_error('invalid_query','شناسهٔ مشتری معتبر نیست.');
         if($resource==='customers')$query['role']='customer';
         $query['per_page']=20;$query['context']='edit';
+        if($content&&!isset($query['status']))$query['status']=array('publish','draft','pending','private','future');
         $result=phb_commerce_call('GET',$path,$query);
         if($result->is_error())return $result->as_error();
         $data=$result->get_data();$headers=$result->get_headers();
         return phb_response(array('actorId'=>get_current_user_id(),'currency'=>function_exists('get_woocommerce_currency')?get_woocommerce_currency():'',$verb==='list'?'items':'item'=>phb_commerce_public($resource,$data),'revision'=>$verb==='read'?phb_commerce_revision($data):null,'total'=>(int)($headers['X-WP-Total']??count(is_array($data)?$data:array()))));
     }
     $values=$request->get_param('values');$operation=$request->get_param('operationKey');
+    $changesBlocks=$content&&is_array($values)&&array_key_exists('blocks',$values);
     if(!is_array($values)||!$values||array_diff(array_keys($values),$spec[1]))return phb_manager_error('invalid_fields','فیلدهای تغییر معتبر نیستند.');
+    if($content){$values=phb_content_values($values);if(is_wp_error($values))return $values;}
     if($resource==='customers')foreach(array('billing','shipping') as $address){if(!isset($values[$address]))continue;
         $keys=array('first_name','last_name','company','address_1','address_2','city','state','postcode','country');if($address==='billing')$keys=array_merge($keys,array('email','phone'));
         if(!is_array($values[$address])||array_diff(array_keys($values[$address]),$keys))return phb_manager_error('invalid_address','فیلدهای نشانی معتبر نیستند.');
@@ -159,6 +172,7 @@ function phb_commerce($request){
             if($current->is_error())return $current->as_error();
             $revision=$request->get_param('revision');
             if(!is_string($revision)||!hash_equals(phb_commerce_revision($current->get_data()),$revision))return phb_manager_error('conflict','این مورد تغییر کرده است. ابتدا نسخهٔ تازه را دریافت کنید؛ فرم شما حفظ شده است.',409);
+            if($changesBlocks&&!phb_content_blocks($current->get_data()['content']['raw']??'')['editable'])return phb_manager_error('rich_content','این متن دارای بلوک‌های پیشرفته است؛ برای حفظ ساختار، فقط اطلاعات انتشار را تغییر دهید.',409);
             if($resource==='orders'&&isset($values['status'])){
                 $order=wc_get_order($id);
                 if($order&&$order->get_status()!==$values['status']&&in_array($order->get_status(),array('refunded','cancelled','failed'),true))return phb_manager_error('terminal_order','تغییر وضعیت سفارش لغوشده، ناموفق یا بازپرداخت‌شده از این پنل مجاز نیست.',409);

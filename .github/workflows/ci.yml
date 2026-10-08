@@ -18,6 +18,7 @@ jobs:
       - run: php tests/design-schema.php
       - run: php tests/manage-permissions.php
       - run: php tests/commerce.php
+      - run: php tests/content.php
       - run: php tests/checkout-customer.php
       - run: php tests/order-currency.php
       - run: php tests/return-plugin.php
