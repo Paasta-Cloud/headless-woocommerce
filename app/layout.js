@@ -3,6 +3,7 @@ import './theme.css';
 import './builder.css';
 import './retail.css';
 import './craft-detail.css';
+import './interface.css';
 import StoreShell from './components/store-shell';
 import { customerAccount } from '../lib/customer-session';
 import {getDesign} from '../lib/design-server';

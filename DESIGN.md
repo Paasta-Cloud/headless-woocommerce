@@ -44,6 +44,11 @@ The manager is a turquoise merchant studio, retaining the approved list/editor/p
 Every route inherits StoreShell: announcement, two-row masthead, search, account/cart drawers and the same four-column footer. Breadcrumbs use a separate white strip. Catalogues have a right-hand filter column and three product columns; category discovery has image tiles. Product pages use gallery, details and purchase columns, with description/specification/delivery tabs and a related shelf. Authentication uses a pale turquoise illustration panel and white form; its drawer reuses the exact login behavior. Cart and checkout share numbered steps and a left-hand summary. Account uses a right-hand navigation rail. Informational pages, missing pages, loading and recoverable/global errors retain this frame.
 
 ## Responsive and interaction contract
+
+Shared cart counts are attached to a 44px icon control with logical inset positioning, never a negative bottom offset. Empty counts are omitted; large visual counts cap at 99+ while accessible names retain the actual quantity. Mobile navigation identifies the current section and contains its cart count. Cart line totals remain visible on narrow screens. Category menus close on route changes and Escape returns focus to the summary.
+
+Operational configuration follows the product studio's hierarchy: a single divided editing surface, clear task headings and a contextual guide beside it at desktop widths. Coupon identity/amount, validity and cart conditions are separated; category identity and hierarchy are separated. Native settings, private-field preservation, revision protection and explicit save confirmation stay unchanged. Labels and hint descriptions have separate accessible associations.
+
 At 640px filters stack, product and checkout panels become one column, category tiles remain two columns and a fixed five-item mobile navigation appears. Native dialogs provide focus containment and Escape dismissal. Password visibility controls, persisted local favorites and a shared cart provider keep controls consistent between routes and drawers. No simulated reviews, coupons, fake discounts or unconfigured contact channels. Licensed Yekan Bakh is optional; no font binaries are bundled.
 
 ## Do's and Don'ts

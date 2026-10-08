@@ -1,0 +1,28 @@
+.commerce-app .operation-settings{padding:0;max-width:none;background:transparent;border:0;box-shadow:none}
+.operation-workbench{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start;margin-top:24px}
+.operation-form{min-width:0;background:#fff;border:1px solid var(--m-line);border-radius:16px;overflow:hidden}
+.operation-section{padding:28px}
+.operation-section+.operation-section{border-top:1px solid var(--m-line)}
+.operation-section>header{display:flex;align-items:start;gap:14px;margin-bottom:24px}
+.operation-section>header>svg{color:var(--m-accent);margin-top:5px;width:22px;height:22px}
+.commerce-app .operation-section h2{margin:0 0 8px;font-size:18px;line-height:1.8}
+.operation-section header p{font-size:13px;color:var(--m-muted);line-height:1.9;margin:0;max-width:60ch}
+.operation-fields>.manage-field:last-child{margin-bottom:0}
+.operation-fields .manage-toggle{justify-content:space-between;flex-direction:row-reverse;gap:20px;padding:14px 0;border-bottom:1px solid var(--m-line);margin:0!important}
+.operation-fields .manage-toggle span{flex:1;line-height:1.9}
+.operation-fields .manage-toggle button{flex:none}
+.operation-fields .manage-toggle:last-child{border-bottom:0}
+.operation-guide{min-width:0;background:#e0f3ed;border-radius:16px;padding:24px;color:var(--m-ink)}
+.operation-guide-icon{display:grid;place-items:center;background:#fff;color:#006c61;border-radius:12px;width:48px;height:48px;margin-bottom:20px}
+.commerce-app .operation-guide h2{font-size:18px;margin:0 0 12px}
+.operation-guide p{color:var(--m-muted);font-size:13px;line-height:2}
+.operation-guide dl{margin:24px 0 0}
+.operation-guide dl>div{display:grid;gap:4px;padding:12px 0;border-top:1px solid var(--m-line);font-size:12px}
+.operation-guide dt{color:var(--m-muted)}
+.operation-guide dd{margin:0;font-weight:600}
+.operation-guide .operation-save-hint{margin:20px 0 0;font-size:12px}
+.operation-fields ul{padding:0;list-style:none}
+.commerce-app .commerce-title strong,.commerce-app .manage-content>h1{overflow-wrap:anywhere}
+.operation-fields li{justify-content:space-between;gap:16px;padding:12px;background:#f2f6f6;border-radius:8px;overflow-wrap:anywhere}
+@media(max-width:1100px){.operation-workbench{grid-template-columns:minmax(0,1fr)}.operation-guide{display:none}}
+@media(max-width:600px){.operation-section{padding:20px}.operation-section>header{gap:10px}.operation-fields .manage-field-grid{grid-template-columns:1fr}.operation-fields input,.operation-fields textarea,.operation-fields select{font-size:16px}.operation-workbench{gap:16px;margin-top:16px}}

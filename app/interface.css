@@ -1,0 +1,33 @@
+/* Shared finishing layer: controls and task pages, without changing preset identity. */
+.store-frame .craft-basket{display:inline-grid;place-items:center;position:relative;width:44px;height:44px;flex:none;isolation:isolate}
+.store-frame .cart-count{position:absolute;inset-block-start:0;inset-inline-end:0;display:grid;place-items:center;min-width:20px;height:20px;padding:0 4px;border:2px solid var(--configured-surface,#fff);border-radius:10px;background:var(--configured-primary,#008f83);color:var(--primary-contrast,#fff);font-size:10px;font-weight:700;line-height:1;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
+.store-frame .mobile-nav-icon{display:inline-grid;place-items:center;position:relative;width:32px;height:28px}
+.store-frame .mobile-nav-icon .cart-count{inset-block-start:-4px;inset-inline-end:-5px;min-width:18px;height:18px;font-size:9px}
+.store-frame .craft-navigation a[aria-current=page]{color:var(--configured-primary);text-decoration:underline;text-underline-offset:7px}
+.store-frame .craft-search button,.store-frame .category-menu summary{min-height:44px}
+.store-frame .craft-search button{min-width:44px}
+.store-frame .quantity button{width:44px;height:44px;min-height:44px}
+.store-frame .remove-line{min-height:44px;padding:8px 12px;text-decoration:underline;text-underline-offset:4px}
+.store-frame .order-row>div,.store-frame .mini-cart span{min-width:0;overflow-wrap:anywhere}
+.store-frame .mini-total strong,.store-frame .order-summary strong{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.store-frame .auth-panel input[type=email],.store-frame .auth-panel input[type=tel],.store-frame .auth-panel input[dir=ltr]{text-align:start}
+.store-frame .auth-panel input,.store-frame .form-grid input,.store-frame .form-grid select{min-height:48px}
+.store-frame .product-tabs button{min-height:44px}
+.store-frame .breadcrumbs{overflow-wrap:anywhere}
+.store-frame .empty-state .primary-action{gap:8px}
+@media(min-width:1000px){.store-frame .order-summary{position:sticky;top:24px}}
+@media(max-width:640px){
+ .store-frame .craft-navigation .craft-tracking{display:none}
+ .store-frame .craft-navigation a[aria-label="علاقه‌مندی‌ها"]{display:inline-grid;place-items:center;width:44px;height:44px}
+ .store-frame .mobile-shop-nav{padding-bottom:env(safe-area-inset-bottom,0px);min-height:64px}
+ .store-frame .mobile-shop-nav a{min-height:58px;min-width:0;gap:3px;border-radius:8px;color:var(--configured-muted,#657174);border-top:2px solid transparent}
+ .store-frame .mobile-shop-nav a[aria-current=page]{background:color-mix(in srgb,var(--configured-primary) 12%,var(--configured-surface));color:var(--configured-text);border-top-color:var(--configured-primary);font-weight:700}
+ .store-frame .order-row{display:grid;grid-template-columns:82px minmax(0,1fr);gap:12px;align-items:start}
+ .store-frame .order-row .row-total{display:block;grid-column:2;margin:0;text-align:start;white-space:normal;font-size:12px}
+ .store-frame .checkout-steps{gap:clamp(8px,3vw,20px)}
+ .store-frame .checkout-steps a{gap:6px;min-height:44px;font-size:11px}
+ .store-frame .checkout-steps a>span{width:28px;height:28px;flex:none}
+ .store-frame .auth-panel input,.store-frame .form-grid input,.store-frame .form-grid select{font-size:16px}
+ .store-frame .order-summary,.store-frame .order-list,.store-frame .address-form{padding:20px}
+}
+@media(prefers-reduced-motion:reduce){.store-frame .mobile-shop-nav a{transition:none}}
