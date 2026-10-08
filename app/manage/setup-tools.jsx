@@ -11,11 +11,11 @@ import {buildConnectionPlan} from '../../lib/connection-plan';
 // FORM: Local extension of the approved settings panel, not a new visual system.
 export function PresetGallery({onSelect}){
   return <section className="manage-settings">
-    <p>یک چیدمان اولیه انتخاب کنید، با محصولات خودتان پیش‌نمایش بگیرید و بعد منتشر کنید. چیدمان‌ها از Dina و Dinama الهام گرفته‌اند؛ تصاویر مرجع نمایشی‌اند و باید پیش از انتشار جایگزین شوند.</p>
+    <p>یک چیدمان اولیه انتخاب کنید، با محصولات خودتان پیش‌نمایش بگیرید و بعد منتشر کنید. چیدمان‌ها مطابق مراجع Dinaha، Dina و Dinama ساخته شده‌اند؛ تصاویر مرجع را پیش از فروش عمومی جایگزین کنید.</p>
     <div className="manage-preset-grid">{storePresets.map(preset=><article key={preset.id} className="manage-preset">
       <div className="manage-preset-swatch" style={{background:preset.background,borderTopColor:preset.color}}><img className="manage-preset-cover" src={presetAssets[preset.id].slides[0].image} alt={`اسلایدر قالب ${preset.name}`} width="1195" height="477" loading="lazy"/><details><summary>چیدمان {preset.sections.length.toLocaleString('fa-IR')} بخش صفحهٔ اصلی</summary><ol aria-label={`ترتیب بخش‌های ${preset.name}`}>{preset.sections.map((label,i)=><li key={label}><span>{(i+1).toLocaleString('fa-IR')}</span>{label}</li>)}</ol></details></div>
       <h2>{preset.name}</h2><p>{preset.description}</p><small>الهام از <bdi>{preset.reference}</bdi> · محصولات همین فروشگاه</small>
-      <a href={`/demos/${preset.id}`} target="_blank" rel="noopener noreferrer">دیدن دمو با کاتالوگ نمایشی ↗</a>
+      <a href={preset.id==='craft'?'/':`/demos/${preset.id}`} target="_blank" rel="noopener noreferrer">{preset.id==='craft'?'دیدن فروشگاه اصلی':'دیدن دمو با کاتالوگ نمایشی'} ↗</a>
       <button onClick={()=>onSelect(preset.id)}>استفاده در پیش‌نویس</button>
     </article>)}</div>
     <p className="manage-hint">نام، لوگو، فونت، منوها و صفحات شما حفظ می‌شوند. چیدمان صفحهٔ اصلی، سبک ویترین، عرض صفحه و دو رنگ تغییر می‌کنند؛ محصول نمونه وارد نمی‌شود. تغییر فقط پس از «انتشار تغییرات» عمومی خواهد شد.</p>

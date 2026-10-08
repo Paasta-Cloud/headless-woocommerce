@@ -12,7 +12,7 @@ export default function ProductCard({product}) {
  const settings=useStoreSettings(),demoNavigate=useDemoNavigation();
  const [quantity,setQuantity]=useState(1),[added,setAdded]=useState(false),[failed,setFailed]=useState(false);
  const preview=mode==='preview',grocery=settings.theme==='grocery';
- const discounted=settings.theme!=='craft'&&product.regularPrice>product.price&&product.price>0;
+ const discounted=product.regularPrice>product.price&&product.price>0;
  async function buy(){setFailed(false);const ok=await addItem(product.id,undefined,quantity)!==false;setAdded(ok);setFailed(!ok);}
  return <article className="craft-product"><div className="craft-product-photo">
   {discounted&&<span className="retail-discount">{Math.round((1-product.price/product.regularPrice)*100).toLocaleString('fa-IR')}٪</span>}

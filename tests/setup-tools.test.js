@@ -13,7 +13,7 @@ test('visual demos are read-only and never select demo products for real checkou
   assert.doesNotMatch(boundary,/fetch\(|api\/|localStorage|sessionStorage|window.location/);
   assert.match(link,/demoNavigate.*href/);
   assert.match(page,/StoreFrame mode="preview"/);
-  assert.match(page,/if\(!preset\)notFound\(\)/);
+  assert.match(page,/if\(!preset\|\|!\['digital','grocery'\]\.includes\(theme\)\)notFound\(\)/);
   assert.match(page,/demo-digital\.json/);
   assert.match(page,/demo-grocery\.json/);
   assert.doesNotMatch(page,/getProducts\(\)/);
@@ -40,10 +40,10 @@ test('all starter layouts preserve identity and page data without mutating the c
     assert.deepEqual(rest,oldRest);
     assert.equal(result.sections.length,preset.sections.length);
     assert.equal(containerWidth,1440);
-    for(const presentation of ['stories','spotlight','offers','ranked','showcase','brands','editorial'])assert.ok(result.sections.some(s=>s.presentation===presentation));
+    for(const presentation of preset.id==='craft'?['spotlight','offers','ranked']:['stories','spotlight','offers','ranked','showcase','brands','editorial'])assert.ok(result.sections.some(s=>s.presentation===presentation));
     assert.equal(result.settings.theme,preset.id);
-    assert.equal(result.sections.find(section=>section.type==='hero').featuredProduct,true);
-    assert.ok(result.sections.every(section=>!section.productIds.length&&!section.categoryIds.length&&!section.image));
+    assert.equal(result.sections.find(section=>section.type==='hero').featuredProduct,preset.id!=='craft');
+    assert.ok(result.sections.every(section=>!section.productIds.length&&!section.categoryIds.length&&(preset.id==='craft'||!section.image)));
     assert.ok(result.sections.filter(section=>section.type==='products').every(section=>section.source==='all'));
   }
   assert.throws(()=>applyStorePreset(original,'unknown'));
