@@ -8,6 +8,8 @@ function phb_commerce_spec($resource,$parent=0) {
         'categories'=>array('/products/categories',array('name','slug','parent','description','image')),
         'coupons'=>array('/coupons',array('code','discount_type','amount','description','date_expires','individual_use','product_ids','excluded_product_ids','usage_limit','usage_limit_per_user','limit_usage_to_x_items','free_shipping','product_categories','excluded_product_categories','exclude_sale_items','minimum_amount','maximum_amount','email_restrictions')),
         'orders'=>array('/orders',array('status','customer_note')),
+        'customers'=>array('/customers',array('first_name','last_name','billing','shipping')),
+        'order-notes'=>array('/orders/'.(int)$parent.'/notes',array('note','customer_note')),
         'zones'=>array('/shipping/zones',array('name','order')),
         'locations'=>array('/shipping/zones',array('locations')),
         'zone-methods'=>array('/shipping/zones/'.(int)$parent.'/methods',array('method_id','enabled','order','settings')),
@@ -20,7 +22,19 @@ function phb_commerce_private_setting($resource,$key,$field=array()){
     $publicCost=$resource==='zone-methods'&&preg_match('/^class_cost_[0-9]+$/D',$key);
     return (!in_array($key,$public,true)&&!$publicCost)||($field['type']??'')==='password';
 }
+function phb_commerce_customer($id){
+    $user=get_user_by('id',$id);
+    return $user&&in_array('customer',$user->roles,true)&&!array_diff($user->roles,array('customer','subscriber'))&&!user_can($user,'manage_options')&&!user_can($user,'edit_posts')&&!user_can($user,'manage_woocommerce');
+}
 function phb_commerce_public($resource,$data){
+    if($resource==='customers'){
+        if(isset($data['id']))return phb_commerce_customer($data['id'])?array_intersect_key($data,array_flip(array('id','first_name','last_name','email','billing','shipping','date_created','date_created_gmt','is_paying_customer'))):null;
+        return array_values(array_filter(array_map(function($item){return phb_commerce_public('customers',$item);},$data)));
+    }
+    if($resource==='orders'){
+        if(isset($data['id'])){foreach(array('order_key','payment_url','customer_ip_address','customer_user_agent','meta_data') as $key)unset($data[$key]);return $data;}
+        return array_map(function($item){return phb_commerce_public('orders',$item);},$data);
+    }
     if(!in_array($resource,array('gateways','zone-methods'),true))return $data;
     if(isset($data['id'])){
         foreach(($data['settings']??array()) as $key=>$field){
@@ -74,19 +88,26 @@ function phb_commerce($request){
         $record=get_option('phb_op_'.hash('sha256',get_current_user_id().':'.$operation));
         return phb_response(array('operation'=>$record?array_intersect_key($record,array_flip(array('status','resource','verb','id','at'))):array('status'=>'unknown')));
     }
-    if($resource==='variations'&&$parent<1)return phb_manager_error('invalid_parent','ابتدا محصول مادر را انتخاب کنید.');
+    if(in_array($resource,array('variations','order-notes'),true)&&$parent<1)return phb_manager_error('invalid_parent','شناسهٔ والد معتبر نیست.');
+    if($resource==='order-notes'&&!in_array($verb,array('list','read','create'),true))return phb_manager_error('unsupported','یادداشت ثبت‌شده از این پنل تغییر نمی‌کند.');
     if($resource==='locations'&&!in_array($verb,array('read','update'),true))return phb_manager_error('unsupported','محدوده را از داخل منطقهٔ ارسال ویرایش کنید.');
     if(in_array($verb,array('read','update'),true)){
         if($resource==='gateways'){
             if(!is_string($id)||!preg_match('/^[a-zA-Z0-9_-]{1,80}$/D',$id))return phb_manager_error('invalid_id','شناسه معتبر نیست.');
         }elseif(!is_int($id)||$id<($resource==='zones'?0:1)||$id>2147483647)return phb_manager_error('invalid_id','شناسه معتبر نیست.');
     }
-    if($verb==='create'&&in_array($resource,array('orders','gateways'),true))return phb_manager_error('unsupported','ایجاد این مورد از مدیریت مجاز نیست.');
+    if($resource==='customers'&&in_array($verb,array('read','update'),true)){
+        if(!phb_commerce_customer($id))return phb_manager_error('protected_account','این بخش فقط حساب مشتریان فروشگاه را مدیریت می‌کند.',403);
+    }
+    if($verb==='create'&&in_array($resource,array('orders','gateways','customers'),true))return phb_manager_error('unsupported','ایجاد این مورد از مدیریت مجاز نیست.');
     $path=$spec[0].(in_array($verb,array('read','update'),true)?'/'.$id:'');
     if($resource==='locations')$path.='/locations';
     if(in_array($verb,array('list','read'),true)){
         $query=$request->get_param('query')?:array();
-        if(!is_array($query)||array_diff(array_keys($query),array('search','page','status','parent','category')))return phb_manager_error('invalid_query','فیلتر معتبر نیست.');
+        $filters=array('search','page','status','parent','category');if($resource==='orders')$filters[]='customer';
+        if(!is_array($query)||array_diff(array_keys($query),$filters))return phb_manager_error('invalid_query','فیلتر معتبر نیست.');
+        if(isset($query['customer'])&&(!is_int($query['customer'])||$query['customer']<1))return phb_manager_error('invalid_query','شناسهٔ مشتری معتبر نیست.');
+        if($resource==='customers')$query['role']='customer';
         $query['per_page']=20;$query['context']='edit';
         $result=phb_commerce_call('GET',$path,$query);
         if($result->is_error())return $result->as_error();
@@ -95,6 +116,15 @@ function phb_commerce($request){
     }
     $values=$request->get_param('values');$operation=$request->get_param('operationKey');
     if(!is_array($values)||!$values||array_diff(array_keys($values),$spec[1]))return phb_manager_error('invalid_fields','فیلدهای تغییر معتبر نیستند.');
+    if($resource==='customers')foreach(array('billing','shipping') as $address){if(!isset($values[$address]))continue;
+        $keys=array('first_name','last_name','company','address_1','address_2','city','state','postcode','country');if($address==='billing')$keys=array_merge($keys,array('email','phone'));
+        if(!is_array($values[$address])||array_diff(array_keys($values[$address]),$keys))return phb_manager_error('invalid_address','فیلدهای نشانی معتبر نیستند.');
+        foreach($values[$address] as $value)if(!is_string($value)||strlen($value)>1000)return phb_manager_error('invalid_address','متن نشانی معتبر نیست.');
+    }
+    if($resource==='order-notes'){
+        if(!isset($values['note'])||!is_string($values['note'])||!trim($values['note'])||strlen($values['note'])>20000||preg_match_all('/./us',$values['note'])>5000||($values['customer_note']??false)!==false)return phb_manager_error('invalid_note','یک یادداشت داخلی با حداکثر ۵۰۰۰ نویسه وارد کنید. ارسال پیام به مشتری در این بخش فعال نیست.');
+        $values['note']=sanitize_textarea_field($values['note']);$values['customer_note']=false;
+    }
     if($resource==='locations'){
         if(!is_array($values['locations'])||count($values['locations'])>100)return phb_manager_error('invalid_locations','حداکثر ۱۰۰ محدوده انتخاب کنید.');
         foreach($values['locations'] as $location)if(!is_array($location)||array_diff(array_keys($location),array('type','code'))||!in_array($location['type']??'',array('country','state','postcode','continent'),true)||!is_string($location['code']??null)||!preg_match('/^[A-Za-z0-9:.* -]{1,80}$/D',$location['code']))return phb_manager_error('invalid_locations','کد محدوده معتبر نیست.');

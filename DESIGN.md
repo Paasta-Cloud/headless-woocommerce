@@ -47,4 +47,6 @@ Every route inherits StoreShell: announcement, two-row masthead, search, account
 At 640px filters stack, product and checkout panels become one column, category tiles remain two columns and a fixed five-item mobile navigation appears. Native dialogs provide focus containment and Escape dismissal. Password visibility controls, persisted local favorites and a shared cart provider keep controls consistent between routes and drawers. No simulated reviews, coupons, fake discounts or unconfigured contact channels. Licensed Yekan Bakh is optional; no font binaries are bundled.
 
 ## Do's and Don'ts
+
+Order/customer operations inherit the merchant studio: factual detail on the main column and the next safe action beside it; on narrow screens the summary precedes the full detail. Selected filters and profile avatars use the established teal tonal ramp (#e0f3ed surface, #006c61 text, #79bdae outline). Never invent customer metrics or mark an unverified online payment complete. Internal-note drafts participate in navigation/unload warnings. Address forms retain unknown native country/state values.
 Use real product imagery, accessible labels and visible focus. Do not invent discounts, stock, countdown deadlines or service guarantees.

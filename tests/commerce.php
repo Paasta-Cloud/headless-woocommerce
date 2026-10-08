@@ -15,7 +15,10 @@ class Reply {
 $allowed=true;$options=array();$writes=0;$nativeFailure=false;$validationFailure=false;$optionFailure=false;$filters=array();$orderStatus='pending';$record=array('id'=>12,'name'=>'Original','status'=>'pending');
 function add_filter($hook,$callback,$priority,$args){global $filters;$filters[$hook]=$callback;}
 function remove_filter($hook,$callback,$priority){global $filters;unset($filters[$hook]);}
-function current_user_can($cap){global $allowed;return $allowed;}
+function current_user_can($cap){global $allowed,$nativeCaps;return $allowed&&(!isset($nativeCaps)||in_array($cap,$nativeCaps,true));}
+function get_user_by($field,$id){return (object)array('ID'=>$id,'roles'=>$id===12?array('customer'):array('administrator','customer'));}
+function user_can($user,$cap){return $user->ID!==12;}
+function sanitize_textarea_field($value){return strip_tags($value);}
 function get_current_user_id(){return 7;}function wp_json_encode($value){return json_encode($value);}
 function wp_kses_post($value){return strip_tags($value);}
 function wp_attachment_is_image($id){return $id===5;}
@@ -26,7 +29,11 @@ function add_option($key,$value,$ignored='',$autoload='no'){global $options,$opt
 function update_option($key,$value,$autoload=false){global $options,$optionFailure;if($optionFailure)return false;$options[$key]=$value;return true;}
 class DB {public $prefix='wp_';function prepare($sql,$lock){check(strlen($lock)<=64);return $sql;}function get_var($sql){return 1;}}
 $wpdb=new DB();
-function rest_do_request($request){global $writes,$record,$nativeFailure,$validationFailure,$filters;if($request->method!=='GET'){if($validationFailure)return new Reply(array(),400);if(isset($filters['rest_dispatch_request'])){ $blocked=$filters['rest_dispatch_request'](null,$request);if($blocked)return new Reply(array(),409);}$writes++;if($nativeFailure)return new Reply(array(),500);$record=array_merge($record,$request->params);}return new Reply($record);}
+function rest_do_request($request){global $writes,$record,$nativeFailure,$validationFailure,$filters,$lastRequest;
+ $lastRequest=$request;
+ if(str_contains($request->path,'/customers')&&!current_user_can($request->method==='GET'?'list_users':'edit_users'))return new Reply(array(),403);
+ if(str_contains($request->path,'/notes')&&!current_user_can('edit_shop_orders'))return new Reply(array(),403);
+ if($request->method!=='GET'){if($validationFailure)return new Reply(array(),400);if(isset($filters['rest_dispatch_request'])){ $blocked=$filters['rest_dispatch_request'](null,$request);if($blocked)return new Reply(array(),409);}$writes++;if($nativeFailure)return new Reply(array(),500);$record=array_merge($record,$request->params);}return new Reply($record);}
 function wc_get_order($id){return new class{function is_paid(){return false;}function get_payment_method(){return 'zibal';}function get_status(){global $orderStatus;return $orderStatus;}};}
 function check($value){if(!$value)throw new RuntimeException('Commerce regression failed');}
 require __DIR__.'/../wordpress/plugins/paasta-headless-builder/commerce.php';
@@ -37,7 +44,7 @@ check(request($create)->data['id']===12);check($writes===1);
 check(request($create)->data['replayed']===true);check($writes===1);
 $changed=$create;$changed['values']['name']='Other';check(request($changed)->data['status']===409);check($writes===1);
 $allowed=false;check(request(array('resource'=>'products'))->data['status']===403);$allowed=true;
-foreach(array('../users','customers','refunds') as $resource)check(request(array('resource'=>$resource)) instanceof WP_Error);
+foreach(array('../users','refunds') as $resource)check(request(array('resource'=>$resource)) instanceof WP_Error);
 check(request(array('resource'=>'products','verb'=>'delete','id'=>12)) instanceof WP_Error);
 check(request(array('resource'=>'products','verb'=>'read','id'=>'12/../../users')) instanceof WP_Error);
 $unsafe=$create;$unsafe['operationKey']='22222222-2222-4222-8222-222222222222';$unsafe['values']['images']=array(array('src'=>'http://internal/'));
@@ -74,4 +81,30 @@ check(!phb_commerce_private_setting('gateways','instructions'));check(phb_commer
 $optionFailure=true;
 check(request(array('resource'=>'products','verb'=>'resolve','operationKey'=>'99999999-9999-4999-8999-999999999999'))->data['status']===503);
 $optionFailure=false;
+$record=array('id'=>12,'email'=>'fixture@example.invalid','first_name'=>'Fixture','role'=>'customer','username'=>'private','billing'=>array('city'=>'Old','company'=>'Preserved'));
+$nativeCaps=array('manage_woocommerce');$beforeWrites=$writes;
+check(request(array('resource'=>'customers','verb'=>'read','id'=>12))->data['status']===403);
+$nativeCaps[]='list_users';
+$customer=request(array('resource'=>'customers','verb'=>'read','id'=>12))->data;
+check(!isset($customer['item']['role'])&&!isset($customer['item']['username']));
+check(request(array('resource'=>'customers','verb'=>'read','id'=>7))->code==='protected_account');
+check(request(array('resource'=>'customers','verb'=>'list','query'=>array('role'=>'administrator')))->code==='invalid_query');
+$change=array('resource'=>'customers','verb'=>'update','id'=>12,'revision'=>$customer['revision'],'operationKey'=>'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','values'=>array('billing'=>array('city'=>'New')));
+check(request($change)->data['status']===403);check($writes===$beforeWrites);
+check(request(array('resource'=>'customers','verb'=>'operation','operationKey'=>$change['operationKey']))->data['operation']['status']==='unknown');
+$nativeCaps[]='edit_users';
+foreach(array('role','password','email') as $key){$bad=$change;$bad['values']=array($key=>'unsafe');check(request($bad)->code==='invalid_fields');}
+$bad=$change;$bad['values']=array('billing'=>array('meta_data'=>array()));check(request($bad)->code==='invalid_address');
+check(request($change)->data['ok']);check($lastRequest->params===array('billing'=>array('city'=>'New')));
+check(request($change)->data['replayed']);check($writes===$beforeWrites+1);
+$note=array('resource'=>'order-notes','parentId'=>29,'verb'=>'create','operationKey'=>'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','values'=>array('note'=>'Internal fixture'));
+check(request($note)->data['status']===403);check($writes===$beforeWrites+1);
+$nativeCaps[]='edit_shop_orders';$bad=$note;$bad['values']['customer_note']=true;check(request($bad)->code==='invalid_note');
+check(request($note)->data['ok']);check($lastRequest->params['customer_note']===false);
+check(request($note)->data['replayed']);check($writes===$beforeWrites+2);
+$bad=$note;$bad['values']['note']='Changed';check(request($bad)->code==='reused_key');
+$bad=$note;$bad['parentId']=0;check(request($bad)->code==='invalid_parent');
+$bad=$note;$bad['operationKey']='cccccccc-cccc-4ccc-8ccc-cccccccccccc';$nativeFailure=true;
+check(request($bad) instanceof WP_Error);$afterFailure=$writes;check(request($bad)->code==='uncertain');check($writes===$afterFailure);
+echo "Customer native capabilities, protected accounts, partial addresses and internal-note replay passed\n";
 echo "Commerce authorization, replay, conflict and gateway-secret checks passed\n";
