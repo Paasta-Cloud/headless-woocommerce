@@ -1,15 +1,54 @@
+import './workspace.css';
 import StoreLink from '../components/store-link';
-import { customerAccount } from '../../lib/customer-session';
-import LogoutButton from './view';
-import {Breadcrumbs} from '../components/ui';
-import AuthFrame from '../components/auth-frame';
+import { customerAccountState } from '../../lib/customer-session';
+import { customerOrderDate, customerOrderMoney, customerOrderStatus } from '../../lib/customer-account';
+import { IRAN_STATES } from '../../lib/iran-states';
+import LogoutButton, { AccountGate } from './view';
+import { Breadcrumbs } from '../components/ui';
 import Icon from '../components/icons';
-export const metadata = { title: 'حساب من | خانه‌چین', robots:{index:false,follow:false} };
+
+export const metadata = { title: 'حساب من | خانه‌چین', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
-const statusLabels={pending:'در انتظار پرداخت',processing:'در حال آماده‌سازی',completed:'تکمیل‌شده','on-hold':'در انتظار بررسی',cancelled:'لغوشده',refunded:'بازپرداخت‌شده',failed:'ناموفق'};
-export default async function AccountPage({searchParams}) {
-  const account = await customerAccount();
-  const tab = (await searchParams).tab==='orders'?'orders':'overview';
-  if(!account)return <AuthFrame><section className="auth-panel"><span className="eyebrow">حساب من</span><h1>به خانه‌چین خوش آمدید</h1><p>برای دیدن اطلاعات حساب و سفارش‌های خود وارد شوید.</p><div className="auth-actions"><StoreLink className="primary-action" href="/login">ورود به حساب</StoreLink><StoreLink href="/register">هنوز حساب ندارید؟ عضویت</StoreLink></div><p className="auth-foot">رمز را فراموش کرده‌اید؟ <StoreLink href="/forgot">بازیابی رمز</StoreLink></p></section></AuthFrame>;
-  return <main className="shop-shell"><Breadcrumbs items={[{label:'حساب کاربری'}]}/><div className="account-layout"><aside className="account-sidebar"><Icon name="user"/><h2>{account.name}</h2><nav aria-label="بخش‌های حساب"><StoreLink href="/account" aria-current={tab==='overview'?'page':undefined}>پیشخوان حساب</StoreLink><StoreLink href="/account?tab=orders" aria-current={tab==='orders'?'page':undefined}>سفارش‌های من</StoreLink><StoreLink href="/favorites">علاقه‌مندی‌ها</StoreLink><StoreLink href="/forgot">تغییر رمز عبور</StoreLink><StoreLink href="/guide">راهنمای خرید</StoreLink></nav></aside><section className="account-home"><div className="account-top"><div><span className="eyebrow">حساب مشتری</span><h1>{tab==='orders'?'سفارش‌های من':'سلام، '+account.name}</h1><p dir="ltr">{account.email}</p></div><LogoutButton/></div>{tab==='overview'&&<><p>از اینجا سفارش‌های خود را پیگیری کنید و به انتخاب‌های ذخیره‌شده برگردید.</p><div className="account-stats"><StoreLink href="/account?tab=orders"><Icon name="order"/><b>{(account.orders?.length||0).toLocaleString('fa-IR')} سفارش</b></StoreLink><StoreLink href="/favorites"><Icon name="heart"/><b>علاقه‌مندی‌ها</b></StoreLink><StoreLink href="/shop"><Icon name="bag"/><b>ادامهٔ خرید</b></StoreLink></div><h2>آخرین سفارش‌ها</h2></>}{account.orders?.length?<div className="account-orders">{(tab==='orders'?account.orders:account.orders.slice(0,5)).map(order=><article key={order.id}><strong>سفارش #{Number(order.id).toLocaleString('fa-IR')}</strong><span>{statusLabels[order.status]||order.status}</span><span>{order.date}</span><b>{new Intl.NumberFormat('fa-IR').format(Number(order.total))} {order.currency==='IRR'?'ریال':['IRT','TOMAN'].includes(order.currency)?'تومان':order.currency}</b></article>)}</div>:<div className="empty-state"><div className="empty-symbol"><Icon name="bag"/></div><h2>هنوز سفارشی ندارید</h2><p>سفارش‌های متصل به این حساب پس از ثبت، اینجا نمایش داده می‌شوند.</p><StoreLink className="primary-action" href="/shop">دیدن محصولات</StoreLink></div>}</section></div></main>;
+
+const tabs = [
+  ['overview', '/account', 'home', 'پیشخوان حساب'],
+  ['orders', '/account?tab=orders', 'order', 'سفارش‌های من'],
+  ['profile', '/account?tab=profile', 'user', 'اطلاعات حساب'],
+];
+
+function OrderList({ orders, recent = false }) {
+  const visible = recent ? orders.slice(0, 5) : orders;
+  if (!visible.length) return <div className="empty-state account-empty"><div className="empty-symbol"><Icon name="bag"/></div><h2>اولین انتخاب شما منتظر است</h2><p>هنوز سفارشی به این حساب متصل نیست. پس از ثبت سفارش، وضعیت آن را اینجا می‌بینید.</p><StoreLink className="primary-action" href="/shop">دیدن محصولات</StoreLink></div>;
+  return <ul className="customer-order-list">{visible.map(order => {
+    const status = customerOrderStatus(order.status);
+    return <li key={order.id}><div className="customer-order-identity"><span className="customer-order-icon"><Icon name="order"/></span><div><h3>سفارش <bdi>#{Number(order.id).toLocaleString('fa-IR')}</bdi></h3><p>{customerOrderDate(order.date)}</p></div></div><span className="customer-order-status" data-tone={status.tone}>{status.label}</span><div className="customer-order-amount"><span>مبلغ سفارش</span><strong><bdi>{customerOrderMoney(order.total, order.currency)}</bdi></strong></div></li>;
+  })}</ul>;
+}
+
+function Profile({ account }) {
+  const billing = account.billing || {};
+  const fields = [
+    ['نام و نام خانوادگی', [billing.first_name, billing.last_name].filter(Boolean).join(' ') || account.name],
+    ['ایمیل حساب', account.email, true], ['شمارهٔ تماس', billing.phone, true],
+    ['استان', IRAN_STATES[billing.state] || billing.state], ['شهر', billing.city],
+    ['کد پستی', billing.postcode, true], ['نشانی صورت‌حساب', billing.address_1],
+  ];
+  return <section className="customer-profile" aria-labelledby="profile-heading"><div className="customer-section-heading"><div><h2 id="profile-heading">اطلاعات ثبت‌شدهٔ شما</h2><p>اطلاعات تماس و صورت‌حساب متصل به این حساب</p></div><Icon name="user"/></div><dl className="customer-profile-fields">{fields.map(([label, value, ltr]) => <div key={label}><dt>{label}</dt><dd>{value ? <bdi dir={ltr ? 'ltr' : 'auto'}>{value}</bdi> : <span className="customer-unset">ثبت نشده</span>}</dd></div>)}</dl><div className="customer-account-note"><Icon name="info"/><p>نشانی صورت‌حساب را هنگام ثبت سفارش می‌توانید تغییر دهید. تغییر آن، اطلاعات سفارش‌های قبلی را عوض نمی‌کند.</p></div></section>;
+}
+
+export default async function AccountPage({ searchParams }) {
+  const { state, account } = await customerAccountState();
+  const selected = (await searchParams)?.tab;
+  const tab = ['orders', 'profile'].includes(selected) ? selected : 'overview';
+  if (!account) return <AccountGate state={state}/>;
+  return <main className="shop-shell account-workspace"><Breadcrumbs items={[{ label: 'حساب کاربری' }]}/><div className="customer-account-layout">
+    <aside className="customer-account-sidebar"><div className="customer-account-person"><span className="customer-account-avatar"><Icon name="user"/></span><div><strong>{account.name || 'حساب مشتری'}</strong><span>خوش آمدید</span></div></div><nav aria-label="بخش‌های حساب">{tabs.map(([key, href, icon, label]) => <StoreLink key={key} href={href} aria-current={tab === key ? 'page' : undefined}><Icon name={icon}/>{label}</StoreLink>)}<StoreLink href="/favorites"><Icon name="heart"/>علاقه‌مندی‌ها</StoreLink><StoreLink href="/forgot"><Icon name="check"/>بازیابی رمز عبور</StoreLink><StoreLink href="/guide"><Icon name="info"/>راهنمای خرید</StoreLink></nav><div className="customer-account-sidebar-foot"><LogoutButton/></div></aside>
+    <section className="customer-account-main"><header className="customer-account-header"><span className="eyebrow">حساب کاربری من</span><h1>{tab === 'orders' ? 'سفارش‌های من' : tab === 'profile' ? 'اطلاعات حساب' : `سلام، ${account.name || 'خوش آمدید'}`}</h1><p>{tab === 'orders' ? 'وضعیت و مبلغ آخرین سفارش‌های متصل به حسابتان را بررسی کنید.' : tab === 'profile' ? 'اطلاعات شما، همان‌طور که در فروشگاه ذخیره شده است.' : 'سفارش‌ها، اطلاعات حساب و انتخاب‌های شما؛ همه در یک جا.'}</p></header>
+      {tab === 'profile' ? <Profile account={account}/> : <>
+        {tab === 'overview' && <div className="customer-account-shortcuts"><StoreLink href="/account?tab=orders"><Icon name="order"/><div><strong>پیگیری سفارش‌ها</strong><span>بررسی آخرین وضعیت سفارش</span></div><Icon name="arrow"/></StoreLink><StoreLink href="/favorites"><Icon name="heart"/><div><strong>انتخاب‌های ذخیره‌شده</strong><span>بازگشت به علاقه‌مندی‌ها</span></div><Icon name="arrow"/></StoreLink></div>}
+        <section className="customer-orders" aria-labelledby="customer-orders-heading"><div className="customer-section-heading"><div><h2 id="customer-orders-heading">{tab === 'overview' ? 'آخرین سفارش‌ها' : 'فهرست سفارش‌های اخیر'}</h2><p>{tab === 'overview' ? 'حداکثر ۵ سفارش اخیر' : 'حداکثر ۲۰ سفارش اخیر این حساب نمایش داده می‌شود.'}</p></div>{tab === 'overview' && account.orders.length > 5 && <StoreLink href="/account?tab=orders">دیدن سفارش‌های اخیر <Icon name="arrow"/></StoreLink>}</div><OrderList orders={account.orders} recent={tab === 'overview'}/></section>
+        <div className="customer-account-note"><Icon name="info"/><p>اگر پرداخت کرده‌اید اما سفارش هنوز در انتظار پرداخت است، دوباره پرداخت نکنید. ابتدا نتیجه را با فروشگاه پیگیری کنید.</p></div>
+      </>}
+    </section>
+  </div></main>;
 }

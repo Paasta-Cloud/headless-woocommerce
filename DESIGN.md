@@ -6,6 +6,12 @@ colors:
   surface: "#ffffff"
   text: "#303537"
   gold: "#ac9160"
+  success: "#006c61"
+  success-surface: "#e0f3ed"
+  warning: "#805a00"
+  warning-surface: "#fff4da"
+  danger: "#b42318"
+  danger-surface: "#fff1f1"
 ---
 
 ## Overview
@@ -44,6 +50,8 @@ The manager is a turquoise merchant studio, retaining the approved list/editor/p
 Every route inherits StoreShell: announcement, two-row masthead, search, account/cart drawers and the same four-column footer. Breadcrumbs use a separate white strip. Catalogues have a right-hand filter column and three product columns; category discovery has image tiles. Product pages use gallery, details and purchase columns, with description/specification/delivery tabs and a related shelf. Authentication uses a pale turquoise illustration panel and white form; its drawer reuses the exact login behavior. Cart and checkout share numbered steps and a left-hand summary. Account uses a right-hand navigation rail. Informational pages, missing pages, loading and recoverable/global errors retain this frame.
 
 ## Responsive and interaction contract
+
+Customer accounts keep the craft storefront frame and configured identity. A right-hand identity/navigation rail sits beside a clear page heading and one divided recent-order surface. Each order separates identity/date, localized status and native-currency amount. Never present the bounded latest-order window as a lifetime count or equate a status chip with payment verification. Profile fields are a read-only definition list, not a simulated address editor. Mobile navigation wraps into two columns with 44px targets; amounts remain visible and long personal text wraps. Guest, expired-session and upstream-unavailable states are distinct; transient errors do not revoke cookies or reveal private backend errors. Authenticated reads remain request-scoped POST with no shared cache.
 
 Shared cart counts are attached to a 44px icon control with logical inset positioning, never a negative bottom offset. Empty counts are omitted; large visual counts cap at 99+ while accessible names retain the actual quantity. Mobile navigation identifies the current section and contains its cart count. Cart line totals remain visible on narrow screens. Category menus close on route changes and Escape returns focus to the summary.
 
