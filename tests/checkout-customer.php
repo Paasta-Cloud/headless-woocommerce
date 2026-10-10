@@ -9,9 +9,12 @@ function get_transient($key){global $session;return $session;}
 function get_user_by($type,$id){global $roles;return (object)array('ID'=>$id,'roles'=>$roles,'display_name'=>'Test','user_email'=>'buyer@example.test');}
 function register_rest_route($namespace,$route,$args){global $routes;$routes[$route]=$args;}
 function get_user_meta($id,$key,$single){return '';}
+function wp_json_encode($value){return json_encode($value);}
 function wc_get_order_status_name($status){return $status;}
 class OwnedOrder{
- function __construct(public $id,public $owner){}
+ function __construct(public $id,public $owner,public $native=0){}
+ function get_type(){return 'shop_order';}
+ function get_customer_id(){return $this->native;}
  function get_id(){return $this->id;}
  function get_meta($key){return $this->owner;}
  function get_status(){return 'processing';}
@@ -19,7 +22,7 @@ class OwnedOrder{
  function get_currency(){return 'IRT';}
  function get_date_created(){return null;}
 }
-function wc_get_orders($query){return isset($query['customer_id'])?array(new OwnedOrder(1,0)):array(new OwnedOrder(2,12),new OwnedOrder(3,99),new OwnedOrder(4,0));}
+function wc_get_orders($query){return isset($query['customer_id'])?array(new OwnedOrder(1,0,12)):array(new OwnedOrder(2,12),new OwnedOrder(3,99),new OwnedOrder(4,0),new OwnedOrder(5,12,99));}
 require __DIR__.'/../wordpress/mu-plugins/khanechin-account.php';
 class TestRequest{function __construct(public $header){}function get_header($key){return $this->header;}}
 class TestOrder{public $customer=0;function update_meta_data($key,$id){verify($key==='_khanechin_customer_id');$this->customer=$id;}function delete_meta_data($key){$this->customer=0;}}

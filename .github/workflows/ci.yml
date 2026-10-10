@@ -20,6 +20,8 @@ jobs:
       - run: php tests/commerce.php
       - run: php tests/content.php
       - run: php tests/checkout-customer.php
+      - run: php tests/customer-profile.php
+      - run: php -l wordpress/mu-plugins/khanechin-account.php
       - run: php tests/order-currency.php
       - run: php tests/return-plugin.php
       - run: php tests/public-cache.php

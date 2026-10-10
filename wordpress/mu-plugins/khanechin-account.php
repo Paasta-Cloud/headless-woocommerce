@@ -7,6 +7,104 @@ defined( 'ABSPATH' ) || exit;
 
 const KHANECHIN_SESSION_TTL = 12 * HOUR_IN_SECONDS;
 
+const KHANECHIN_BILLING_FIELDS = array( 'first_name', 'last_name', 'phone', 'state', 'city', 'postcode', 'address_1' );
+
+function khanechin_customer_billing( $user ) {
+    $billing = array( 'email' => $user->user_email );
+    foreach ( array_merge( KHANECHIN_BILLING_FIELDS, array( 'country', 'address_2', 'company' ) ) as $field ) {
+        $billing[$field] = (string) get_user_meta( $user->ID, 'billing_' . $field, true );
+    }
+    return $billing;
+}
+
+function khanechin_billing_revision( $billing ) {
+    return hash( 'sha256', wp_json_encode( $billing ) );
+}
+
+function khanechin_customer_owns_order( $order, $customer_id ) {
+    if ( ! $order || $order->get_type() !== 'shop_order' ) return false;
+    $native = (int) $order->get_customer_id();
+    $bound = (int) $order->get_meta( '_khanechin_customer_id' );
+    // Never let legacy binding override a different native owner.
+    return ( $native === (int) $customer_id && ( ! $bound || $bound === $native ) )
+        || ( ! $native && $bound === (int) $customer_id );
+}
+
+function khanechin_customer_permission( $request ) {
+    return khanechin_customer_from_request( $request ) ? true
+        : new WP_Error( 'unauthorized', 'ورود لازم است.', array( 'status' => 401 ) );
+}
+
+function khanechin_save_customer_profile( $request ) {
+    $user = khanechin_customer_from_request( $request );
+    if ( ! $user ) return khanechin_customer_permission( $request );
+    $body = $request->get_json_params();
+    if ( ! is_array( $body ) || array_diff( array_keys( $body ), array( 'revision', 'values' ) )
+        || ! is_string( $body['revision'] ?? null ) || ! preg_match( '/^[a-f0-9]{64}$/D', $body['revision'] )
+        || ! is_array( $body['values'] ?? null ) || count( $body['values'] ) !== count( KHANECHIN_BILLING_FIELDS )
+        || array_diff( array_keys( $body['values'] ), KHANECHIN_BILLING_FIELDS ) ) {
+        return new WP_Error( 'invalid_profile', 'اطلاعات فرم معتبر نیست.', array( 'status' => 400 ) );
+    }
+    $values = array();
+    foreach ( KHANECHIN_BILLING_FIELDS as $field ) {
+        $value = $body['values'][$field] ?? null;
+        if ( ! is_string( $value ) || strlen( $value ) > ( $field === 'address_1' ? 1800 : 600 ) ) {
+            return new WP_Error( 'invalid_profile', 'اطلاعات فرم معتبر نیست.', array( 'status' => 400 ) );
+        }
+        $values[$field] = sanitize_text_field( trim( $value ) );
+    }
+    if ( ! class_exists( 'WC_Customer' ) ) return new WP_Error( 'unavailable', 'فروشگاه در دسترس نیست.', array( 'status' => 503 ) );
+    global $wpdb;
+    $lock = 'kh_profile_' . substr( hash( 'sha256', DB_NAME . ':' . $wpdb->prefix . ':' . $user->ID ), 0, 40 );
+    if ( (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 3)', $lock ) ) !== 1 ) {
+        return new WP_Error( 'busy', 'ذخیرهٔ دیگری در حال انجام است. کمی بعد تلاش کنید.', array( 'status' => 409 ) );
+    }
+    try {
+        // Read under the per-customer lock, including checkout changes from
+        // other requests. Identical desired values are a no-op on replay.
+        wp_cache_delete( $user->ID, 'user_meta' );
+        $current = khanechin_customer_billing( $user );
+        $desired = array_replace( $current, $values );
+        if ( $desired !== $current ) {
+            if ( ! hash_equals( khanechin_billing_revision( $current ), $body['revision'] ) ) {
+                return new WP_Error( 'profile_conflict', 'اطلاعات در جای دیگری تغییر کرده است. دوباره آن را بخوانید.', array( 'status' => 409 ) );
+            }
+            $customer = new WC_Customer( $user->ID );
+            foreach ( $values as $field => $value ) $customer->{'set_billing_' . $field}( $value );
+            $customer->save();
+            wp_cache_delete( $user->ID, 'user_meta' );
+            $current = khanechin_customer_billing( $user );
+            if ( $current !== $desired ) throw new RuntimeException( 'Profile readback mismatch' );
+        }
+        return array( 'ok' => true, 'billing' => $current, 'billing_revision' => khanechin_billing_revision( $current ) );
+    } catch ( Throwable $error ) {
+        // A timeout/error does not prove that the native save did not happen.
+        return new WP_Error( 'profile_uncertain', 'نتیجهٔ ذخیره مشخص نیست. پیش از تلاش دوباره اطلاعات را بخوانید.', array( 'status' => 503 ) );
+    } finally {
+        $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) );
+    }
+}
+
+function khanechin_customer_order_detail( $request ) {
+    $user = khanechin_customer_from_request( $request );
+    if ( ! $user ) return khanechin_customer_permission( $request );
+    $id = $request->get_param( 'id' );
+    if ( ! is_int( $id ) || $id < 1 || $id > 9007199254740991 ) return new WP_Error( 'invalid_order', 'شمارهٔ سفارش معتبر نیست.', array( 'status' => 400 ) );
+    $order = function_exists( 'wc_get_order' ) ? wc_get_order( $id ) : false;
+    if ( ! khanechin_customer_owns_order( $order, $user->ID ) ) return new WP_Error( 'order_missing', 'این سفارش در حساب شما در دسترس نیست.', array( 'status' => 404 ) );
+    $billing = array();
+    foreach ( array_merge( KHANECHIN_BILLING_FIELDS, array( 'country', 'address_2', 'company', 'email' ) ) as $field ) $billing[$field] = (string) $order->{'get_billing_' . $field}();
+    $shipping = array();
+    foreach ( array( 'first_name', 'last_name', 'country', 'state', 'city', 'postcode', 'address_1', 'address_2', 'company' ) as $field ) $shipping[$field] = (string) $order->{'get_shipping_' . $field}();
+    $items = array();
+    foreach ( $order->get_items() as $item ) $items[] = array( 'name' => $item->get_name(), 'quantity' => $item->get_quantity(), 'total' => $item->get_total() );
+    return array( 'id' => $order->get_id(), 'status' => wc_get_order_status_name( $order->get_status() ), 'currency' => $order->get_currency(),
+        'date' => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '', 'items' => $items,
+        'billing' => $billing, 'shipping' => $shipping, 'payment' => $order->get_payment_method_title(), 'delivery' => $order->get_shipping_method(),
+        'subtotal' => $order->get_subtotal(), 'discount' => $order->get_discount_total(), 'shipping_total' => $order->get_shipping_total(),
+        'tax' => $order->get_total_tax(), 'total' => $order->get_total() );
+}
+
 function khanechin_customer_from_request( $request ) {
     $header = $request->get_header( 'authorization' );
     if ( ! is_string( $header ) || ! preg_match( '/^Bearer ([a-f0-9]{64})$/', $header, $matches ) ) {
@@ -239,20 +337,23 @@ add_action( 'rest_api_init', function () {
             $orders = function_exists( 'wc_get_orders' ) ? wc_get_orders( array( 'customer_id' => $user->ID, 'limit' => 20, 'orderby' => 'date', 'order' => 'DESC' ) ) : array();
             if(function_exists('wc_get_orders')){
                 $headless=wc_get_orders(array('meta_query'=>array(array('key'=>'_khanechin_customer_id','value'=>$user->ID,'compare'=>'=')),'limit'=>20,'orderby'=>'date','order'=>'DESC'));
-                $headless=array_filter($headless,function($order)use($user){return (int)$order->get_meta('_khanechin_customer_id')===(int)$user->ID;});
                 $unique=array();foreach(array_merge($orders,$headless) as $order)$unique[$order->get_id()]=$order;
+                $unique=array_filter($unique,function($order)use($user){return khanechin_customer_owns_order($order,$user->ID);});
                 usort($unique,function($a,$b){return $b->get_id()<=>$a->get_id();});$orders=array_slice($unique,0,20);
             }
             return array(
                 'name' => $user->display_name,
                 'email' => $user->user_email,
-                'billing' => array_merge(array('email'=>$user->user_email),array_combine(array('first_name','last_name','address_1','city','state','postcode','phone'),array_map(function($field)use($user){return (string)get_user_meta($user->ID,'billing_'.$field,true);},array('first_name','last_name','address_1','city','state','postcode','phone')))),
+                'billing' => khanechin_customer_billing( $user ),
+                'billing_revision' => khanechin_billing_revision( khanechin_customer_billing( $user ) ),
                 'orders' => array_map( function ( $order ) {
                     return array( 'id' => $order->get_id(), 'status' => wc_get_order_status_name( $order->get_status() ), 'total' => $order->get_total(), 'currency' => $order->get_currency(), 'date' => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '' );
                 }, $orders ),
             );
         },
     ) );
+    register_rest_route( 'khanechin/v1', '/profile', array( 'methods' => 'POST', 'permission_callback' => 'khanechin_customer_permission', 'callback' => 'khanechin_save_customer_profile' ) );
+    register_rest_route( 'khanechin/v1', '/customer-order', array( 'methods' => 'POST', 'permission_callback' => 'khanechin_customer_permission', 'callback' => 'khanechin_customer_order_detail' ) );
     register_rest_route( 'khanechin/v1', '/logout', array(
         'methods' => 'POST',
         'permission_callback' => '__return_true',
