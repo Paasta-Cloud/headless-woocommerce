@@ -36,8 +36,8 @@ test('Store API toman amounts do not receive a hidden conversion', () => {
 
 test('live WooCommerce response is used without silently falling back to demo', async () => {
   const server = createServer((request, response) => {
-    if(request.url==='/wp-json/paasta-cache/v1/revision'){response.writeHead(404);response.end();return;}
-    assert.equal(request.url, '/wp-json/wc/store/v1/products?per_page=100&page=1');
+    if(request.url==='/?rest_route=%2Fpaasta-cache%2Fv1%2Frevision'){response.writeHead(404);response.end();return;}
+    assert.equal(request.url, '/?per_page=100&page=1&rest_route=%2Fwc%2Fstore%2Fv1%2Fproducts');
     response.setHeader('content-type', 'application/json');
     response.end(JSON.stringify([{ id: 42, name: 'محصول زنده', prices: { price: '100000', currency_minor_unit: 0, currency_code: 'IRT' } }]));
   });
@@ -59,7 +59,7 @@ test('live WooCommerce response is used without silently falling back to demo', 
 test('catalogue follows all pages and preserves the optional category boundary', async () => {
   const requests = [];
   const server = createServer((request, response) => {
-    if(request.url==='/wp-json/paasta-cache/v1/revision'){response.writeHead(404);response.end();return;}
+    if(request.url==='/?rest_route=%2Fpaasta-cache%2Fv1%2Frevision'){response.writeHead(404);response.end();return;}
     const url = new URL(request.url, 'http://localhost');
     requests.push(url.searchParams.get('page'));
     assert.equal(url.searchParams.get('category'), '176');
@@ -123,7 +123,7 @@ test('variation details expose price, unit and stock without attribute guessing'
 
 test('variation stock and price are read from the Store API variation query', async () => {
   const server = createServer((request, response) => {
-    assert.equal(request.url, '/wp-json/wc/store/v1/products?type=variation&parent=9&per_page=100&orderby=id&order=asc');
+    assert.equal(request.url, '/?type=variation&parent=9&per_page=100&orderby=id&order=asc&rest_route=%2Fwc%2Fstore%2Fv1%2Fproducts');
     response.setHeader('content-type', 'application/json');
     response.end(JSON.stringify([
       { id: 91, prices: { price: '500000', currency_minor_unit: 0, currency_code: 'IRT' }, is_in_stock: true },

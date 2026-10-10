@@ -46,7 +46,7 @@ test('variation adds carry the chosen variation id and exact attribute pairs', (
 
 test('cart token is forwarded to WooCommerce and private fields are not exposed', async () => {
   const server = createServer(async (request, response) => {
-    assert.equal(request.url, '/wp-json/wc/store/v1/cart/add-item');
+    assert.equal(request.url, '/?rest_route=%2Fwc%2Fstore%2Fv1%2Fcart%2Fadd-item');
     assert.equal(request.headers['cart-token'], 'test-token');
     const chunks = [];
     for await (const chunk of request) chunks.push(chunk);
@@ -98,7 +98,7 @@ test('cart reads bypass shared WordPress caches without putting the token in the
     assert.equal(requests.length, 2);
     assert.notEqual(requests[0].url, requests[1].url);
     for (const request of requests) {
-      assert.equal(new URL(request.url, 'http://localhost').pathname, '/wp-json/wc/store/v1/cart');
+      assert.equal(new URL(request.url, 'http://localhost').searchParams.get('rest_route'), '/wc/store/v1/cart');
       assert.equal(request.token, 'test-token');
       assert.ok(!request.url.includes('test-token'));
     }

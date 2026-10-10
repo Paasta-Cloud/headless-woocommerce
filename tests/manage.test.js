@@ -8,7 +8,7 @@ test('management transport is private, fixed to the configured tenant and never 
   let calls=0;
   globalThis.fetch=async(url,options)=>{
     calls++;
-    assert.equal(url,'https://shop.example.test/wp-json/paasta-headless/v1/manage/save');
+    assert.equal(url,'https://shop.example.test/?rest_route=%2Fpaasta-headless%2Fv1%2Fmanage%2Fsave');
     assert.equal(options.cache,'no-store');assert.equal(options.redirect,'error');assert.equal(options.method,'POST');
     assert.equal(options.headers.Authorization,`Bearer ${'a'.repeat(64)}`);
     assert.deepEqual(JSON.parse(options.body),{revision:'old',design:{version:1}});

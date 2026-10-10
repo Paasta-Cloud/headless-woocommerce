@@ -17,20 +17,21 @@ function cart() {
 }
 
 createServer(async (request, response) => {
+  const route=new URL(request.url,'http://localhost').searchParams.get('rest_route')||'';
   response.setHeader('Content-Type', 'application/json');
   response.setHeader('Cart-Token', 'local-test-token');
-  if (request.url?.startsWith('/wp-json/wc/store/v1/products')) {
+  if (route.startsWith('/wc/store/v1/products')) {
     response.end(JSON.stringify([product]));
     return;
   }
-  if (request.url?.startsWith('/wp-json/wc/store/v1/cart')) {
+  if (route.startsWith('/wc/store/v1/cart')) {
     if (request.method === 'POST') {
       const chunks = [];
       for await (const chunk of request) chunks.push(chunk);
       const body = JSON.parse(Buffer.concat(chunks).toString());
-      if (request.url.endsWith('/add-item') && body.id === product.id) quantity += 1;
-      else if (request.url.endsWith('/update-item') && body.key === key) quantity = body.quantity;
-      else if (request.url.endsWith('/remove-item') && body.key === key) quantity = 0;
+      if (route.endsWith('/add-item') && body.id === product.id) quantity += 1;
+      else if (route.endsWith('/update-item') && body.key === key) quantity = body.quantity;
+      else if (route.endsWith('/remove-item') && body.key === key) quantity = 0;
       else { response.writeHead(400); response.end(JSON.stringify({ code: 'invalid_request' })); return; }
     }
     response.end(JSON.stringify(cart()));

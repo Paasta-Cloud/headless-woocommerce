@@ -27,7 +27,7 @@ test('order status is read from WooCommerce with guest credentials and no Cart T
     assert.equal(order.status, 'processing');
     assert.equal(order.items[0].name, 'ماگ');
     assert.equal(seen.token, undefined);
-    assert.match(seen.url, /^\/wp-json\/wc\/store\/v1\/order\/29\?/);
+    assert.equal(new URL(seen.url,'http://localhost').searchParams.get('rest_route'), '/wc/store/v1/order/29');
     assert.match(seen.url, /billing_email=buyer%40example.com/);
   } finally {
     if (previous === undefined) delete process.env.WOOCOMMERCE_URL;

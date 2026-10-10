@@ -60,7 +60,7 @@ test('successful registration forwards only email and password and sets no sessi
     const response = await registerPost(storefrontRequest('register', { email: 'user@example.com', password: 'پسورد-طولانی' }));
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { ok: true });
-    assert.equal(seen.url, '/wp-json/khanechin/v1/register');
+    assert.equal(seen.url, '/?rest_route=%2Fkhanechin%2Fv1%2Fregister');
     assert.deepEqual(seen.body, { email: 'user@example.com', password: 'پسورد-طولانی' });
     assert.equal(response.headers.get('set-cookie'), null);
     assert.equal(response.headers.get('cache-control'), 'no-store');
@@ -100,7 +100,7 @@ test('verification accepts only 64-hex tokens and forwards valid ones', async ()
     const ok = await verifyPost(storefrontRequest('verify', { token: 'a'.repeat(64) }));
     assert.equal(ok.status, 200);
     assert.deepEqual(seen.body, { token: 'a'.repeat(64) });
-    assert.equal(seen.url, '/wp-json/khanechin/v1/verify');
+    assert.equal(seen.url, '/?rest_route=%2Fkhanechin%2Fv1%2Fverify');
     const second = await verifyPost(storefrontRequest('verify', { token: 'b'.repeat(64) }));
     assert.equal(second.status, 200);
     assert.equal(seen.body.token, 'b'.repeat(64));
@@ -129,7 +129,7 @@ test('resend answers identically without confirming whether an account exists', 
 
 test('password recovery request is generic and never reveals registered emails', async () => {
   const server = await mockWordPress((url, body) => {
-    assert.equal(url, '/wp-json/khanechin/v1/lost-password');
+    assert.equal(url, '/?rest_route=%2Fkhanechin%2Fv1%2Flost-password');
     return { status: 200, data: { ok: true } };
   });
   const previous = process.env.WOOCOMMERCE_URL;
@@ -158,7 +158,7 @@ test('password reset forwards the login and key once and rejects short passwords
     assert.equal((await resetPost(storefrontRequest('reset', { login: 'user', key: 'k'.repeat(20), password: 'short' }))).status, 400);
     const ok = await resetPost(storefrontRequest('reset', { login: 'user@example.com', key: 'k'.repeat(20), password: 'رمز-تازه-۸نویسه' }));
     assert.equal(ok.status, 200);
-    assert.equal(seen.url, '/wp-json/khanechin/v1/reset-password');
+    assert.equal(seen.url, '/?rest_route=%2Fkhanechin%2Fv1%2Freset-password');
     assert.deepEqual(seen.body, { login: 'user@example.com', key: 'k'.repeat(20), password: 'رمز-تازه-۸نویسه' });
     const invalid = await resetPost(storefrontRequest('reset', { login: 'user@example.com', key: 'k'.repeat(20), password: 'rejected' }));
     assert.equal(invalid.status, 400);
