@@ -37,7 +37,7 @@ test('Store API toman amounts do not receive a hidden conversion', () => {
 test('live WooCommerce response is used without silently falling back to demo', async () => {
   const server = createServer((request, response) => {
     if(request.url==='/?rest_route=%2Fpaasta-cache%2Fv1%2Frevision'){response.writeHead(404);response.end();return;}
-    assert.equal(request.url, '/?per_page=100&page=1&rest_route=%2Fwc%2Fstore%2Fv1%2Fproducts');
+    assert.equal(request.url, '/?per_page=24&page=1&orderby=date&order=desc&rest_route=%2Fwc%2Fstore%2Fv1%2Fproducts');
     response.setHeader('content-type', 'application/json');
     response.end(JSON.stringify([{ id: 42, name: 'محصول زنده', prices: { price: '100000', currency_minor_unit: 0, currency_code: 'IRT' } }]));
   });
@@ -56,7 +56,7 @@ test('live WooCommerce response is used without silently falling back to demo', 
   }
 });
 
-test('catalogue follows all pages and preserves the optional category boundary', async () => {
+test('catalogue reads the requested page and preserves the optional category boundary', async () => {
   const requests = [];
   const server = createServer((request, response) => {
     if(request.url==='/?rest_route=%2Fpaasta-cache%2Fv1%2Frevision'){response.writeHead(404);response.end();return;}
@@ -73,8 +73,9 @@ test('catalogue follows all pages and preserves the optional category boundary',
   process.env.WOOCOMMERCE_CATEGORY_ID = '176';
   try {
     const result = await getProducts();
-    assert.deepEqual(requests, ['1', '2']);
-    assert.deepEqual(result.products.map(p => p.id), [1, 2]);
+    assert.deepEqual(requests, ['1']);
+    assert.deepEqual(result.products.map(p => p.id), [1]);
+    assert.equal(result.totalPages,2);
     assert.deepEqual(result.products[0].categories, ['مینا']);
     assert.equal(result.products[0].category, 'مینا');
   } finally {

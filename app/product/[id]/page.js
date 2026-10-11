@@ -10,8 +10,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductPage({ params }) {
-  const [product,{products}]=await Promise.all([getProduct(Number((await params).id)),getProducts()]);
+  const product=await getProduct(Number((await params).id));
   if (!product) notFound();
+  const {products}=await getProducts({perPage:5,...(product.categoryRefs?.[0]?.id?{category:product.categoryRefs[0].id}:{})});
   // Variation stock and price come from the Store API products query; the
   // attribute pairs of each variation come from the parent product itself.
   let stock = null;

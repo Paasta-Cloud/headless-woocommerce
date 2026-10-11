@@ -24,8 +24,8 @@ export function RetailMedia({section}){
   </div>
  </div>;
 }
-export function CategoryShowcase({section,products}){
- const categories=catalogCategories(products).filter(c=>!section.categoryIds.length||section.categoryIds.includes(c.id));
+export function CategoryShowcase({section,products,categories:storeCategories}){
+ const categories=(storeCategories||catalogCategories(products)).filter(c=>!section.categoryIds.length||section.categoryIds.includes(c.id)).slice(0,section.limit||12);
  return <div className="retail-category-showcase builder-grid">{categories.map(c=><section key={c.id}><h2>{c.name}</h2><div>{products.filter(p=>inCategory(p,c)).slice(0,4).map(p=><StoreLink key={p.id} href={`/product/${p.id}`} aria-label={p.name}><img src={p.thumbnail||p.image} alt={p.name} width="160" height="160" loading="lazy"/></StoreLink>)}</div><StoreLink href={`/category/${c.id}`}>مشاهدهٔ همه <Icon name="arrow"/></StoreLink></section>)}</div>;
 }
 export function RankedProducts({products}){

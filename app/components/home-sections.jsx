@@ -30,18 +30,18 @@ function Products({section,products,error}){
   if(section.featuredProduct&&visible.length&&!error)return <div className="craft-latest-pair">{shelf}<FeaturedProduct product={visible[0]}/></div>;
   return shelf;
 }
-export default function HomeSection({section,products,error,index}){
+export default function HomeSection({section,products,error,index,categories:storeCategories}){
   const settings=useStoreSettings();
   if(!section.enabled)return null;
   let content;
   if(section.type==='hero')content=section.featuredProduct&&products.length?<div className={`builder-hero-pair image-${section.imageSide}`}><Hero section={section}/>{settings.theme==='craft'?<aside aria-label="محصول منتخب"><ProductCard product={products.find(p=>p.id===section.productIds[0])||products[0]}/></aside>:<FeaturedProduct product={products.find(p=>p.id===section.productIds[0])||products[0]}/>}</div>:<Hero section={section}/>;
   else if(section.type==='products')content=section.presentation==='spotlight'&&!error?<ProductSpotlight section={section} products={products}/>:<Products section={section} products={products} error={error}/>;
   else if(section.type==='banners'&&['stories','brands','editorial'].includes(section.presentation))content=<RetailMedia section={section}/>;
-  else if(section.type==='categories'&&section.presentation==='showcase')content=<CategoryShowcase section={section} products={products}/>;
+  else if(section.type==='categories'&&section.presentation==='showcase')content=error?<p className="form-error" role="alert">{error}</p>:<CategoryShowcase section={section} products={products} categories={storeCategories}/>;
   else if(section.type==='banners')content=<div className="craft-tiles builder-grid">{section.items.filter(item=>item.image).map((item,i)=><OptionalLink key={i} href={item.href}><img src={item.image} alt={item.title} width="400" height="240" loading="lazy"/></OptionalLink>)}</div>;
   else if(section.type==='features')content=<div className="craft-benefits builder-grid">{section.items.map((item,i)=><OptionalLink key={i} href={item.href}><Icon name={item.icon}/><span><strong>{item.title}</strong><small>{item.body}</small></span></OptionalLink>)}</div>;
   else if(section.type==='categories'){
-    const categories=catalogCategories(products).filter(category=>!section.categoryIds.length||section.categoryIds.includes(category.id));
+    const categories=(storeCategories||catalogCategories(products)).filter(category=>!section.categoryIds.length||section.categoryIds.includes(category.id));
     content=<><h2 className="builder-section-title">{section.title}</h2><div className="categories-grid builder-grid">{categories.map(category=><StoreLink className="category-card" key={category.id} href={`/category/${category.id}`}><div>{category.image?<img src={category.image} alt="" loading="lazy"/>:<Icon name="grid"/>}</div><h3>{category.name}</h3><span>{category.count.toLocaleString('fa-IR')} محصول</span></StoreLink>)}</div></>;
   }else if(section.type==='text-image')content=<div className={`builder-text-image image-${section.imageSide}${section.image?'':' no-image'}`}>{section.image&&<img src={section.image} alt={section.title} loading="lazy"/>}<div>{section.subtitle&&<span className="eyebrow">{section.subtitle}</span>}<h2>{section.title}</h2><p>{section.body}</p>{section.href&&section.buttonLabel&&<StoreLink className="secondary-button" href={section.href}>{section.buttonLabel}<Icon name="arrow"/></StoreLink>}</div></div>;
   else if(section.type==='faq')content=<div className="content-panel builder-faq"><h2>{section.title}</h2>{section.items.map((item,i)=><details key={i}><summary>{item.title}</summary><p>{item.body}</p></details>)}</div>;
