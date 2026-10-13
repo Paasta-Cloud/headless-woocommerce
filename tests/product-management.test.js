@@ -30,7 +30,7 @@ test('new product sections retain private write safeguards, independent media st
  assert.match(ui,/key=\{resource\+'-'\+\(editor.id\|\|'new'\)\}/);
  assert.match(ui,/resource==='products'\|\|contentResources.has\(resource\)/);
  assert.match(ui,/cache:'no-store'/);assert.match(ui,/operationKey:crypto.randomUUID\(\)/);assert.match(ui,/id:editor.id,revision/);
- assert.match(editor,/visited.includes\('organization'\)/);assert.match(editor,/page\*20>=total/);
+ assert.match(editor,/visited.includes\('organization'\)/);assert.match(editor,/<Pagination page=\{page\} total=\{total\} label="دسته‌بندی‌ها" disabled=\{busy\} onPage=\{setPage\}/);
  assert.match(editor,/setMedia\(current=>\[\.\.\.current,image\]\)/);
  assert.ok(!editor.includes('dangerouslySetInnerHTML'));assert.match(editor,/hidden=\{active!==key\}/);
 });

@@ -32,5 +32,5 @@ test('unsent notes warn on navigation and filtered customer pages retain upstrea
  assert.match(editor,/<OrderNotes key=\{item.id\}/);
  assert.ok(ui.includes("if(resource==='orders'){setEditor(current=>({...current,...draft}))"));
  assert.ok(ui.includes('setRevision(fresh.revision)'));
- assert.ok(ui.includes('disabled={busy||page*20>=total}'));
+ assert.match(ui,/<Pagination page=\{page\} total=\{total\} perPage=\{perPage\} label=\{names\[resource\]\} disabled=\{busy\} onPage=\{changePage\}/);
 });

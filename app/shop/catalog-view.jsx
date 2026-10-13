@@ -6,6 +6,7 @@ import {catalogCategories,filterProducts} from '../../lib/catalog';
 import {catalogHref} from '../../lib/catalog-query';
 import {Breadcrumbs,EmptyState} from '../components/ui';
 import ProductCard from '../components/product-card';
+import Pagination from '../components/pagination';
 import '../catalog-pagination.css';
 
 export default function CatalogView({products,error,category=null,initialQuery='',filters,categories:allCategories,categoryError='',page=1,total=0,totalPages=0,perPage=24}) {
@@ -18,7 +19,9 @@ export default function CatalogView({products,error,category=null,initialQuery='
   const current={query,stock,min,max,sort,minorUnit:products[0]?.minorUnit??filters?.minorUnit??0};
   function navigate(href){startTransition(()=>router.push(href));}
   function apply(change={}){if(paged)navigate(catalogHref(path,{...current,...change}));}
-  const numbers=[...new Set([1,...Array.from({length:5},(_,i)=>page+i-2).filter(n=>n>0&&n<=totalPages),totalPages])].filter(n=>n>0).sort((a,b)=>a-b);
+  const applied=paged?filters:current;
+  const activeFilters=[applied.query&&{key:'query',label:`جست‌وجو: ${applied.query}`,value:''},applied.stock&&{key:'stock',label:'فقط کالاهای موجود',value:false},applied.min&&{key:'min',label:`از ${Number(applied.min).toLocaleString('fa-IR')}`,value:''},applied.max&&{key:'max',label:`تا ${Number(applied.max).toLocaleString('fa-IR')}`,value:''}].filter(Boolean);
+  function removeFilter(filter){({query:setQuery,stock:setStock,min:setMin,max:setMax})[filter.key](filter.value);if(paged)navigate(catalogHref(path,{...filters,[filter.key]:filter.value}));}
   return <main className="shop-shell">
     <Breadcrumbs items={[...(category?[{label:'دسته‌بندی‌ها',href:'/categories'}]:[]),{label:title}]}/>
     <div className="catalog-layout">
@@ -34,14 +37,11 @@ export default function CatalogView({products,error,category=null,initialQuery='
           <button type="button" onClick={()=>{setQuery('');setStock(false);setMin('');setMax('');setSort('newest');if(paged)navigate(path);}} disabled={pending}>پاک‌کردن فیلترها</button>
         </form>
       </aside>
-      <section aria-busy={pending}>
-        <div className="catalog-toolbar"><div><h1>{title}</h1><p role="status">{pending?'در حال دریافت محصولات…':`${(paged?total:visible.length).toLocaleString('fa-IR')} محصول`}</p></div><select aria-label="مرتب‌سازی محصولات" value={sort} disabled={pending} onChange={e=>{setSort(e.target.value);apply({sort:e.target.value});}}><option value="newest">جدیدترین‌ها</option><option value="cheap">ارزان‌ترین</option><option value="expensive">گران‌ترین</option></select></div>
-        {(filters?.query||!paged&&query)&&<p className="catalog-active">نتایج جست‌وجوی «{filters?.query||query}»</p>}
+      <section className="catalog-results" aria-busy={pending}>
+        <div className="catalog-toolbar"><div><h1>{title}</h1><p role="status">{pending?'در حال دریافت محصولات…':`${(paged?total:visible.length).toLocaleString('fa-IR')} محصول`}{!pending&&paged&&totalPages>1&&<span className="catalog-page-position">صفحهٔ {page.toLocaleString('fa-IR')} از {totalPages.toLocaleString('fa-IR')}</span>}</p></div><label className="catalog-sort"><span>مرتب‌سازی</span><select aria-label="مرتب‌سازی محصولات" value={sort} disabled={pending} onChange={e=>{setSort(e.target.value);apply({sort:e.target.value});}}><option value="newest">جدیدترین‌ها</option><option value="cheap">ارزان‌ترین</option><option value="expensive">گران‌ترین</option></select></label></div>
+        {activeFilters.length>0&&<div className="catalog-active-filters" aria-label="فیلترهای فعال"><span>فیلترهای فعال:</span>{activeFilters.map(filter=><button type="button" key={filter.key} disabled={pending} onClick={()=>removeFilter(filter)} aria-label={`حذف فیلتر ${filter.label}`}>{filter.label}<span aria-hidden="true">×</span></button>)}</div>}
         {error?<div className="form-error" role="alert">{error} <StoreLink href={path}>تلاش دوباره</StoreLink></div>:visible.length?<div className="craft-products">{visible.map(p=><ProductCard key={p.id} product={p}/>)}</div>:<EmptyState icon="search" title="محصولی پیدا نشد" href={path} action="نمایش همهٔ محصولات">عبارت جست‌وجو یا محدودهٔ قیمت را تغییر دهید. می‌توانید فیلتر موجودی را هم بردارید.</EmptyState>}
-        {paged&&!error&&totalPages>1&&<nav className="catalog-pagination" aria-label="صفحه‌های محصولات">
-          <p>صفحهٔ {page.toLocaleString('fa-IR')} از {totalPages.toLocaleString('fa-IR')}<span>نمایش {((page-1)*perPage+1).toLocaleString('fa-IR')} تا {Math.min(page*perPage,total).toLocaleString('fa-IR')} از {total.toLocaleString('fa-IR')} محصول</span></p>
-          <div>{page>1&&<StoreLink href={catalogHref(path,filters,page-1)} aria-label="صفحهٔ قبلی محصولات">قبلی</StoreLink>}{numbers.map((number,index)=><span key={number}>{index>0&&number>numbers[index-1]+1&&<span className="pagination-gap" aria-hidden="true">…</span>}{number===page?<span className="pagination-current" aria-current="page" aria-label={`صفحهٔ ${number.toLocaleString('fa-IR')}`}>{number.toLocaleString('fa-IR')}</span>:<StoreLink href={catalogHref(path,filters,number)} aria-label={`صفحهٔ ${number.toLocaleString('fa-IR')} محصولات`}>{number.toLocaleString('fa-IR')}</StoreLink>}</span>)}{page<totalPages&&<StoreLink href={catalogHref(path,filters,page+1)} aria-label="صفحهٔ بعدی محصولات">بعدی</StoreLink>}</div>
-        </nav>}
+        {paged&&!error&&<Pagination page={page} total={total} perPage={perPage} label="محصولات" disabled={pending} href={number=>catalogHref(path,filters,number)}/>}
       </section>
     </div>
   </main>;

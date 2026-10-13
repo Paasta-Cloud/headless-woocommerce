@@ -61,6 +61,8 @@ At 640px filters stack, product and checkout panels become one column, category 
 
 ## Do's and Don'ts
 
+List navigation is shared by the storefront and merchant studio. Keep native bounded reads (24 public products, 20 operational records), show the real result range, and render at most five page numbers plus gaps. Previous/next controls stay 44px and disabled at boundaries; on narrow screens numbers have their own row. Public links preserve committed filters; admin pagination keeps the current filter and returns keyboard focus to the results heading or error. Never leave stale rows actionable after a failed read. Catalog chips remove individual committed filters. Existing neutral border #dce3e3 and secondary text #536078 are retained; selected controls use the established #e0f3ed / #006c61 / #79bdae ramp.
+
 Order/customer operations inherit the merchant studio: factual detail on the main column and the next safe action beside it; on narrow screens the summary precedes the full detail. Selected filters and profile avatars use the established teal tonal ramp (#e0f3ed surface, #006c61 text, #79bdae outline). Never invent customer metrics or mark an unverified online payment complete. Internal-note drafts participate in navigation/unload warnings. Address forms retain unknown native country/state values.
 Use real product imagery, accessible labels and visible focus. Do not invent discounts, stock, countdown deadlines or service guarantees.
 
