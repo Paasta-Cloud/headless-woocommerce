@@ -7,10 +7,10 @@ test('runtime is non-root standalone and excludes local secrets from Docker cont
   const docker = read('Dockerfile');
   const runtime = docker.split('AS runtime')[1];
   assert.match(docker, /node scripts\/package-connector.mjs && npm run build/);
-  assert.match(runtime, /apt-get upgrade -y/);
-  assert.match(runtime, /USER node/);
-  assert.match(runtime, /CMD \["node", "server.js"\]/);
-  assert.doesNotMatch(runtime, /COPY \.|npm ci/);
+  assert.match(docker, /FROM gcr\.io\/distroless\/nodejs22-debian13:nonroot AS runtime/);
+  assert.match(runtime, /USER 65532:65532/);
+  assert.match(runtime, /CMD \["server.js"\]/);
+  assert.doesNotMatch(runtime, /COPY \.|npm ci|RUN /);
   assert.match(read('.dockerignore'), /^\.env\*$/m);
   assert.match(read('next.config.mjs'), /output: 'standalone'/);
 });

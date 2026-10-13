@@ -59,7 +59,7 @@ jobs:
         run: |
           docker run -d --name storefront-smoke -p 127.0.0.1:3119:3000 -e WOOCOMMERCE_URL=demo headless-candidate:${{ github.sha }}
           trap 'docker logs --tail 30 storefront-smoke; docker rm -f storefront-smoke' EXIT
-          docker exec storefront-smoke node -e 'if(process.getuid()===0)process.exit(1)'
+          docker exec storefront-smoke /nodejs/bin/node -e 'if(process.getuid()===0)process.exit(1)'
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:3119/api/health > /dev/null; then break; fi
             sleep 2
