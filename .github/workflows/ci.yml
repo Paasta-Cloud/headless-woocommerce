@@ -24,6 +24,7 @@ jobs:
       - run: php tests/customer-profile.php
       - run: php tests/customer-history.php
       - run: php tests/readiness.php
+      - run: php tests/returns.php
       - run: php -l wordpress/mu-plugins/khanechin-account.php
       - run: php tests/order-currency.php
       - run: php tests/return-plugin.php
