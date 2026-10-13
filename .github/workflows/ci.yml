@@ -22,6 +22,8 @@ jobs:
       - run: php tests/content.php
       - run: php tests/checkout-customer.php
       - run: php tests/customer-profile.php
+      - run: php tests/customer-history.php
+      - run: php tests/readiness.php
       - run: php -l wordpress/mu-plugins/khanechin-account.php
       - run: php tests/order-currency.php
       - run: php tests/return-plugin.php
@@ -29,8 +31,8 @@ jobs:
       - run: php tests/connector.php
       - run: php -l wordpress/plugins/paasta-headless-connector/paasta-headless-connector.php
       - run: find wordpress/plugins/paasta-headless-builder -name '*.php' -exec php -l {} \;
-      - run: npm run build
       - run: node scripts/package-connector.mjs
+      - run: npm run build
       - run: git diff --check
       - run: cd wordpress/plugins && zip -r ../../paasta-headless-builder.zip paasta-headless-builder
       - uses: actions/upload-artifact@v4
@@ -51,15 +53,44 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+      - name: Build fresh release candidate
+        run: docker build --pull --no-cache -t headless-candidate:${{ github.sha }} .
+      - name: Verify non-root production startup
+        run: |
+          docker run -d --name storefront-smoke -p 127.0.0.1:3119:3000 -e WOOCOMMERCE_URL=demo headless-candidate:${{ github.sha }}
+          trap 'docker logs --tail 30 storefront-smoke; docker rm -f storefront-smoke' EXIT
+          docker exec storefront-smoke node -e 'if(process.getuid()===0)process.exit(1)'
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3119/api/health > /dev/null; then break; fi
+            sleep 2
+          done
+          curl --fail --silent http://127.0.0.1:3119/api/health > /dev/null
+          curl --fail --silent http://127.0.0.1:3119/shop > /dev/null
+      - name: Scan the exact runtime image before publishing
+        uses: aquasecurity/trivy-action@c03d123cb480c08c69b054af418ea5e69fe6e57e
+        with:
+          version: v0.75.0
+          image-ref: headless-candidate:${{ github.sha }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          format: json
+          output: image-security.json
+          exit-code: '1'
+          ignore-unfixed: false
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-security-report
+          path: image-security.json
+          if-no-files-found: warn
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/paasta-cloud/headless-woocommerce:${{ github.sha }}
-            ghcr.io/paasta-cloud/headless-woocommerce:latest
+      - name: Publish only the scanned candidate
+        run: |
+          docker tag headless-candidate:${{ github.sha }} ghcr.io/paasta-cloud/headless-woocommerce:${{ github.sha }}
+          docker tag headless-candidate:${{ github.sha }} ghcr.io/paasta-cloud/headless-woocommerce:latest
+          docker push ghcr.io/paasta-cloud/headless-woocommerce:${{ github.sha }}
+          docker push ghcr.io/paasta-cloud/headless-woocommerce:latest

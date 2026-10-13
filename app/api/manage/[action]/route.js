@@ -22,7 +22,9 @@ export async function POST(request,{params}){
       if(action==='login'&&(typeof body.login!=='string'||typeof body.password!=='string'||body.login.length>254||body.password.length>1024))return json({error:'نام کاربری و رمز عبور معتبر وارد کنید.'},400);
     }
     const result=await managerRequest(action,token,body);
+    if(action==='readiness'&&result.status===404)return json({error:'برای بررسی اتصال، افزونهٔ فروشگاه را به نسخهٔ جدید به‌روزرسانی کنید.'},409);
     if(result.status!==200)return json({error:result.data?.message||'درخواست انجام نشد. دوباره تلاش کنید.',code:result.data?.code},result.status>=400&&result.status<600?result.status:502);
+    if(action==='readiness')return json({...result.data,checkoutEnabled:process.env.STORE_CHECKOUT_ENABLED==='true',sandbox:process.env.ZIBAL_SANDBOX==='true'});
     if(action==='login'){
       if(!/^[a-f0-9]{64}$/.test(result.data?.token||''))throw Error('Invalid session');
       const response=json({ok:true});response.cookies.set(MANAGER_COOKIE,result.data.token,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'strict',path:'/api/manage',maxAge:3600});return response;

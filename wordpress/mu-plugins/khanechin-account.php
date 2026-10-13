@@ -35,6 +35,64 @@ function khanechin_customer_permission( $request ) {
         : new WP_Error( 'unauthorized', 'ورود لازم است.', array( 'status' => 401 ) );
 }
 
+// HPOS supports meta_query directly. Legacy order storage needs the native
+// data-store hook; never silently drop the ownership restriction on that store.
+add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', function ( $query, $vars ) {
+    if ( isset( $vars['khanechin_bound_customer'] ) ) {
+        $query['meta_query'][] = array( 'key' => '_khanechin_customer_id', 'value' => (int) $vars['khanechin_bound_customer'], 'compare' => '=' );
+    }
+    return $query;
+}, 10, 2 );
+
+function khanechin_order_cursor( $values, $user_id ) {
+    $payload = rtrim( strtr( base64_encode( wp_json_encode( $values ) ), '+/', '-_' ), '=' );
+    return $payload . '.' . hash_hmac( 'sha256', $user_id . ':' . $payload, wp_salt( 'auth' ) );
+}
+
+function khanechin_customer_order_summary( $order ) {
+    return array( 'id' => $order->get_id(), 'status' => wc_get_order_status_name( $order->get_status() ), 'total' => $order->get_total(), 'currency' => $order->get_currency(), 'date' => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d' ) : '' );
+}
+
+function khanechin_customer_orders( $request ) {
+    $user = khanechin_customer_from_request( $request );
+    if ( ! $user ) return khanechin_customer_permission( $request );
+    if ( ! function_exists( 'wc_get_orders' ) ) return new WP_Error( 'unavailable', 'فروشگاه در دسترس نیست.', array( 'status' => 503 ) );
+    $body = $request->get_json_params();
+    if ( ! is_array( $body ) || array_diff( array_keys( $body ), array( 'cursor' ) ) || ! is_string( $body['cursor'] ?? '' ) || strlen( $body['cursor'] ?? '' ) > 600 ) {
+        return new WP_Error( 'invalid_cursor', 'نشانی صفحه معتبر نیست. از آخرین سفارش‌ها شروع کنید.', array( 'status' => 400 ) );
+    }
+    $position = array( 'native' => 0, 'legacy' => 0, 'at' => time() );
+    if ( ! empty( $body['cursor'] ) ) {
+        $parts = explode( '.', $body['cursor'] );
+        if ( count( $parts ) !== 2 || ! hash_equals( hash_hmac( 'sha256', $user->ID . ':' . $parts[0], wp_salt( 'auth' ) ), $parts[1] ) ) {
+            return new WP_Error( 'invalid_cursor', 'نشانی صفحه معتبر نیست. از آخرین سفارش‌ها شروع کنید.', array( 'status' => 400 ) );
+        }
+        $position = json_decode( base64_decode( strtr( $parts[0], '-_', '+/' ), true ), true );
+        if ( ! is_array( $position ) || count( $position ) !== 3 || ! is_int( $position['native'] ?? null ) || ! is_int( $position['legacy'] ?? null ) || ! is_int( $position['at'] ?? null ) || min( $position['native'], $position['legacy'] ) < 0 || $position['at'] > time() || $position['at'] < time() - HOUR_IN_SECONDS ) {
+            return new WP_Error( 'invalid_cursor', 'این فهرست قدیمی شده است. از آخرین سفارش‌ها شروع کنید.', array( 'status' => 400 ) );
+        }
+    }
+    // Two bounded, disjoint streams keep old guest-bound orders accessible
+    // without loading the customer's full history or counting foreign records.
+    $common = array( 'type' => 'shop_order', 'limit' => 21, 'orderby' => 'ID', 'order' => 'DESC', 'date_created' => '<=' . $position['at'] );
+    $native = wc_get_orders( array_merge( $common, array( 'customer_id' => $user->ID, 'offset' => $position['native'] ) ) );
+    $legacy = wc_get_orders( array_merge( $common, array( 'customer_id' => 0, 'offset' => $position['legacy'], 'khanechin_bound_customer' => $user->ID,
+        'meta_query' => array( array( 'key' => '_khanechin_customer_id', 'value' => $user->ID, 'compare' => '=' ) ) ) ) );
+    $candidates = array();
+    foreach ( array( 'native' => $native, 'legacy' => $legacy ) as $source => $orders ) {
+        foreach ( $orders as $order ) $candidates[] = array( 'source' => $source, 'order' => $order );
+    }
+    usort( $candidates, function ( $a, $b ) { return $b['order']->get_id() <=> $a['order']->get_id(); } );
+    $items = array(); $consumed = 0;
+    foreach ( $candidates as $candidate ) {
+        $position[$candidate['source']]++; $consumed++;
+        if ( khanechin_customer_owns_order( $candidate['order'], $user->ID ) ) $items[] = khanechin_customer_order_summary( $candidate['order'] );
+        if ( count( $items ) === 20 ) break;
+    }
+    $more = $consumed < count( $candidates ) || count( $native ) === 21 || count( $legacy ) === 21;
+    return array( 'orders' => $items, 'next_cursor' => $more && $consumed ? khanechin_order_cursor( $position, $user->ID ) : null );
+}
+
 function khanechin_save_customer_profile( $request ) {
     $user = khanechin_customer_from_request( $request );
     if ( ! $user ) return khanechin_customer_permission( $request );
@@ -353,6 +411,7 @@ add_action( 'rest_api_init', function () {
         },
     ) );
     register_rest_route( 'khanechin/v1', '/profile', array( 'methods' => 'POST', 'permission_callback' => 'khanechin_customer_permission', 'callback' => 'khanechin_save_customer_profile' ) );
+    register_rest_route( 'khanechin/v1', '/customer-orders', array( 'methods' => 'POST', 'permission_callback' => 'khanechin_customer_permission', 'callback' => 'khanechin_customer_orders' ) );
     register_rest_route( 'khanechin/v1', '/customer-order', array( 'methods' => 'POST', 'permission_callback' => 'khanechin_customer_permission', 'callback' => 'khanechin_customer_order_detail' ) );
     register_rest_route( 'khanechin/v1', '/logout', array(
         'methods' => 'POST',

@@ -9,6 +9,7 @@ import Icon from '../components/icons';
 import {defaultDesign} from '../../lib/design';
 import ContentSettings from './content-settings';
 import {PresetGallery,ConnectionPlanner} from './setup-tools';
+import Readiness from './readiness';
 import {applyStorePreset} from '../../lib/store-presets';
 import {Switch,Badge} from '../components/vibefarsi/controls';
 
@@ -66,7 +67,7 @@ export default function Manager(){
         </div>}
         {tab==='identity'&&<section className="manage-settings"><Settings value={design.settings} onChange={setSettings} onMedia={setMediaTarget}/></section>}
         {tab==='presets'&&<PresetGallery onSelect={selectPreset}/>}
-        <div hidden={tab!=='connection'}><ConnectionPlanner/></div>
+        <div hidden={tab!=='connection'}><Readiness request={api}/><ConnectionPlanner/></div>
         {tab==='menus'&&<section className="manage-settings">{[['headerLinks','منوی بالای فروشگاه',12],['footerLinks','منوی پایین فروشگاه',36],['mobileLinks','دسترسی سریع موبایل',5]].map(([key,title,max])=><Links key={key} title={title} kind={key} value={design.settings[key]} max={max} onChange={v=>setSettings({[key]:v})}/>)}</section>}
         {(tab==='content'||tab==='display')&&<section className="manage-settings"><fieldset disabled={Boolean(busy)}><ContentSettings mode={tab} value={design.settings} onChange={setSettings}/></fieldset></section>}
         {tab==='history'&&<section className="manage-settings"><h2>نسخه‌های ذخیره‌شده</h2><p>با بازگردانی یک نسخه، تنظیمات و چیدمان همان نسخه منتشر می‌شود. محصولات و سفارش‌ها تغییر نمی‌کنند.</p>{busy==='history'?<p role="status">در حال دریافت تاریخچه…</p>:history.length?<ol className="manage-history">{history.map((r,i)=><li key={r.id}><Icon name="order"/><div><strong>نسخهٔ {fa(history.length-i)}</strong><small>{new Date(`${r.date.replace(' ','T')}Z`).toLocaleString('fa-IR')}</small></div><button disabled={Boolean(busy)} onClick={()=>restore(r.id)}>بازگردانی این نسخه</button></li>)}</ol>:<p>پس از اولین تغییر، نسخه‌های قبلی اینجا نمایش داده می‌شوند.</p>}</section>}

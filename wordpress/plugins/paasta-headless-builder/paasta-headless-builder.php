@@ -2,7 +2,7 @@
 /**
  * Plugin Name: صفحه‌ساز فروشگاه هدلس پاستا
  * Description: مدیریت بلوکی صفحهٔ اصلی، هویت بصری و منوهای فرانت‌اند مستقل؛ همراه با پیش‌نمایش امن و تاریخچهٔ وردپرس.
- * Version: 1.7.0
+ * Version: 1.8.0
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
@@ -10,6 +10,7 @@
 if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/schema.php';
 require_once __DIR__ . '/manage.php';
+require_once __DIR__ . '/readiness.php';
 require_once __DIR__ . '/commerce.php';
 require_once __DIR__ . '/content.php';
 
