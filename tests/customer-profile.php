@@ -32,6 +32,7 @@ $meta[12]=['billing_country'=>'IR','billing_address_2'=>'Preserved second line']
 $original=khanechin_customer_billing($user);$body=['values'=>$values,'revision'=>khanechin_billing_revision($original)];
 check(status(khanechin_save_customer_profile(new FixtureRequest($body,false)))===401);
 $roles=['administrator'];check(status(khanechin_save_customer_profile(new FixtureRequest($body)))===401);$roles=['customer'];
+$roles=['customer','administrator'];check(status(khanechin_save_customer_profile(new FixtureRequest($body)))===401);$roles=['customer'];
 foreach([array_merge($body,['user_id'=>99]),array_merge($body,['values'=>array_merge($values,['email'=>'attack@example.test'])]),array_merge($body,['revision'=>'bad'])] as $bad)check(status(khanechin_save_customer_profile(new FixtureRequest($bad)))===400);
 check($saves===0);
 $saved=khanechin_save_customer_profile(new FixtureRequest($body));check(status($saved)===200&&$saves===1);check($saved['billing']['country']==='IR'&&$saved['billing']['address_2']==='Preserved second line');check(!isset($meta[99]));

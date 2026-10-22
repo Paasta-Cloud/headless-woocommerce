@@ -2,6 +2,7 @@ import { Breadcrumbs, CheckoutSteps } from '../../components/ui';
 import { cookies } from 'next/headers';
 import { decodeReceipt, getOrder, orderCookieName } from '../../../lib/order';
 import SettleCart from './settle-cart';
+import {nativeCheckout} from '../../../lib/native-checkout';
 
 export const metadata = { title: 'پیگیری سفارش', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
@@ -34,6 +35,7 @@ export default async function OrderPage({ params }) {
       <p>{explanation}</p>
       {order && <div className="order-details"><div><span>شمارهٔ سفارش</span><strong dir="ltr">{order.id}</strong></div><div><span>مبلغ سفارش</span><strong>{amount} {unit}</strong></div>{order.items.map((item, index) => <div key={`${index}-${item.name}`}><span>{item.name}</span><strong>× {new Intl.NumberFormat('fa-IR').format(item.quantity)}</strong></div>)}</div>}
       <p className="fine-print">این صفحه وضعیت ثبت‌شده در ووکامرس را نشان می‌دهد، نه صرفاً پیام بازگشت از درگاه. اگر پرداختی انجام داده‌اید ولی وضعیت هنوز تغییر نکرده است، دوباره پرداخت نکنید و با فروشگاه پیگیری کنید.</p>
+      {nativeCheckout()&&order&&['pending','failed'].includes(order.status)&&<form action={`/order/${id}/pay`} method="post"><input type="hidden" name="expectedTotal" value={order.total}/><button className="secondary-action">تلاش دوبارهٔ پرداخت همین سفارش</button></form>}
       <div className="order-actions"><a className="primary-action" href="/account">پیگیری از حساب فروشگاه</a><a href="/">بازگشت به فروشگاه</a></div>
     </section>
   </main>;

@@ -6,6 +6,8 @@ import { storeOrigin } from '../../../lib/store';
 import { orderCookieName, receiptFromCheckout } from '../../../lib/order';
 import {SESSION_COOKIE} from '../../../lib/account';
 import {cartDigest,cartSessionDigest} from '../../../lib/cart-settlement';
+import {nativeCheckout,nativeSummary,prepareNativeCart} from '../../../lib/native-checkout';
+import {nativeSubmit} from './native';
 
 const noStore = { 'Cache-Control': 'no-store' };
 const fail = (error, status) => Response.json({ error }, { status, headers: noStore });
@@ -17,6 +19,7 @@ export async function GET() {
   if (!token) return fail('سبد خرید خالی است. ابتدا کالایی انتخاب کنید.', 409);
   try {
     const cart = await storeRequest('cart', token);
+    if(nativeCheckout())return Response.json(await nativeSummary(cart),{headers:noStore});
     const methods = availableMethods(cart, process.env.ZIBAL_SANDBOX === 'true');
     const state = process.env.STORE_CHECKOUT_ENABLED === 'true'
       ? { ready: methods.some(method => checkoutReady(cart, method).ready), reason: methods.length ? checkoutReady(cart, methods[0]).reason : 'روش پرداخت فعالی در ووکامرس وجود ندارد.' }
@@ -33,6 +36,10 @@ export async function POST(request) {
   const input = await request.json().catch(() => null);
   const address = validAddress(input?.address);
   const method = input?.paymentMethod;
+  if(nativeCheckout()){
+    if(!address||typeof input?.expectedTotal!=='string'||!/^\d{1,16}$/.test(input.expectedTotal))return fail('نشانی و مبلغ معتبر نیست. سفارشی ثبت نشده است.',400);
+    return nativeSubmit(request,input,token,address);
+  }
   if (!['cod', ZIBAL_METHOD].includes(method) || (process.env.ZIBAL_SANDBOX === 'true' && method !== ZIBAL_METHOD) || !address || typeof input?.expectedTotal !== 'string' || !/^\d{1,16}$/.test(input.expectedTotal)) return fail('اطلاعات تماس، استان، کد پستی یا مبلغ معتبر نیست. استان را از فهرست انتخاب کنید؛ سفارشی ثبت نشده است.', 400);
   let stage = 'customer';
   try {
@@ -68,4 +75,15 @@ export async function POST(request) {
     if (error?.status === 409) return fail('مبلغ یا موجودی تغییر کرده است. صورت‌حساب را تازه کنید و دوباره بررسی کنید.', 409);
     return fail('وضعیت ثبت سفارش نامشخص است. پیش از تلاش دوباره، سفارش‌های حساب ووکامرس یا ایمیل تأیید را بررسی کنید تا سفارش تکراری ثبت نشود.', 502);
   }
+}
+
+// Address/rate calculation never creates an order and is always private.
+export async function PATCH(request){
+  if(!sameSiteOrigin(request))return fail('درخواست از مبدأ نامعتبر رد شد.',403);
+  if(!nativeCheckout())return fail('محاسبهٔ ارسال برای این فروشگاه در دسترس نیست.',409);
+  const token=await cartToken();if(!token)return fail('سبد خرید خالی است.',409);
+  const input=await request.json().catch(()=>null);const address=validAddress(input?.address);
+  if(!address)return fail('نشانی، استان، اطلاعات تماس و کد پستی را کامل کنید.',400);
+  try{const {cart}=await prepareNativeCart(token,address,input.shippingSelections,input.paymentMethod);return Response.json(await nativeSummary(cart),{headers:noStore});}
+  catch{return fail('ارسال محاسبه نشد یا روش آن تغییر کرده است. نشانی را بررسی و دوباره تلاش کنید؛ سفارشی ثبت نشده است.',409);}
 }

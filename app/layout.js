@@ -9,6 +9,7 @@ import StoreShell from './components/store-shell';
 import { customerAccount } from '../lib/customer-session';
 import {getDesign} from '../lib/design-server';
 import {storeMetadata} from '../lib/store-metadata';
+import {nativeAuth} from '../lib/native-auth';
 
 export async function generateMetadata(){
   const {design:{settings:s}}=await getDesign();
@@ -18,5 +19,5 @@ export default async function Layout({ children }) {
   const mode = !process.env.WOOCOMMERCE_URL || process.env.WOOCOMMERCE_URL === 'demo' ? 'demo' : 'live';
   const [account,{design,preview}]=await Promise.all([customerAccount(),getDesign()]);
   const s=design.settings;
-  return <html lang="fa" dir="rtl"><body>{s.font==='custom'&&s.fontUrl&&<style>{`@font-face{font-family:StoreCustom;src:url("${s.fontUrl}");font-display:swap}`}</style>}<StoreShell mode={mode} signedIn={Boolean(account)} settings={s} preview={preview}>{children}</StoreShell></body></html>;
+  return <html lang="fa" dir="rtl"><body>{s.font==='custom'&&s.fontUrl&&<style>{`@font-face{font-family:StoreCustom;src:url("${s.fontUrl}");font-display:swap}`}</style>}<StoreShell mode={mode} signedIn={Boolean(account)} settings={s} preview={preview} nativeAccount={nativeAuth()}>{children}</StoreShell></body></html>;
 }

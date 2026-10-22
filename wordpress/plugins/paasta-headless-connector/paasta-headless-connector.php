@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: اتصال فروشگاه هدلس پاستا
- * Description: اتصال حساب مشتری، سفارش، بازگشت زیبال و صفحه‌ساز به فرانت مستقل. بدون انتقال محصولات یا تغییر دامنهٔ وردپرس.
- * Version: 1.2.1
+ * Description: اتصال حساب مشتری، سفارش، درگاه بومی و صفحه‌ساز به فرانت مستقل. بدون انتقال محصولات یا تغییر دامنهٔ وردپرس.
+ * Version: 1.2.2
  * Requires PHP: 7.4
  * Requires Plugins: woocommerce
  * License: GPL-2.0-or-later
@@ -15,7 +15,7 @@ add_action('plugins_loaded', function () {
     if(!function_exists('khc_revision') && file_exists(__DIR__.'/modules/khanechin-public-cache.php'))require_once __DIR__.'/modules/khanechin-public-cache.php';
     if(get_option('paasta_connector_enabled')==='yes'){
         if(!defined('PAASTA_CONNECTOR_RESPECT_REGISTRATION'))define('PAASTA_CONNECTOR_RESPECT_REGISTRATION',true);
-        foreach (array('khanechin-account.php'=>'khanechin_customer_from_request','khanechin-return.php'=>'khanechin_frontend_url') as $file=>$symbol) {
+        foreach (array('khanechin-account.php'=>'khanechin_customer_from_request','khanechin-return.php'=>'khanechin_frontend_url','paasta-native-commerce.php'=>'pnc_customer') as $file=>$symbol) {
             if (!function_exists($symbol)) require_once __DIR__.'/modules/'.$file;
         }
     }
@@ -63,5 +63,5 @@ function paasta_connector_page(){
     if($error)echo '<div class="notice notice-error"><p>'.esc_html($error).'</p></div>';
     echo '<form method="post">';wp_nonce_field('paasta_headless_connection');
     echo '<p><label for="paasta-front">نشانی HTTPS فرانت</label></p><input id="paasta-front" name="frontend" type="url" required maxlength="500" dir="ltr" class="regular-text" value="'.esc_attr(get_option('khanechin_frontend_url','')).'"><p><label><input type="checkbox" name="confirm" value="1" required> تأیید می‌کنم لینک‌های حساب و بازگشت زیبال به این فرانت هدایت شوند.</label></p>';
-    submit_button('ذخیرهٔ اتصال');echo '</form><p>پشتیبانی بازگشت پرداخت در این نسخه برای زیبال است؛ سازگاری سایر درگاه‌ها تضمین نمی‌شود. ارسال ایمیل به تنظیمات معتبر ایمیل همین هاست نیاز دارد؛ افزونه ارسال موفق را شبیه‌سازی نمی‌کند.</p></div>';
+    submit_button('ذخیرهٔ اتصال');echo '</form><p>پرداخت بومی در فرانت با فعال‌کردن حالت native برای زیبال، زرین‌پال و اسنپ‌پی در دسترس است. سایر درگاه‌ها به آزمون سازگاری نیاز دارند. ارسال ایمیل به تنظیمات معتبر ایمیل همین هاست نیاز دارد؛ افزونه ارسال موفق را شبیه‌سازی نمی‌کند.</p></div>';
 }

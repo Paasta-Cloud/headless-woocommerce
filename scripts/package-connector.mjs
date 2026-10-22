@@ -8,7 +8,7 @@ const plugin=join(temporary,'paasta-headless-connector');
 cpSync('wordpress/plugins/paasta-headless-connector',plugin,{recursive:true});
 cpSync('wordpress/plugins/paasta-headless-builder',join(plugin,'builder'),{recursive:true});
 mkdirSync(join(plugin,'modules'));
-for(const file of ['khanechin-account.php','khanechin-return.php','khanechin-public-cache.php'])cpSync(`wordpress/mu-plugins/${file}`,join(plugin,'modules',file));
+for(const file of ['khanechin-account.php','khanechin-return.php','khanechin-public-cache.php','paasta-native-commerce.php'])cpSync(`wordpress/mu-plugins/${file}`,join(plugin,'modules',file));
 mkdirSync('public/downloads',{recursive:true});
 const output=resolve('public/downloads/paasta-headless-connector.zip');
 if(process.platform==='win32')execFileSync('powershell.exe',['-NoProfile','-Command',`Compress-Archive -LiteralPath '${plugin.replaceAll("'","''")}' -DestinationPath '${output.replaceAll("'","''")}' -Force`]);

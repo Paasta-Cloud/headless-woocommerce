@@ -170,7 +170,7 @@ function khanechin_customer_from_request( $request ) {
     }
     $id = get_transient( 'khanechin_session_' . hash( 'sha256', $matches[1] ) );
     $user = $id ? get_user_by( 'id', (int) $id ) : false;
-    return $user && in_array( 'customer', (array) $user->roles, true ) ? $user : null;
+    return $user && in_array( 'customer', (array) $user->roles, true ) && !array_intersect(['administrator','shop_manager','editor','author','contributor'],(array)$user->roles) ? $user : null;
 }
 
 /**
@@ -240,7 +240,7 @@ add_action( 'rest_api_init', function () {
                 return new WP_Error( 'rate_limited', 'تلاش‌های ورود زیاد بوده است. ۱۵ دقیقه دیگر دوباره امتحان کنید.', array( 'status' => 429 ) );
             }
             $user = wp_authenticate( $login, $password );
-            if ( is_wp_error( $user ) || ! in_array( 'customer', (array) $user->roles, true ) ) {
+            if ( is_wp_error( $user ) || ! in_array( 'customer', (array) $user->roles, true ) || array_intersect(['administrator','shop_manager','editor','author','contributor'],(array)$user->roles) ) {
                 set_transient( $limit_key, $attempts + 1, 15 * MINUTE_IN_SECONDS );
                 set_transient( $ip_key, $ip_attempts + 1, 15 * MINUTE_IN_SECONDS );
                 return new WP_Error( 'invalid_login', 'نام کاربری یا رمز عبور درست نیست.', array( 'status' => 401 ) );
