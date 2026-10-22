@@ -2,6 +2,12 @@
 require __DIR__.'/../wordpress/plugins/paasta-headless-builder/schema.php';
 function check($condition) { if (!$condition) throw new RuntimeException('Design regression failed'); }
 $design=phb_clean_design(phb_defaults());
+check($design['settings']['layout']==='standard');
+$boutique=phb_defaults();$boutique['settings']['layout']='boutique';
+check(phb_clean_design($boutique)['settings']['layout']==='boutique');
+check(phb_clean_design(phb_clean_design($boutique))===phb_clean_design($boutique));
+$boutique['settings']['layout']='invalid';
+check(phb_clean_design($boutique)['settings']['layout']==='standard');
 check(count($design['sections'])===5);
 foreach(array('javascript:alert(1)','//evil.test','https://user:pass@example.test/a','/\\evil.test','https://example.test/"</style>') as $url) check(phb_url($url)==='');
 check(phb_url('/shop?q=1')==='/shop?q=1');

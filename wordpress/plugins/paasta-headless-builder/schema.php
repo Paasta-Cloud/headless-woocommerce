@@ -25,6 +25,7 @@ function phb_clean_design($raw) {
     if (!is_array($raw) || ($raw['version'] ?? null) !== 1 || !isset($raw['settings'], $raw['sections']) || !is_array($raw['settings']) || !is_array($raw['sections'])) throw new InvalidArgumentException('ساختار طراحی معتبر نیست.');
     $d = phb_defaults()['settings']; $s = $raw['settings']; $settings = array();
     $settings['theme']=in_array($s['theme']??'',array('digital','grocery'),true)?$s['theme']:'craft';
+    $settings['layout']=($s['layout']??'')==='boutique'?'boutique':'standard';
     foreach (array('name','tagline','description','announcement','announcementNote','footerText','footerNote') as $key) $settings[$key] = phb_text($s[$key] ?? $d[$key], $key === 'footerText' ? 1000 : 200);
     if (!$settings['name']) $settings['name'] = $d['name'];
     foreach (array('primary','background','surface','text','muted') as $key) $settings[$key] = phb_color($s[$key] ?? '', $d[$key]);

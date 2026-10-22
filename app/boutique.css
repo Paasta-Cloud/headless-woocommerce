@@ -1,0 +1,55 @@
+/* Opt-in boutique composition. Merchant imagery, colours and shelves stay in the design document. */
+.store-frame[data-store-layout=boutique] .craft-header{display:grid;grid-template-columns:max-content 145px minmax(0,1fr) 190px;gap:0 20px;direction:ltr;padding:8px 24px 0;box-shadow:none}
+.store-frame[data-store-layout=boutique] .craft-head-main,.store-frame[data-store-layout=boutique] .craft-navigation{display:contents}
+.store-frame[data-store-layout=boutique] .craft-header .craft-brand{grid-area:1/4;direction:rtl;justify-self:end;align-self:center}
+.store-frame[data-store-layout=boutique] .craft-brand img{display:block;width:160px;height:54px;object-fit:contain}
+.store-frame[data-store-layout=boutique] .craft-search{grid-area:1/3;direction:rtl;max-width:none;width:100%;height:44px;margin:0;background:var(--configured-surface);border:1px solid #dedee2;border-radius:10px}
+.store-frame[data-store-layout=boutique] .craft-search>a{order:2;border:0;background:#f4f4f6;border-radius:6px;padding:6px;font-size:11px}
+.store-frame[data-store-layout=boutique] .craft-search input{order:1;padding:8px}
+.store-frame[data-store-layout=boutique] .craft-search>button{order:3}
+.store-frame[data-store-layout=boutique] .craft-account{grid-area:1/2;direction:rtl;background:none;color:var(--configured-text);margin:0;padding:8px 0;min-height:44px;justify-content:center;font-size:12px}
+.store-frame[data-store-layout=boutique] .craft-navigation>div:first-child{grid-area:2/1/3/-1;direction:rtl;display:flex;align-items:center;gap:24px;min-width:0;margin:8px -24px 0;padding:4px 24px;background:#f7f7fb;min-height:44px}
+.store-frame[data-store-layout=boutique] .craft-navigation>div:last-child{grid-area:1/1;direction:rtl;display:flex;align-items:center;gap:0}
+.store-frame[data-store-layout=boutique] .craft-navigation>div:last-child>a,.store-frame[data-store-layout=boutique] .craft-basket{position:relative;display:grid;place-items:center;min-width:44px;min-height:44px}
+.store-frame[data-store-layout=boutique] .category-dropdown{direction:rtl}
+.store-frame[data-store-layout=boutique] .craft-main{display:grid;grid-template-columns:minmax(20px,1fr) minmax(0,calc(var(--store-width,1240px) - 48px)) minmax(20px,1fr);max-width:none;padding:0 0 24px}
+.store-frame[data-store-layout=boutique] .craft-main>.builder-section{grid-column:2;min-width:0}
+.store-frame[data-store-layout=boutique] .craft-main>.builder-hero:first-of-type{grid-column:1/-1;border-radius:0}
+.store-frame[data-store-layout=boutique] .craft-campaign{box-shadow:none;border-radius:0;background:var(--configured-background)}
+.store-frame[data-store-layout=boutique] .craft-campaign img{aspect-ratio:1280/587;height:auto;object-fit:contain}
+.store-frame[data-store-layout=boutique] .craft-slide-controls{inset-inline-start:24px;inset-inline-end:auto;left:auto;transform:none;background:#ffffffdb}
+.store-frame[data-store-layout=boutique] .craft-slide-controls button{width:44px;height:44px;display:grid;place-items:center;padding:0}
+.store-frame[data-store-layout=boutique] .craft-next{width:44px;height:44px;opacity:0}
+.store-frame[data-store-layout=boutique] .craft-campaign:hover .craft-next,.store-frame[data-store-layout=boutique] .craft-next:focus-visible{opacity:1}
+.store-frame[data-store-layout=boutique] .craft-tiles{align-items:start}
+.store-frame[data-store-layout=boutique] .craft-tiles>a{border-radius:28px;overflow:hidden}
+.store-frame[data-store-layout=boutique] .craft-tiles img{aspect-ratio:1280/853;object-fit:cover}
+.store-frame[data-store-layout=boutique] .craft-shelf{background:var(--configured-surface);padding:24px;border-radius:14px;box-shadow:none}
+.store-frame[data-store-layout=boutique] .craft-section-title h2{font-size:20px;font-weight:700}
+.store-frame[data-store-layout=boutique] .craft-section-title h2>svg{display:none}
+.store-frame[data-store-layout=boutique] .craft-product{box-shadow:none;border:1px solid #ebebed;border-radius:12px;background:var(--configured-surface)}
+.store-frame[data-store-layout=boutique] .craft-product h3{font-size:13px;line-height:1.9}
+.store-frame[data-store-layout=boutique] .craft-product-price strong{color:var(--configured-text)}
+.store-frame[data-store-layout=boutique] .retail-stories img{border-color:#bc243e}
+.store-frame[data-store-layout=boutique] .retail-stories .retail-media-items{justify-content:flex-start}
+.store-frame[data-store-layout=boutique] .retail-stories .retail-media-item{flex:0 0 calc((100% - 4 * var(--section-gap,20px)) / 5)}
+.store-frame[data-store-layout=boutique] .retail-brands .retail-media-items{background:var(--configured-surface);border-radius:12px}
+.store-frame[data-store-layout=boutique] .footer-columns p{max-width:65ch}
+@media(max-width:760px){
+ .store-frame[data-store-layout=boutique] .craft-header{grid-template-columns:88px minmax(0,1fr) 100px;gap:8px 12px;padding:8px 16px 0}
+ .store-frame[data-store-layout=boutique] .craft-header .craft-brand{grid-area:1/3}
+ .store-frame[data-store-layout=boutique] .craft-brand img{width:100px;height:42px}
+ .store-frame[data-store-layout=boutique] .craft-account{grid-area:1/2;font-size:11px}
+ .store-frame[data-store-layout=boutique] .craft-navigation .craft-tracking{display:none}
+ .store-frame[data-store-layout=boutique] .craft-search{grid-area:2/1/3/-1;order:initial}
+ .store-frame[data-store-layout=boutique] .craft-navigation>div:first-child{grid-area:3/1/4/-1;margin:0 -16px;padding:0 16px;gap:22px;flex-wrap:wrap}
+ .store-frame[data-store-layout=boutique] .craft-navigation>div:first-child a{display:flex;font-size:12px}
+ .store-frame[data-store-layout=boutique] .craft-main{grid-template-columns:16px minmax(0,1fr) 16px}
+ .store-frame[data-store-layout=boutique] .craft-campaign img{aspect-ratio:1280/587}
+ .store-frame[data-store-layout=boutique] .craft-slide-controls{bottom:0;inset-inline-start:4px}
+ .store-frame[data-store-layout=boutique] .craft-shelf{padding:16px 12px}
+ .store-frame[data-store-layout=boutique] .craft-tiles>a{border-radius:16px}
+ .store-frame[data-store-layout=boutique] .craft-section-title h2{font-size:17px}
+ .store-frame[data-store-layout=boutique] .craft-product h3{font-size:12px}
+ .store-frame[data-store-layout=boutique] .retail-stories .retail-media-item{flex:0 0 100px}
+}

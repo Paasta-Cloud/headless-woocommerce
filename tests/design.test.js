@@ -19,6 +19,18 @@ test('builder defaults preserve the existing five homepage sections',()=>{
   assert.equal(defaultDesign.settings.mobileLinks.length,5);
 });
 
+test('boutique layout is opt-in, bounded and retained across a design round trip',()=>{
+  assert.equal(defaultDesign.settings.layout,'standard');
+  const raw=structuredClone(defaultDesign);raw.settings.layout='boutique';
+  const design=normalizeDesign(raw);
+  assert.equal(design.settings.layout,'boutique');
+  assert.deepEqual(normalizeDesign(design),design);
+  raw.settings.layout='boutique" onclick="alert(1)';
+  assert.equal(normalizeDesign(raw).settings.layout,'standard');
+  assert.match(readFileSync('app/components/store-shell.jsx','utf8'),/data-store-layout=\{settings.layout\}/);
+  assert.match(readFileSync('app/manage/workspace.jsx','utf8'),/setSettings\(\{layout\}\)/);
+});
+
 test('page and display settings are bounded, safe and backwards compatible',()=>{
   const raw=structuredClone(defaultDesign);
   raw.settings.pages={about:{enabled:true,title:'<b>درباره</b>',intro:'شرح',body:'x'.repeat(13000)},unknown:{enabled:true}};
