@@ -1,5 +1,6 @@
 'use client';
 import StoreLink from '../../components/store-link';
+import StoreImage from '../../components/store-image';
 
 
 import { useRef, useState } from 'react';
@@ -89,7 +90,7 @@ export default function ProductView({ product, mode, stock, variationError, rela
   return <main className="shop-shell">
     <Breadcrumbs items={[{label:product.category,href:category?'/category/'+category.id:'/categories'},{label:product.name}]}/>
     <section className="detail-grid">
-      <div className="detail-gallery"><button className="detail-image" aria-label="بزرگ‌نمایی تصویر محصول" disabled={!images.length} onClick={()=>zoom.current.showModal()}>{images.length?<img src={images[imageIndex].src} alt={product.name}/>:<span>{product.label}</span>}</button>{images.length>1&&<div className="gallery-thumbnails">{images.map((image,index)=><button key={image.src} aria-label={'تصویر '+(index+1).toLocaleString('fa-IR')} aria-pressed={imageIndex===index} onClick={()=>setImageIndex(index)}><img src={image.src} alt=""/></button>)}</div>}<dialog className="gallery-zoom" ref={zoom} aria-label="تصویر بزرگ محصول" onClick={e=>{if(e.target===e.currentTarget)zoom.current.close();}}><button onClick={()=>zoom.current.close()} aria-label="بستن تصویر"><Icon name="close"/></button>{images.length>0&&<img src={images[imageIndex].src} alt={product.name}/>}</dialog></div>
+      <div className="detail-gallery"><button className="detail-image" aria-label="بزرگ‌نمایی تصویر محصول" disabled={!images.length} onClick={()=>zoom.current.showModal()}>{images.length?<StoreImage src={images[imageIndex].src} sizes="(max-width: 700px) 100vw, 600px" fetchPriority="high" alt={product.name}/>:<span>{product.label}</span>}</button>{images.length>1&&<div className="gallery-thumbnails">{images.map((image,index)=><button key={image.src} aria-label={'تصویر '+(index+1).toLocaleString('fa-IR')} aria-pressed={imageIndex===index} onClick={()=>setImageIndex(index)}><StoreImage src={image.src} sizes="80px" loading="lazy" alt=""/></button>)}</div>}<dialog className="gallery-zoom" ref={zoom} aria-label="تصویر بزرگ محصول" onClick={e=>{if(e.target===e.currentTarget)zoom.current.close();}}><button onClick={()=>zoom.current.close()} aria-label="بستن تصویر"><Icon name="close"/></button>{images.length>0&&<StoreImage src={images[imageIndex].src} loading="lazy" alt={product.name}/>}</dialog></div>
       <div className="detail-copy"><span className="eyebrow">{product.category}</span><h1>{product.name}</h1><p>{description.slice(0,240)||'جزئیات و موجودی این محصول را پیش از خرید بررسی کنید.'}</p>
       {variable && (product.options || []).map(option => <div className="variation-group" key={option.name}><span className="variation-label">{option.name}</span><div className="variation-options">{option.terms.map(term => {
         const enabled = termEnabled(option, term.slug);

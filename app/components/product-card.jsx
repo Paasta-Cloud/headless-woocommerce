@@ -1,5 +1,6 @@
 'use client';
 import StoreLink from './store-link';
+import StoreImage from './store-image';
 import {useState} from 'react';
 import {useCart} from '../use-cart';
 import {useFavorites} from '../use-favorites';
@@ -16,7 +17,7 @@ export default function ProductCard({product}) {
  async function buy(){setFailed(false);const ok=await addItem(product.id,undefined,quantity)!==false;setAdded(ok);setFailed(!ok);}
  return <article className="craft-product"><div className="craft-product-photo">
   {discounted&&<span className="retail-discount">{Math.round((1-product.price/product.regularPrice)*100).toLocaleString('fa-IR')}٪</span>}
-  <StoreLink href={`/product/${product.id}`}>{product.image?<img src={product.thumbnail||product.image} srcSet={product.imageSrcSet||undefined} sizes="(max-width: 640px) 50vw, 300px" alt={product.name} width="300" height="300" loading="lazy" decoding="async"/>:<span>{product.label}</span>}</StoreLink>
+  <StoreLink href={`/product/${product.id}`}>{product.image?<StoreImage src={product.thumbnail||product.image} srcSet={product.imageSrcSet||undefined} sizes="(max-width: 640px) 44vw, (max-width: 1100px) 25vw, 220px" alt={product.name} width="300" height="300" loading="lazy" decoding="async"/>:<span>{product.label}</span>}</StoreLink>
   <button aria-label={`${favorites.has(product.id)?'حذف از':'افزودن به'} علاقه‌مندی‌ها: ${product.name}`} aria-pressed={favorites.has(product.id)} onClick={()=>preview?demoNavigate?.('/favorites'):favorites.toggle(product.id)}><Icon name="heart"/></button>
  </div><div className="craft-product-body"><small>{product.category}</small><h3><StoreLink href={`/product/${product.id}`}>{product.name}</StoreLink></h3>
  <div className="craft-product-price">{discounted&&<del>{product.regularPrice.toLocaleString('fa-IR')} <small>{product.unit}</small></del>}<strong>{product.price.toLocaleString('fa-IR')} <small>{product.unit}</small></strong></div>

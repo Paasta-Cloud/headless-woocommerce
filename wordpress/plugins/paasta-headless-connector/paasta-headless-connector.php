@@ -2,7 +2,7 @@
 /**
  * Plugin Name: اتصال فروشگاه هدلس پاستا
  * Description: اتصال حساب مشتری، سفارش، درگاه بومی و صفحه‌ساز به فرانت مستقل. بدون انتقال محصولات یا تغییر دامنهٔ وردپرس.
- * Version: 1.2.3
+ * Version: 1.2.4
  * Requires PHP: 7.4
  * Requires Plugins: woocommerce
  * License: GPL-2.0-or-later
@@ -12,6 +12,7 @@ defined('ABSPATH') || exit;
 // Existing MU installations take precedence; never register their hooks twice.
 add_action('plugins_loaded', function () {
     if (!class_exists('WooCommerce')) return;
+    if(!function_exists('phm_generate') && file_exists(__DIR__.'/modules/paasta-media.php'))require_once __DIR__.'/modules/paasta-media.php';
     if(!function_exists('khc_revision') && file_exists(__DIR__.'/modules/khanechin-public-cache.php'))require_once __DIR__.'/modules/khanechin-public-cache.php';
     if(get_option('paasta_connector_enabled')==='yes'){
         if(!defined('PAASTA_CONNECTOR_RESPECT_REGISTRATION'))define('PAASTA_CONNECTOR_RESPECT_REGISTRATION',true);

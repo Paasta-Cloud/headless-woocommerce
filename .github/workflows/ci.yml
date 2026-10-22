@@ -31,6 +31,8 @@ jobs:
       - run: php tests/public-cache.php
       - run: php tests/connector.php
       - run: php tests/native-commerce.php
+      - run: php tests/media.php
+      - run: php -l wordpress/mu-plugins/paasta-media.php
       - run: php -l wordpress/mu-plugins/paasta-native-commerce.php
       - run: php -l wordpress/plugins/paasta-headless-connector/paasta-headless-connector.php
       - run: find wordpress/plugins/paasta-headless-builder -name '*.php' -exec php -l {} \;

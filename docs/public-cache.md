@@ -1,5 +1,7 @@
 # Public cache
 
+Image bytes are handled separately by [responsive media delivery](media-delivery.md); public JSON caching alone does not make oversized PNGs smaller.
+
 The connector archive includes the public cache module. Existing MU installations take precedence, without registering hooks twice. Alternatively install `wordpress/mu-plugins/khanechin-public-cache.php` in the site's MU plugin directory. No Redis, credentials or public purge API are required.
 
 WordPress caches only anonymous GET product/design responses, for up to 60 seconds. Storage is bounded to 64 collision-safe transient slots, each accepting at most 512 KiB of JSON. Cookies, authorization, cart tokens, nonces, unknown query parameters, errors and Set-Cookie responses bypass caching. WordPress database transients work without a persistent object cache; an existing correctly isolated object cache can also serve them.

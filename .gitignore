@@ -2,6 +2,7 @@
 node_modules/
 .artifacts/
 .freebuff/
+.seo-cache/
 .env*
 !.env
 !.env.example
