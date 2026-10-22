@@ -40,29 +40,31 @@ function phm_generate($id) {
     foreach(($metadata['sizes']??[]) as $size)$aliases[]=dirname(wp_get_attachment_url($id)).'/'.$size['file'];
     $saved=['fingerprint'=>$fingerprint,'aliases'=>array_unique($aliases),'src'=>end($variants),'variants'=>$variants];
     update_post_meta($id,'_paasta_media',$saved);
-    delete_transient('paasta_media_index');
+    delete_transient('paasta_media_index_v2');
     return $saved;
 }
 
 function phm_index() {
-    $index=get_transient('paasta_media_index');
+    $index=get_transient('paasta_media_index_v2');
     if(is_array($index))return $index;
     global $wpdb;
-    $index=[];
+    $index=['aliases'=>[],'images'=>[]];
     foreach($wpdb->get_col($wpdb->prepare("SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key=%s",'_paasta_media')) as $value){
         $entry=maybe_unserialize($value);
         if(!is_array($entry)||empty($entry['src'])||empty($entry['variants']))continue;
-        foreach(($entry['aliases']??[]) as $alias)$index[$alias]=$entry;
+        $key=count($index['images']);
+        $index['images'][$key]=['src'=>$entry['src'],'variants'=>$entry['variants']];
+        foreach(($entry['aliases']??[]) as $alias)$index['aliases'][$alias]=$key;
     }
-    set_transient('paasta_media_index',$index,3600);
+    set_transient('paasta_media_index_v2',$index,3600);
     return $index;
 }
 
 function phm_transform($data,$index) {
-    if(is_string($data))return $index[$data]['src']??$data;
+    if(is_string($data))return isset($index['aliases'][$data])?$index['images'][$index['aliases'][$data]]['src']:$data;
     if(!is_array($data)&&!is_object($data))return $data;
     $object=is_object($data);$values=(array)$data;
-    $entry=isset($values['src'])&&is_string($values['src'])?($index[$values['src']]??null):null;
+    $entry=isset($values['src'])&&is_string($values['src'])&&isset($index['aliases'][$values['src']])?$index['images'][$index['aliases'][$values['src']]]:null;
     foreach($values as $key=>$value)$values[$key]=phm_transform($value,$index);
     if($entry){
         $values['src']=$entry['src'];
@@ -76,6 +78,8 @@ function phm_public_response($response,$server,$request) {
     $route=$request->get_route();
     if($request->get_method()!=='GET'||$response->get_status()!==200||
         ($route!=='/paasta-headless/v1/design'&&!preg_match('#^/wc/store/v1/products(?:/[1-9][0-9]*|/categories)?$#D',$route)))return $response;
+    // Cached public data has already been rewritten; avoid loading the media index twice.
+    if(($response->get_headers()['X-Paasta-Public-Cache']??'')==='HIT')return $response;
     $response->set_data(phm_transform($response->get_data(),phm_index()));
     return $response;
 }
@@ -87,4 +91,4 @@ add_filter('wp_generate_attachment_metadata',static function($metadata,$id){
     return $metadata;
 },20,2);
 add_action('paasta_optimize_attachment','phm_generate');
-add_action('delete_attachment',static function(){delete_transient('paasta_media_index');});
+add_action('delete_attachment',static function(){delete_transient('paasta_media_index_v2');});
