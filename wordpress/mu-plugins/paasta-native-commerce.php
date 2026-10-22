@@ -2,6 +2,22 @@
 /** Native gateway hand-off and signed WordPress customer-session exchange. */
 defined('ABSPATH') || exit;
 
+function pnc_cart_session_handler($handler){
+    $session='Automattic\\WooCommerce\\StoreApi\\SessionHandler';
+    $jwt='Automattic\\WooCommerce\\StoreApi\\Utilities\\JsonWebToken';
+    if(!in_array($handler,['WC_Session_Handler',$session],true))return $handler;
+    $route=$_GET['rest_route']??'';
+    if(!$route){$path=parse_url($_SERVER['REQUEST_URI']??'',PHP_URL_PATH);$prefix='/wp-json';$at=is_string($path)?strpos($path,$prefix.'/'):false;if($at!==false)$route=substr($path,$at+strlen($prefix));}
+    if(!is_string($route)||!preg_match('#^/wc/store/v1/(?:cart(?:/[a-z-]+)?|checkout)/?$#D',$route))return $handler;
+    $token=$_SERVER['HTTP_CART_TOKEN']??'';
+    if(!is_string($token)||strlen($token)>4096||!class_exists($jwt)||!class_exists($session))return $handler;
+    try{return $jwt::validate($token,'@'.wp_salt())?$session:$handler;}catch(Throwable $error){return $handler;}
+}
+// Some themes initialize Woo's cookie session before REST selects its token
+// session. Select the *same native class* early, only after core JWT validation.
+// Do not replace custom session providers or touch non-Store-API requests.
+add_filter('woocommerce_session_handler','pnc_cart_session_handler',PHP_INT_MAX);
+
 function pnc_customer($user) {
     return $user && in_array('customer',(array)$user->roles,true)
         && !array_intersect(['administrator','shop_manager','editor','author','contributor'],(array)$user->roles);

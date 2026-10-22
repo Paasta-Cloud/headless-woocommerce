@@ -2,7 +2,7 @@
 /**
  * Plugin Name: اتصال فروشگاه هدلس پاستا
  * Description: اتصال حساب مشتری، سفارش، درگاه بومی و صفحه‌ساز به فرانت مستقل. بدون انتقال محصولات یا تغییر دامنهٔ وردپرس.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Requires PHP: 7.4
  * Requires Plugins: woocommerce
  * License: GPL-2.0-or-later

@@ -1,5 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Exceptions {class RouteException extends \RuntimeException{function __construct($code,$message,$status){parent::__construct($message,$status);}}}
+namespace Automattic\WooCommerce\StoreApi {class SessionHandler{}}
+namespace Automattic\WooCommerce\StoreApi\Utilities {class JsonWebToken{static function validate($token,$secret){return $token==='signed-cart'&&$secret==='@fixture-salt';}}}
 namespace {
 define('ABSPATH',__DIR__);define('KHANECHIN_SESSION_TTL',43200);
 $actions=[];$filters=[];$routes=[];$limited=false;$roles=['customer'];$signed=true;$issued=[];$verified='';
@@ -14,6 +16,7 @@ function set_transient($key,$value,$ttl){$GLOBALS['issued'][$key]=$value;}
 function khanechin_frontend_url(){return 'https://front.example.test';}
 function wc_get_order($id){return $GLOBALS['orders'][$id]??false;}
 function wp_strip_all_tags($value){return strip_tags($value);}
+function wp_salt(){return 'fixture-salt';}
 function wc_add_number_precision($value){return (int)$value;}
 class WP_Error {function __construct(public $code,public $message,public $data){}}
 class WP_REST_Response {function __construct(public $data,public $status,public $headers){}}
@@ -26,6 +29,13 @@ class NativeOrder {
 require __DIR__.'/../wordpress/mu-plugins/paasta-native-commerce.php';
 $actions['rest_api_init']();
 function check_native($ok){if(!$ok)throw new RuntimeException('Native commerce regression');}
+$_GET['rest_route']='/wc/store/v1/cart/add-item';$_SERVER['HTTP_CART_TOKEN']='signed-cart';
+check_native(pnc_cart_session_handler('WC_Session_Handler')==='Automattic\\WooCommerce\\StoreApi\\SessionHandler');
+check_native(pnc_cart_session_handler('CustomMerchantSession')==='CustomMerchantSession');
+$_SERVER['HTTP_CART_TOKEN']='forged';check_native(pnc_cart_session_handler('WC_Session_Handler')==='WC_Session_Handler');
+$_SERVER['HTTP_CART_TOKEN']='signed-cart';$_GET['rest_route']='/wc/store/v1/products';check_native(pnc_cart_session_handler('WC_Session_Handler')==='WC_Session_Handler');
+unset($_GET['rest_route']);$_SERVER['REQUEST_URI']='/wp-json/wc/store/v1/cart';check_native(pnc_cart_session_handler('WC_Session_Handler')==='Automattic\\WooCommerce\\StoreApi\\SessionHandler');
+unset($_SERVER['HTTP_CART_TOKEN']);
 $request=new NativeRequest(['cookie'=>'signed-native-cookie']);
 check_native(pnc_session_exchange(new NativeRequest(['cookie'=>'forged'])) instanceof WP_Error);
 foreach([['administrator'],['shop_manager'],['customer','administrator'],['subscriber']] as $role){$roles=$role;check_native(pnc_session_exchange($request) instanceof WP_Error);}
