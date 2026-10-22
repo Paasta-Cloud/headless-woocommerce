@@ -12,6 +12,7 @@ defined('ABSPATH') || exit;
 // Existing MU installations take precedence; never register their hooks twice.
 add_action('plugins_loaded', function () {
     if (!class_exists('WooCommerce')) return;
+    if(!function_exists('khc_revision') && file_exists(__DIR__.'/modules/khanechin-public-cache.php'))require_once __DIR__.'/modules/khanechin-public-cache.php';
     if(get_option('paasta_connector_enabled')==='yes'){
         if(!defined('PAASTA_CONNECTOR_RESPECT_REGISTRATION'))define('PAASTA_CONNECTOR_RESPECT_REGISTRATION',true);
         foreach (array('khanechin-account.php'=>'khanechin_customer_from_request','khanechin-return.php'=>'khanechin_frontend_url') as $file=>$symbol) {

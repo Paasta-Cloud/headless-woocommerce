@@ -11,7 +11,7 @@ import PrintOrder from '../print-button';
 import ReturnRequest from '../../../components/return-request';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'جزئیات سفارش | خانه‌چین', robots: { index: false, follow: false }, referrer: 'no-referrer' };
+export const metadata = { title: 'جزئیات سفارش', robots: { index: false, follow: false }, referrer: 'no-referrer' };
 
 function Address({ value }) {
   if (!value || !Object.values(value).some(Boolean)) return <p className="customer-unset">نشانی ثبت نشده است.</p>;

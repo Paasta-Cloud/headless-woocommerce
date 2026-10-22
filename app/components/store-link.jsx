@@ -8,5 +8,6 @@ export default function StoreLink({href,onMouseEnter,onFocus,...props}){
  const demoNavigate=useDemoNavigation();
  if(demoNavigate&&typeof href==='string'&&!href.startsWith('#'))return <a {...props} href={`#demo-${encodeURIComponent(href)}`} onClick={event=>{event.preventDefault();demoNavigate(href);}}/>;
  if(typeof href!=='string'||!href.startsWith('/')||href.startsWith('//'))return <a href={href} onMouseEnter={onMouseEnter} onFocus={onFocus} {...props}/>;
- return <Link href={href} prefetch={intent?null:false} onMouseEnter={event=>{setIntent(true);onMouseEnter?.(event);}} onFocus={event=>{setIntent(true);onFocus?.(event);}} {...props}/>;
+ const publicPage=/^\/(?:$|shop(?:[/?]|$)|product\/|categor(?:y\/|ies(?:[/?]|$))|blog(?:[/?]|$)|about(?:[/?]|$)|contact(?:[/?]|$)|guide(?:[/?]|$)|faq(?:[/?]|$))/.test(href);
+ return <Link href={href} prefetch={intent&&publicPage} onMouseEnter={event=>{setIntent(true);onMouseEnter?.(event);}} onFocus={event=>{setIntent(true);onFocus?.(event);}} {...props}/>;
 }

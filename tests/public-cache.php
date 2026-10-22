@@ -38,6 +38,11 @@ foreach(['authorization','cart-token','nonce','x-wp-nonce'] as $header)check(khc
 check(khc_key(new Request(method:'POST'))===null);
 check(khc_key(new Request(params:['context'=>'edit']))===null);
 check(khc_key(new Request(params:['type'=>'variation','parent'=>'42']))===null);
+check(khc_key(new Request(params:['include'=>'12,42','category_operator'=>'and']))!==null);
+check(khc_key(new Request(params:['rest_route'=>'/wc/store/v1/products']))===khc_key(new Request()));
+check(khc_key(new Request(params:['rest_route'=>'/wc/store/v1/cart']))===null);
+check(khc_key(new Request('/wc/store/v1/products/categories'))!==null);
+check(khc_key(new Request('/wc/store/v1/products/categories',headers:['authorization'=>'private']))===null);
 $_COOKIE=['session'=>'private'];check(khc_key($r)===null);$_COOKIE=[];
 $slots=[];for($i=0;$i<1000;$i++)$slots[khc_slot(hash('sha256',(string)$i))]=true;check(count($slots)<=64);
 $pre(null,null,$r);$post(new WP_REST_Response(['error'=>1],500),null,$r);check($pre(null,null,$r)===null);

@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { decodeReceipt, getOrder, orderCookieName } from '../../../lib/order';
 import SettleCart from './settle-cart';
 
-export const metadata = { title: 'پیگیری سفارش | خانه‌چین', robots: { index: false, follow: false } };
+export const metadata = { title: 'پیگیری سفارش', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
 
 const messages = {

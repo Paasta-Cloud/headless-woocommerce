@@ -8,10 +8,11 @@ import './boutique.css';
 import StoreShell from './components/store-shell';
 import { customerAccount } from '../lib/customer-session';
 import {getDesign} from '../lib/design-server';
+import {storeMetadata} from '../lib/store-metadata';
 
 export async function generateMetadata(){
   const {design:{settings:s}}=await getDesign();
-  return {title:s.name,description:s.description,icons:s.favicon?{icon:s.favicon}:undefined};
+  return storeMetadata(s);
 }
 export default async function Layout({ children }) {
   const mode = !process.env.WOOCOMMERCE_URL || process.env.WOOCOMMERCE_URL === 'demo' ? 'demo' : 'live';

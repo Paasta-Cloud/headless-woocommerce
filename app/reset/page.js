@@ -1,6 +1,6 @@
 import ResetForm from './view';
 
-export const metadata = { title: 'تعیین رمز تازه | خانه‌چین' };
+export const metadata = { title: 'تعیین رمز تازه' };
 export const dynamic = 'force-dynamic';
 export default async function ResetPage({ searchParams }) {
   const params = await searchParams;

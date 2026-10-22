@@ -35,6 +35,16 @@
 .store-frame[data-store-layout=boutique] .retail-stories .retail-media-item{flex:0 0 calc((100% - 4 * var(--section-gap,20px)) / 5)}
 .store-frame[data-store-layout=boutique] .retail-brands .retail-media-items{background:var(--configured-surface);border-radius:12px}
 .store-frame[data-store-layout=boutique] .footer-columns p{max-width:65ch}
+.store-frame .craft-products .craft-product{display:flex;flex-direction:column;min-width:0}
+.store-frame .craft-products .craft-product-photo{flex:none;aspect-ratio:1;min-height:0;overflow:hidden}
+.store-frame .craft-products .craft-product-photo>a{width:100%;height:100%;min-height:0;aspect-ratio:auto}
+.store-frame .craft-products .craft-product-photo img{width:100%;height:100%;min-height:0;object-fit:contain}
+.store-frame .craft-products .craft-product-body{display:flex;flex-direction:column;flex:1;min-height:0}
+.store-frame .craft-products .craft-product-body>small{min-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.store-frame .craft-products .craft-product h3{min-height:3.8em;line-height:1.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.store-frame .craft-products .craft-product-price{margin-top:auto;min-height:60px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;padding-top:12px}
+.store-frame .craft-products .craft-product-price strong{white-space:nowrap}
+.store-frame .craft-products .craft-card-action,.store-frame .craft-products .craft-buy{min-height:44px}
 @media(max-width:760px){
  .store-frame[data-store-layout=boutique] .craft-header{grid-template-columns:88px minmax(0,1fr) 100px;gap:8px 12px;padding:8px 16px 0}
  .store-frame[data-store-layout=boutique] .craft-header .craft-brand{grid-area:1/3}

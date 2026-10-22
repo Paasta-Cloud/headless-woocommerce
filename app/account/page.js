@@ -10,7 +10,7 @@ import { cookies } from 'next/headers';
 import { SESSION_COOKIE } from '../../lib/account';
 import { loadCustomerHistory } from '../../lib/customer-history';
 
-export const metadata = { title: 'حساب من | خانه‌چین', robots: { index: false, follow: false }, referrer: 'no-referrer' };
+export const metadata = { title: 'حساب من', robots: { index: false, follow: false }, referrer: 'no-referrer' };
 export const dynamic = 'force-dynamic';
 
 const tabs = [

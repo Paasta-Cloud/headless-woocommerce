@@ -28,11 +28,14 @@ function khc_key($request) {
         $request->get_header('authorization') || $request->get_header('cart-token') ||
         $request->get_header('nonce') || $request->get_header('x-wp-nonce')) return null;
     $route = $request->get_route();
-    if ($route !== '/paasta-headless/v1/design' && !preg_match('#^/wc/store/v1/products(?:/[1-9][0-9]*)?$#D', $route)) return null;
+    if ($route !== '/paasta-headless/v1/design' && $route !== '/wc/store/v1/products/categories' && !preg_match('#^/wc/store/v1/products(?:/[1-9][0-9]*)?$#D', $route)) return null;
     $params = $request->get_query_params();
     unset($params['_']); // Builder's historical cache-buster is not content.
+    // Query-form REST carries routing metadata alongside real filters.
+    if(isset($params['rest_route']) && $params['rest_route']!==$route)return null;
+    unset($params['rest_route']);
     foreach ($params as $name => $value) {
-        if (!in_array($name, ['per_page', 'page', 'category', 'orderby', 'order'], true) || !is_scalar($value)) return null;
+        if (!in_array($name, ['per_page', 'page', 'category', 'category_operator', 'include', 'orderby', 'order'], true) || !is_scalar($value)) return null;
     }
     ksort($params);
     return hash('sha256', $route . '?' . http_build_query($params) . ':' . khc_revision());

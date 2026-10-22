@@ -16,3 +16,17 @@ test('revision changes invalidate data across reads; missing plugin falls back s
   assert.equal(await publicVersionedRead('https://legacy.test','legacy',load),3);
  }finally{globalThis.fetch=original;}
 });
+
+test('an unavailable revision endpoint is negatively cached per tenant instead of blocking every read',async()=>{
+ const original=globalThis.fetch;let probes=0,loads=0;
+ globalThis.fetch=async()=>{probes++;return new Response('',{status:404});};
+ try{
+  const load=async()=>++loads;
+  assert.equal(await publicVersionedRead('https://legacy-cache-regression.test','catalog',load),1);
+  assert.equal(await publicVersionedRead('https://legacy-cache-regression.test','catalog',load),1);
+  assert.equal(await publicVersionedRead('https://legacy-cache-regression.test','design',load),2);
+  assert.equal(probes,1);
+  await publicVersionedRead('https://different-cache-regression.test','catalog',load);
+  assert.equal(probes,2);
+ }finally{globalThis.fetch=original;}
+});
